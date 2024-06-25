@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pixel-font-knife"
+version = "0.0.0"
+description = "A set of pixel font utilities."
+readme = "README.md"
+license = { text = "MIT License" }
+requires-python = ">=3.10"
+authors = [
+    { name = "TakWolf" },
+]
+maintainers = [
+    { name = "TakWolf" },
+]
+keywords = ["font", "pixel"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "pypng>=0.20220715.0",
+]
+
+[project.urls]
+homepage = "https://github.com/TakWolf/pixel-font-knife"
+source = "https://github.com/TakWolf/pixel-font-knife"
+issues = "https://github.com/TakWolf/pixel-font-knife/issues"
+
+[tool.pytest.ini_options]
+pythonpath = [
+    ".",
+    "src",
+]
+addopts = [
+    "--import-mode=importlib",
+]
