@@ -9,11 +9,17 @@ def _file_sha256(file_path: Path) -> str:
 
 
 def test_load_save(assets_dir: Path, tmp_path: Path):
-    load_file_path = assets_dir.joinpath('4E2D.png')
-    save_file_path = tmp_path.joinpath('4E2D.png')
+    black_load_path = assets_dir.joinpath('png', '4E2D-black.png')
+    black_save_path = tmp_path.joinpath('4E2D-black.png')
+    black_bitmap, black_width, black_height = mono_bitmap_util.load_png(black_load_path)
+    mono_bitmap_util.save_png(black_bitmap, black_save_path)
 
-    bitmap, width, height = mono_bitmap_util.load_png(load_file_path)
-    assert bitmap == [
+    red_load_path = assets_dir.joinpath('png', '4E2D-red.png')
+    red_save_path = tmp_path.joinpath('4E2D-red.png')
+    red_bitmap, red_width, red_height = mono_bitmap_util.load_png(red_load_path)
+    mono_bitmap_util.save_png(red_bitmap, red_save_path, color=(255, 0, 0))
+
+    assert black_bitmap == red_bitmap == [
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -27,7 +33,7 @@ def test_load_save(assets_dir: Path, tmp_path: Path):
         [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
     ]
-    assert width == height == 12
-
-    mono_bitmap_util.save_png(bitmap, save_file_path)
-    assert _file_sha256(load_file_path) == _file_sha256(save_file_path)
+    assert black_width == red_width == 12
+    assert black_height == red_height == 12
+    assert _file_sha256(black_load_path) == _file_sha256(black_save_path)
+    assert _file_sha256(red_load_path) == _file_sha256(red_save_path)
