@@ -3,15 +3,13 @@ from pathlib import Path
 
 from pixel_font_knife import mono_bitmap_util
 
-project_root_dir = Path(__file__).parent.joinpath('..').resolve()
-
 
 def _file_sha256(file_path: Path) -> str:
     return hashlib.sha256(file_path.read_bytes()).hexdigest()
 
 
-def test_load_save(tmp_path: Path):
-    load_file_path = project_root_dir.joinpath('assets', '4E2D.png')
+def test_load_save(assets_dir: Path, tmp_path: Path):
+    load_file_path = assets_dir.joinpath('4E2D.png')
     save_file_path = tmp_path.joinpath('4E2D.png')
 
     bitmap, width, height = mono_bitmap_util.load_png(load_file_path)
