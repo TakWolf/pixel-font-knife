@@ -104,6 +104,16 @@ def test_resize():
     ])
 
 
+def test_draw():
+    bitmap = MonoBitmap([
+        [1, 1, 0, 0],
+        [0, 0, 1, 1],
+    ])
+    text = ('████    *\n'
+            '    ████*\n')
+    assert bitmap.draw(end='*') == text
+
+
 def test_load_save(glyphs_dir: Path, tmp_path: Path):
     black_load_dir = glyphs_dir.joinpath('black')
     black_save_dir = tmp_path.joinpath('black')

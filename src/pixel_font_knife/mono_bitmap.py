@@ -1,4 +1,5 @@
 from collections import UserList
+from io import StringIO
 from os import PathLike
 from typing import Any
 
@@ -68,6 +69,16 @@ class MonoBitmap(UserList[list[int]]):
                 bitmap_row.append(self[sy][sx] if 0 <= sy < self.height and 0 <= sx < self.width else 0)
             bitmap.append(bitmap_row)
         return bitmap
+
+    def draw(self, white: str = '  ', black: str = '██', end: str | None = None) -> str:
+        text = StringIO()
+        for bitmap_row in self:
+            for alpha in bitmap_row:
+                text.write(white if alpha == 0 else black)
+            if end is not None:
+                text.write(end)
+            text.write('\n')
+        return text.getvalue()
 
     def save_png(
             self,
