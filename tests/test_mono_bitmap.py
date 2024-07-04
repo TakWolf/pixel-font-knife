@@ -115,6 +115,33 @@ def test_scale(glyphs_dir: Path):
         assert x3_bitmap.scale(0.5, 0.5) == x1_5_bitmap
 
 
+def test_plus_minus():
+    bitmap = MonoBitmap([
+        [1, 1, 1, 1],
+        [1, 0, 0, 1],
+        [1, 0, 0, 1],
+        [1, 1, 1, 1],
+    ])
+    assert bitmap.plus([
+        [1, 1, 1],
+        [1, 1, 1],
+    ], x=-1, y=1) == [
+        [1, 1, 1, 1],
+        [1, 1, 0, 1],
+        [1, 1, 0, 1],
+        [1, 1, 1, 1],
+    ]
+    assert bitmap.minus([
+        [1, 1, 1],
+        [1, 1, 1],
+    ], x=-1, y=1) == [
+        [1, 1, 1, 1],
+        [0, 0, 0, 1],
+        [0, 0, 0, 1],
+        [1, 1, 1, 1],
+    ]
+
+
 def test_draw():
     bitmap = MonoBitmap([
         [1, 1, 0, 0],

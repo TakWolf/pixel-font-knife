@@ -83,6 +83,34 @@ class MonoBitmap(UserList[list[int]]):
             bitmap.append(bitmap_row)
         return bitmap
 
+    def plus(self, other: list[list[int]], x: int = 0, y: int = 0) -> 'MonoBitmap':
+        bitmap = self.copy()
+        for oy, other_row in enumerate(other):
+            ty = oy + y
+            if ty < 0 or ty >= bitmap.height:
+                continue
+            for ox, alpha in enumerate(other_row):
+                tx = ox + x
+                if tx < 0 or tx >= bitmap.width:
+                    continue
+                if alpha != 0:
+                    bitmap[ty][tx] = 1
+        return bitmap
+
+    def minus(self, other: list[list[int]], x: int = 0, y: int = 0) -> 'MonoBitmap':
+        bitmap = self.copy()
+        for oy, other_row in enumerate(other):
+            ty = oy + y
+            if ty < 0 or ty >= bitmap.height:
+                continue
+            for ox, alpha in enumerate(other_row):
+                tx = ox + x
+                if tx < 0 or tx >= bitmap.width:
+                    continue
+                if alpha != 0:
+                    bitmap[ty][tx] = 0
+        return bitmap
+
     def draw(self, white: str = '  ', black: str = '██', end: str | None = None) -> str:
         text = StringIO()
         for bitmap_row in self:
