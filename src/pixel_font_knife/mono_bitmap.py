@@ -123,6 +123,21 @@ class MonoBitmap(UserList[list[int]]):
                     bitmap[ty][tx] = 0
         return bitmap
 
+    def expand(self, size: int) -> 'MonoBitmap':
+        bitmap = self.copy()
+        for y, source_row in enumerate(self):
+            for x, alpha in enumerate(source_row):
+                if alpha == 0:
+                    continue
+                for ty in range(y - size, y + size + 1):
+                    if not bitmap.is_y_inside(ty):
+                        continue
+                    for tx in range(x - size, x + size + 1):
+                        if not bitmap.is_x_inside(tx):
+                            continue
+                        bitmap[ty][tx] = 1
+        return bitmap
+
     def draw(self, white: str = '  ', black: str = '██', end: str | None = None) -> str:
         text = StringIO()
         for bitmap_row in self:
