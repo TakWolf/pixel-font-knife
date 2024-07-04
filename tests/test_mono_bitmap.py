@@ -50,6 +50,25 @@ def test_create():
     ]
 
 
+def test_eq():
+    assert MonoBitmap([
+        [0, 1],
+        [1, 0],
+    ]) == [
+        [0, 1],
+        [1, 0],
+    ]
+
+    bitmap_1 = MonoBitmap([
+        [1, 1, 1],
+        [0, 0, 0],
+    ])
+    bitmap_2 = bitmap_1.copy()
+    bitmap_2.width = 2
+    bitmap_2.height = 3
+    assert bitmap_1 != bitmap_2
+
+
 def test_copy():
     bitmap = MonoBitmap([
         [0, 0, 0],

@@ -1,5 +1,6 @@
 from collections import UserList
 from os import PathLike
+from typing import Any
 
 import png
 
@@ -39,6 +40,13 @@ class MonoBitmap(UserList[list[int]]):
                 if self.width != len(bitmap_row):
                     raise ValueError('Rows widths unequal')
                 self.append([0 if alpha == 0 else 1 for alpha in bitmap_row])
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, MonoBitmap):
+            return (self.width == other.width and
+                    self.height == other.height and
+                    super().__eq__(other))
+        return super().__eq__(other)
 
     def copy(self) -> 'MonoBitmap':
         bitmap = MonoBitmap()
