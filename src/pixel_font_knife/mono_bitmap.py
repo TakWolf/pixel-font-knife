@@ -48,6 +48,19 @@ class MonoBitmap(UserList[list[int]]):
         bitmap.height = self.height
         return bitmap
 
+    def resize(self, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> 'MonoBitmap':
+        bitmap = MonoBitmap()
+        bitmap.width = self.width + left + right
+        bitmap.height = self.height + top + bottom
+        for y in range(bitmap.height):
+            sy = y - top
+            bitmap_row = []
+            for x in range(bitmap.width):
+                sx = x - left
+                bitmap_row.append(self[sy][sx] if 0 <= sy < self.height and 0 <= sx < self.width else 0)
+            bitmap.append(bitmap_row)
+        return bitmap
+
     def save_png(
             self,
             file_path: str | bytes | PathLike[str] | PathLike[bytes],

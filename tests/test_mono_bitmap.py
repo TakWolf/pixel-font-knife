@@ -61,6 +61,30 @@ def test_copy():
     assert bitmap is not copy_bitmap
 
 
+def test_resize():
+    bitmap = MonoBitmap([
+        [1, 0, 1, 0],
+        [1, 0, 0, 0],
+        [1, 1, 1, 0],
+        [0, 0, 1, 0],
+    ])
+    assert bitmap.resize(left=2, right=1, top=3, bottom=2) == MonoBitmap([
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+    ])
+    assert bitmap.resize(left=-1, right=-1, top=-1, bottom=-1) == MonoBitmap([
+        [0, 0],
+        [1, 1],
+    ])
+
+
 def test_load_save(glyphs_dir: Path, tmp_path: Path):
     black_load_dir = glyphs_dir.joinpath('black')
     black_save_dir = tmp_path.joinpath('black')
