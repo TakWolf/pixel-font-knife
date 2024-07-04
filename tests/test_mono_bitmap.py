@@ -104,6 +104,17 @@ def test_resize():
     ])
 
 
+def test_scale(glyphs_dir: Path):
+    for file_path in glyphs_dir.joinpath('black').iterdir():
+        x1_bitmap = MonoBitmap.load_png(file_path)
+        x3_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('x3', file_path.name))
+        x1_5_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('x1.5', file_path.name))
+        assert x1_bitmap.scale(3, 3) == x3_bitmap
+        assert x1_bitmap.scale(1.5, 1.5) == x1_5_bitmap
+        assert x3_bitmap.scale(1 / 3, 1 / 3) == x1_bitmap
+        assert x3_bitmap.scale(0.5, 0.5) == x1_5_bitmap
+
+
 def test_draw():
     bitmap = MonoBitmap([
         [1, 1, 0, 0],

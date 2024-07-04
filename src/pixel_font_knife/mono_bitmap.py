@@ -70,6 +70,19 @@ class MonoBitmap(UserList[list[int]]):
             bitmap.append(bitmap_row)
         return bitmap
 
+    def scale(self, scale_x: float = 1, scale_y: float = 1) -> 'MonoBitmap':
+        bitmap = MonoBitmap()
+        bitmap.width = int(self.width * scale_x)
+        bitmap.height = int(self.height * scale_y)
+        for y in range(bitmap.height):
+            sy = int(y / scale_y)
+            bitmap_row = []
+            for x in range(bitmap.width):
+                sx = int(x / scale_x)
+                bitmap_row.append(self[sy][sx])
+            bitmap.append(bitmap_row)
+        return bitmap
+
     def draw(self, white: str = '  ', black: str = '██', end: str | None = None) -> str:
         text = StringIO()
         for bitmap_row in self:
