@@ -8,20 +8,20 @@ class MonoBitmap(UserList[list[int]]):
     @staticmethod
     def create(width: int, height: int, alpha: int = 0) -> 'MonoBitmap':
         bitmap = MonoBitmap()
-        for _ in range(height):
-            bitmap.append([0 if alpha == 0 else 1] * width)
         bitmap.width = width
         bitmap.height = height
+        for _ in range(height):
+            bitmap.append([0 if alpha == 0 else 1] * width)
         return bitmap
 
     @staticmethod
     def load_png(file_path: str | bytes | PathLike[str] | PathLike[bytes]) -> 'MonoBitmap':
         width, height, pixels, _ = png.Reader(filename=file_path).read()
         bitmap = MonoBitmap()
-        for pixels_row in pixels:
-            bitmap.append([1 if pixels_row[i + 3] > 127 else 0 for i in range(0, width * 4, 4)])
         bitmap.width = width
         bitmap.height = height
+        for pixels_row in pixels:
+            bitmap.append([1 if pixels_row[i + 3] > 127 else 0 for i in range(0, width * 4, 4)])
         return bitmap
 
     width: int
