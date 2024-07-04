@@ -36,6 +36,14 @@ class MonoBitmap(UserList[list[int]]):
         for _ in range(height):
             self.append([alpha] * width)
 
+    def copy(self) -> 'MonoBitmap':
+        bitmap = MonoBitmap(0, 0)
+        bitmap.width = self.width
+        bitmap.height = self.height
+        for bitmap_row in self:
+            bitmap.append(bitmap_row[:])
+        return bitmap
+
     def save_png(
             self,
             file_path: str | bytes | PathLike[str] | PathLike[bytes],

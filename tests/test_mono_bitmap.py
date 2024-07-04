@@ -50,6 +50,17 @@ def test_cost():
         ])
 
 
+def test_copy():
+    bitmap = MonoBitmap.cost([
+        [0, 0, 0],
+        [1, 0, 1],
+        [0, 1, 0],
+    ])
+    copy_bitmap = bitmap.copy()
+    assert bitmap == copy_bitmap
+    assert bitmap is not copy_bitmap
+
+
 def test_load_save(glyphs_dir: Path, tmp_path: Path):
     black_load_dir = glyphs_dir.joinpath('black')
     black_save_dir = tmp_path.joinpath('black')
