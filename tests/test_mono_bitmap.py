@@ -216,3 +216,31 @@ def test_load_save(glyphs_dir: Path, tmp_path: Path):
         red_save_path = red_save_dir.joinpath(red_load_path.name)
         red_bitmap.save_png(red_save_path, color=(255, 0, 0))
         assert _file_sha256(red_load_path) == _file_sha256(red_save_path)
+
+
+def test_bold_s4_r1_e1(glyphs_dir: Path):
+    for file_path in glyphs_dir.joinpath('black').iterdir():
+        bitmap = MonoBitmap.load_png(file_path)
+        result_bitmap = bitmap.scale(scale_x=4, scale_y=4).resize(left=1, right=1, top=1, bottom=1).expand(1)
+        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('bold-s4-r1-e1', file_path.name))
+        assert result_bitmap == bold_bitmap
+
+
+def test_bold_left_os(glyphs_dir: Path):
+    for file_path in glyphs_dir.joinpath('black').iterdir():
+        bitmap = MonoBitmap.load_png(file_path)
+        solid_bitmap = bitmap.resize(right=1).plus(bitmap, x=1)
+        shadow_bitmap = solid_bitmap.minus(bitmap, x=1).resize(left=-1)
+        result_bitmap = solid_bitmap.minus(shadow_bitmap)
+        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('bold-left-os', file_path.name))
+        assert result_bitmap == bold_bitmap
+
+
+def test_bold_right_os(glyphs_dir: Path):
+    for file_path in glyphs_dir.joinpath('black').iterdir():
+        bitmap = MonoBitmap.load_png(file_path)
+        solid_bitmap = bitmap.resize(left=1).plus(bitmap)
+        shadow_bitmap = solid_bitmap.minus(bitmap).resize(left=1)
+        result_bitmap = solid_bitmap.minus(shadow_bitmap)
+        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('bold-right-os', file_path.name))
+        assert result_bitmap == bold_bitmap
