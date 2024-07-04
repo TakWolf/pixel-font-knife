@@ -23,7 +23,10 @@ class MonoBitmap(UserList[list[int]]):
         bitmap.width = width
         bitmap.height = height
         for pixels_row in pixels:
-            bitmap.append([1 if pixels_row[i + 3] > 127 else 0 for i in range(0, width * 4, 4)])
+            bitmap_row = []
+            for i in range(0, width * 4, 4):
+                bitmap_row.append(1 if pixels_row[i + 3] > 127 else 0)
+            bitmap.append(bitmap_row)
         return bitmap
 
     width: int
@@ -49,6 +52,15 @@ class MonoBitmap(UserList[list[int]]):
                     super().__eq__(other))
         return super().__eq__(other)
 
+    def is_x_inside(self, x: int) -> bool:
+        return 0 <= x < self.width
+
+    def is_y_inside(self, y: int) -> bool:
+        return 0 <= y < self.height
+
+    def is_inside(self, x: int, y: int) -> bool:
+        return self.is_x_inside(x) and self.is_y_inside(y)
+
     def copy(self) -> 'MonoBitmap':
         bitmap = MonoBitmap()
         for bitmap_row in self:
@@ -66,7 +78,7 @@ class MonoBitmap(UserList[list[int]]):
             bitmap_row = []
             for x in range(bitmap.width):
                 sx = x - left
-                bitmap_row.append(self[sy][sx] if 0 <= sy < self.height and 0 <= sx < self.width else 0)
+                bitmap_row.append(self[sy][sx] if self.is_inside(sx, sy) else 0)
             bitmap.append(bitmap_row)
         return bitmap
 
@@ -87,11 +99,11 @@ class MonoBitmap(UserList[list[int]]):
         bitmap = self.copy()
         for oy, other_row in enumerate(other):
             ty = oy + y
-            if ty < 0 or ty >= bitmap.height:
+            if not bitmap.is_y_inside(ty):
                 continue
             for ox, alpha in enumerate(other_row):
                 tx = ox + x
-                if tx < 0 or tx >= bitmap.width:
+                if not bitmap.is_x_inside(tx):
                     continue
                 if alpha != 0:
                     bitmap[ty][tx] = 1
@@ -101,11 +113,11 @@ class MonoBitmap(UserList[list[int]]):
         bitmap = self.copy()
         for oy, other_row in enumerate(other):
             ty = oy + y
-            if ty < 0 or ty >= bitmap.height:
+            if not bitmap.is_y_inside(ty):
                 continue
             for ox, alpha in enumerate(other_row):
                 tx = ox + x
-                if tx < 0 or tx >= bitmap.width:
+                if not bitmap.is_x_inside(tx):
                     continue
                 if alpha != 0:
                     bitmap[ty][tx] = 0

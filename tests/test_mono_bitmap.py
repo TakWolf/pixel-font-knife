@@ -69,6 +69,19 @@ def test_eq():
     assert bitmap_1 != bitmap_2
 
 
+def test_inside():
+    bitmap = MonoBitmap.create(50, 50)
+    assert bitmap.is_x_inside(10)
+    assert not bitmap.is_x_inside(-1)
+    assert not bitmap.is_x_inside(60)
+    assert bitmap.is_y_inside(25)
+    assert not bitmap.is_y_inside(-5)
+    assert not bitmap.is_y_inside(90)
+    assert bitmap.is_inside(20, 40)
+    assert not bitmap.is_inside(-6, 10)
+    assert not bitmap.is_inside(15, 90)
+
+
 def test_copy():
     bitmap = MonoBitmap([
         [0, 0, 0],
