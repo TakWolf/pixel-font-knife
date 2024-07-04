@@ -135,19 +135,19 @@ def test_plus_minus():
         [1, 0, 0, 1],
         [1, 1, 1, 1],
     ])
-    assert bitmap.plus([
+    assert bitmap.plus(MonoBitmap([
         [1, 1, 1],
         [1, 1, 1],
-    ], x=-1, y=1) == [
+    ]), x=-1, y=1) == [
         [1, 1, 1, 1],
         [1, 1, 0, 1],
         [1, 1, 0, 1],
         [1, 1, 1, 1],
     ]
-    assert bitmap.minus([
+    assert bitmap.minus(MonoBitmap([
         [1, 1, 1],
         [1, 1, 1],
-    ], x=-1, y=1) == [
+    ]), x=-1, y=1) == [
         [1, 1, 1, 1],
         [0, 0, 0, 1],
         [0, 0, 0, 1],

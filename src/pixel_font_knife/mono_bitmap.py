@@ -95,7 +95,7 @@ class MonoBitmap(UserList[list[int]]):
             bitmap.append(bitmap_row)
         return bitmap
 
-    def plus(self, other: list[list[int]], x: int = 0, y: int = 0) -> 'MonoBitmap':
+    def plus(self, other: 'MonoBitmap', x: int = 0, y: int = 0) -> 'MonoBitmap':
         bitmap = self.copy()
         for oy, other_row in enumerate(other):
             ty = oy + y
@@ -109,7 +109,7 @@ class MonoBitmap(UserList[list[int]]):
                     bitmap[ty][tx] = 1
         return bitmap
 
-    def minus(self, other: list[list[int]], x: int = 0, y: int = 0) -> 'MonoBitmap':
+    def minus(self, other: 'MonoBitmap', x: int = 0, y: int = 0) -> 'MonoBitmap':
         bitmap = self.copy()
         for oy, other_row in enumerate(other):
             ty = oy + y
