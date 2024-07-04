@@ -10,29 +10,8 @@ def _file_sha256(file_path: Path) -> str:
     return hashlib.sha256(file_path.read_bytes()).hexdigest()
 
 
-def test_create():
-    bitmap = MonoBitmap(3, 4)
-    assert bitmap.width == 3
-    assert bitmap.height == 4
-    assert bitmap == [
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 0, 0],
-    ]
-
-    bitmap = MonoBitmap(2, 3, alpha=1)
-    assert bitmap.width == 2
-    assert bitmap.height == 3
-    assert bitmap == [
-        [1, 1],
-        [1, 1],
-        [1, 1],
-    ]
-
-
-def test_cost():
-    bitmap = MonoBitmap.cost([
+def test_init():
+    bitmap = MonoBitmap([
         [0, 1, 2, 3],
         [1, 0, 0, 1],
     ])
@@ -44,14 +23,35 @@ def test_cost():
     ]
 
     with pytest.raises(ValueError):
-        MonoBitmap.cost([
+        MonoBitmap([
             [0, 1, 2],
             [],
         ])
 
 
+def test_create():
+    bitmap = MonoBitmap.create(3, 4)
+    assert bitmap.width == 3
+    assert bitmap.height == 4
+    assert bitmap == [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    bitmap = MonoBitmap.create(2, 3, alpha=2)
+    assert bitmap.width == 2
+    assert bitmap.height == 3
+    assert bitmap == [
+        [1, 1],
+        [1, 1],
+        [1, 1],
+    ]
+
+
 def test_copy():
-    bitmap = MonoBitmap.cost([
+    bitmap = MonoBitmap([
         [0, 0, 0],
         [1, 0, 1],
         [0, 1, 0],

@@ -6,42 +6,46 @@ import png
 
 class MonoBitmap(UserList[list[int]]):
     @staticmethod
-    def cost(source: list[list[int]]) -> 'MonoBitmap':
-        bitmap = MonoBitmap(0, 0)
-        bitmap.width = len(source[0])
-        bitmap.height = len(source)
-        for source_row in source:
-            if bitmap.width != len(source_row):
-                raise ValueError('Rows widths unequal')
-            bitmap.append([0 if alpha == 0 else 1 for alpha in source_row])
+    def create(width: int, height: int, alpha: int = 0) -> 'MonoBitmap':
+        bitmap = MonoBitmap()
+        for _ in range(height):
+            bitmap.append([0 if alpha == 0 else 1] * width)
+        bitmap.width = width
+        bitmap.height = height
         return bitmap
 
     @staticmethod
     def load_png(file_path: str | bytes | PathLike[str] | PathLike[bytes]) -> 'MonoBitmap':
         width, height, pixels, _ = png.Reader(filename=file_path).read()
-        bitmap = MonoBitmap(0, 0)
-        bitmap.width = width
-        bitmap.height = height
+        bitmap = MonoBitmap()
         for pixels_row in pixels:
             bitmap.append([1 if pixels_row[i + 3] > 127 else 0 for i in range(0, width * 4, 4)])
+        bitmap.width = width
+        bitmap.height = height
         return bitmap
 
     width: int
     height: int
 
-    def __init__(self, width: int, height: int, alpha: int = 0):
+    def __init__(self, bitmap: list[list[int]] | None = None):
         super().__init__()
-        self.width = width
-        self.height = height
-        for _ in range(height):
-            self.append([alpha] * width)
+        if bitmap is None:
+            self.width = 0
+            self.height = 0
+        else:
+            self.width = len(bitmap[0])
+            self.height = len(bitmap)
+            for bitmap_row in bitmap:
+                if self.width != len(bitmap_row):
+                    raise ValueError('Rows widths unequal')
+                self.append([0 if alpha == 0 else 1 for alpha in bitmap_row])
 
     def copy(self) -> 'MonoBitmap':
-        bitmap = MonoBitmap(0, 0)
-        bitmap.width = self.width
-        bitmap.height = self.height
+        bitmap = MonoBitmap()
         for bitmap_row in self:
             bitmap.append(bitmap_row[:])
+        bitmap.width = self.width
+        bitmap.height = self.height
         return bitmap
 
     def save_png(
