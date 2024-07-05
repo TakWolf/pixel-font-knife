@@ -25,8 +25,8 @@ def test_init():
 
     with pytest.raises(ValueError):
         MonoBitmap([
-            [0, 1, 2],
-            [],
+            [0, 1, 1],
+            [1],
         ])
 
 
