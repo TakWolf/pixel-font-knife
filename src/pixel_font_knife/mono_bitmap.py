@@ -1,7 +1,7 @@
 from collections import UserList
 from io import StringIO
 from os import PathLike
-from typing import Any
+from typing import Any, BinaryIO
 
 import png
 
@@ -148,11 +148,7 @@ class MonoBitmap(UserList[list[int]]):
             text.write('\n')
         return text.getvalue()
 
-    def save_png(
-            self,
-            file_path: str | bytes | PathLike[str] | PathLike[bytes],
-            color: tuple[int, int, int] = (0, 0, 0),
-    ):
+    def _build_png(self, color: tuple[int, int, int]) -> png.Image:
         red, green, blue = color
         pixels = []
         for bitmap_row in self:
@@ -163,4 +159,14 @@ class MonoBitmap(UserList[list[int]]):
                 pixels_row.append(blue)
                 pixels_row.append(255 if alpha != 0 else 0)
             pixels.append(pixels_row)
-        png.from_array(pixels, 'RGBA').save(file_path)
+        return png.from_array(pixels, 'RGBA')
+
+    def dump_png(self, stream: BinaryIO, color: tuple[int, int, int] = (0, 0, 0)):
+        self._build_png(color).write(stream)
+
+    def save_png(
+            self,
+            file_path: str | bytes | PathLike[str] | PathLike[bytes],
+            color: tuple[int, int, int] = (0, 0, 0),
+    ):
+        self._build_png(color).save(file_path)

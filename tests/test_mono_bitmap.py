@@ -1,4 +1,5 @@
 import hashlib
+from io import BytesIO
 from pathlib import Path
 
 import pytest
@@ -6,8 +7,8 @@ import pytest
 from pixel_font_knife.mono_bitmap import MonoBitmap
 
 
-def _file_sha256(file_path: Path) -> str:
-    return hashlib.sha256(file_path.read_bytes()).hexdigest()
+def _sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
 
 
 def test_init():
@@ -192,7 +193,7 @@ def test_draw():
     assert bitmap.draw(end='*') == text
 
 
-def test_load_save(glyphs_dir: Path, tmp_path: Path):
+def test_load_dump_save(glyphs_dir: Path, tmp_path: Path):
     black_load_dir = glyphs_dir.joinpath('black')
     black_save_dir = tmp_path.joinpath('black')
     black_save_dir.mkdir()
@@ -211,11 +212,15 @@ def test_load_save(glyphs_dir: Path, tmp_path: Path):
 
         black_save_path = black_save_dir.joinpath(black_load_path.name)
         black_bitmap.save_png(black_save_path)
-        assert _file_sha256(black_load_path) == _file_sha256(black_save_path)
+        black_stream = BytesIO()
+        black_bitmap.dump_png(black_stream)
+        assert _sha256(black_load_path.read_bytes()) == _sha256(black_save_path.read_bytes()) == _sha256(black_stream.getvalue())
 
         red_save_path = red_save_dir.joinpath(red_load_path.name)
         red_bitmap.save_png(red_save_path, color=(255, 0, 0))
-        assert _file_sha256(red_load_path) == _file_sha256(red_save_path)
+        red_stream = BytesIO()
+        red_bitmap.dump_png(red_stream, color=(255, 0, 0))
+        assert _sha256(red_load_path.read_bytes()) == _sha256(red_save_path.read_bytes()) == _sha256(red_stream.getvalue())
 
 
 def test_bold_s4_r1_e1(glyphs_dir: Path):
