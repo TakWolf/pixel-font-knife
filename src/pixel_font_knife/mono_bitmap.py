@@ -17,7 +17,7 @@ class MonoBitmap(UserList[list[int]]):
         return bitmap
 
     @staticmethod
-    def load_png(file_path: str | bytes | PathLike[str] | PathLike[bytes]) -> 'MonoBitmap':
+    def load_png(file_path: str | PathLike[str]) -> 'MonoBitmap':
         width, height, pixels, _ = png.Reader(filename=file_path).read()
         bitmap = MonoBitmap()
         bitmap.width = width
@@ -164,9 +164,5 @@ class MonoBitmap(UserList[list[int]]):
     def dump_png(self, stream: BinaryIO, color: tuple[int, int, int] = (0, 0, 0)):
         self._build_png(color).write(stream)
 
-    def save_png(
-            self,
-            file_path: str | bytes | PathLike[str] | PathLike[bytes],
-            color: tuple[int, int, int] = (0, 0, 0),
-    ):
+    def save_png(self, file_path: str | PathLike[str], color: tuple[int, int, int] = (0, 0, 0)):
         self._build_png(color).save(file_path)
