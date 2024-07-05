@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -51,7 +52,7 @@ def test_flavor_group():
 
 
 def test_load_context(glyphs_dir: Path):
-    context = glyph_file_util.load_context(glyphs_dir.joinpath('context'))
+    context = glyph_file_util.load_context(os.fspath(glyphs_dir.joinpath('context')))
     assert len(context) == 3
     assert -1 in context
     group_4e11 = context[0x4E11]
