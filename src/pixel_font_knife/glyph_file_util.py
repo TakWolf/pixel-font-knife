@@ -80,15 +80,12 @@ class GlyphFlavorGroup(UserDict[str, GlyphFile]):
             self,
             flavor: str = '',
             fallback_default: bool = False,
-            fallback_any: bool = False,
             allow_none: bool = False,
     ) -> GlyphFile | None:
         if flavor in self:
             return self[flavor]
         if flavor != '' and fallback_default and '' in self:
             return self['']
-        if fallback_any and len(self) > 0:
-            return next(iter(self.values()))
         if allow_none:
             return None
         raise KeyError(flavor)

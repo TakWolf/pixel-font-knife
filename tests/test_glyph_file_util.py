@@ -38,7 +38,6 @@ def test_flavor_group():
     with pytest.raises(KeyError):
         flavor_group.get_file('c')
     assert flavor_group.get_file('c', fallback_default=True).file_path == Path('6000.png')
-    assert flavor_group.get_file('c', fallback_any=True) is not None
     assert flavor_group.get_file('c', allow_none=True) is None
 
     with pytest.raises(ValueError):
