@@ -13,7 +13,7 @@ class GlyphFile:
         if file_path.suffix != '.png':
             raise ValueError(f"Not a '.png' file: '{file_path}'")
 
-        tokens = re.split(r'\s+', file_path.stem, 1)
+        tokens = re.split(r'\s+', file_path.stem.strip(), 1)
 
         if tokens[0] == 'notdef':
             code_point = -1
