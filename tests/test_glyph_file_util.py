@@ -12,6 +12,7 @@ def test_glyph_file_1():
     glyph_file = GlyphFile.load(Path('notdef.png'))
     assert glyph_file.code_point == -1
     assert len(glyph_file.flavors) == 0
+    assert glyph_file.glyph_name == '.notdef'
 
 
 def test_glyph_file_2():
@@ -24,12 +25,14 @@ def test_glyph_file_3():
     glyph_file = GlyphFile.load(Path('4E00.png'))
     assert glyph_file.code_point == 0x4E00
     assert len(glyph_file.flavors) == 0
+    assert glyph_file.glyph_name == '4E00'
 
 
 def test_glyph_file_4():
     glyph_file = GlyphFile.load(Path('4E00 a,b,c,b,a.png'))
     assert glyph_file.code_point == 0x4E00
     assert glyph_file.flavors == ['a', 'b', 'c']
+    assert glyph_file.glyph_name == '4E00-A'
 
 
 def test_glyph_file_5(glyphs_dir: Path):

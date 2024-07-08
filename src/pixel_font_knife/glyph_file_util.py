@@ -52,6 +52,16 @@ class GlyphFile:
     def height(self) -> int:
         return self.bitmap.height
 
+    @property
+    def glyph_name(self) -> str:
+        if self.code_point == -1:
+            return '.notdef'
+
+        name = f'{self.code_point:04X}'
+        if len(self.flavors) > 0:
+            name = f'{name}-{self.flavors[0].upper()}'
+        return name
+
 
 class GlyphFlavorGroup(UserDict[str, GlyphFile]):
     code_point: int
