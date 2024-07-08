@@ -123,7 +123,10 @@ class MonoBitmap(UserList[list[int]]):
                     bitmap[ty][tx] = 0
         return bitmap
 
-    def expand(self, size: int) -> 'MonoBitmap':
+    def stroke(self, size: int) -> 'MonoBitmap':
+        if size <= 0:
+            raise ValueError(f'The stroke size must be a positive number: {size}')
+
         bitmap = self.copy()
         for y, source_row in enumerate(self):
             for x, alpha in enumerate(source_row):

@@ -156,7 +156,7 @@ def test_plus_minus():
     ]
 
 
-def test_expand():
+def test_stroke():
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
@@ -169,7 +169,7 @@ def test_expand():
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ])
-    assert bitmap.expand(1) == [
+    assert bitmap.stroke(1) == [
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
@@ -226,7 +226,7 @@ def test_load_dump_save(glyphs_dir: Path, tmp_path: Path):
 def test_bold_s4_r1_e1(glyphs_dir: Path):
     for file_path in glyphs_dir.joinpath('black').iterdir():
         bitmap = MonoBitmap.load_png(file_path)
-        result_bitmap = bitmap.scale(scale_x=4, scale_y=4).resize(left=1, right=1, top=1, bottom=1).expand(1)
+        result_bitmap = bitmap.scale(scale_x=4, scale_y=4).resize(left=1, right=1, top=1, bottom=1).stroke(1)
         bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('bold-s4-r1-e1', file_path.name))
         assert result_bitmap == bold_bitmap
 
