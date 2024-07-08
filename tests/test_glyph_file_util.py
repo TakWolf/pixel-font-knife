@@ -8,23 +8,42 @@ from pixel_font_knife.glyph_file_util import GlyphFile, GlyphFlavorGroup
 from pixel_font_knife.mono_bitmap import MonoBitmap
 
 
-def test_glyph_file_1(glyphs_dir: Path):
+def test_glyph_file_1():
     glyph_file = GlyphFile.load(Path('notdef.png'))
     assert glyph_file.code_point == -1
     assert len(glyph_file.flavors) == 0
 
-    glyph_file = GlyphFile.load(Path('40FF a,b,c,b,a.png'))
-    assert glyph_file.code_point == 0x40FF
+
+def test_glyph_file_2():
+    with pytest.raises(ValueError) as info:
+        glyph_file = GlyphFile.load(Path('notdef a,b.png'))
+    assert info.value.args[0] == "'notdef' can't have flavors: 'notdef a,b.png'"
+
+
+def test_glyph_file_3():
+    glyph_file = GlyphFile.load(Path('4E00.png'))
+    assert glyph_file.code_point == 0x4E00
+    assert len(glyph_file.flavors) == 0
+
+
+def test_glyph_file_4():
+    glyph_file = GlyphFile.load(Path('4E00 a,b,c,b,a.png'))
+    assert glyph_file.code_point == 0x4E00
     assert glyph_file.flavors == ['a', 'b', 'c']
 
+
+def test_glyph_file_5(glyphs_dir: Path):
     file_path = glyphs_dir.joinpath('black', '6A1E.png')
     glyph_file = GlyphFile.load(file_path)
     assert glyph_file.bitmap == MonoBitmap.load_png(file_path)
     assert glyph_file.width == 12
     assert glyph_file.height == 12
 
-    with pytest.raises(ValueError):
-        GlyphFile.load(Path('5000.txt'))
+
+def test_glyph_file_6():
+    with pytest.raises(ValueError) as info:
+        GlyphFile.load(Path('4E00.txt'))
+    assert info.value.args[0] == "Not a '.png' file: '4E00.txt'"
 
 
 def test_flavor_group():
