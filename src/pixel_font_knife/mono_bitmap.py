@@ -141,6 +141,19 @@ class MonoBitmap(UserList[list[int]]):
                         bitmap[ty][tx] = 1
         return bitmap
 
+    def crop(self, x: int, y: int, width: int, height: int) -> 'MonoBitmap':
+        bitmap = MonoBitmap()
+        bitmap.width = width
+        bitmap.height = height
+        for ny in range(height):
+            sy = ny + y
+            bitmap_row = []
+            for nx in range(width):
+                sx = nx + x
+                bitmap_row.append(self[sy][sx])
+            bitmap.append(bitmap_row)
+        return bitmap
+
     def draw(self, white: str = '  ', black: str = '██', end: str | None = None) -> str:
         text = StringIO()
         for bitmap_row in self:
