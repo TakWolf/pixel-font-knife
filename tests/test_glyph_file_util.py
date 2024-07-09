@@ -50,37 +50,39 @@ def test_glyph_file_6():
 
 
 def test_flavor_group():
-    flavor_group = GlyphFlavorGroup(0x6000)
-    flavor_group.add_file(GlyphFile.load(Path('6000.png')))
-    flavor_group.add_file(GlyphFile.load(Path('6000 a,b.png')))
-    assert len(flavor_group) == 3
-    assert flavor_group.get_file().file_path == Path('6000.png')
-    assert flavor_group.get_file('a').file_path == Path('6000 a,b.png')
+    flavor_group = GlyphFlavorGroup()
+
+    glyph_file_default = GlyphFile.load(Path('6000.png'))
+    flavor_group[''] = glyph_file_default
+
+    glyph_file_ab = GlyphFile.load(Path('6000 a,b.png'))
+    flavor_group['a'] = glyph_file_ab
+    flavor_group['b'] = glyph_file_ab
+
+    assert flavor_group.get_file() == flavor_group.get_file('c') == glyph_file_default
+    assert flavor_group.get_file('a') == flavor_group.get_file('b') == glyph_file_ab
 
     with pytest.raises(KeyError):
-        flavor_group.get_file('c')
-    assert flavor_group.get_file('c', fallback_default=True).file_path == Path('6000.png')
-    assert flavor_group.get_file('c', allow_none=True) is None
-
-    with pytest.raises(ValueError):
-        flavor_group.add_file(GlyphFile.load(Path('7000.png')))
-
-    with pytest.raises(RuntimeError):
-        flavor_group.add_file(GlyphFile.load(Path('6000.png')))
-
-    with pytest.raises(RuntimeError):
-        flavor_group.add_file(GlyphFile.load(Path('6000 b.png')))
+        flavor_group.get_file('c', fallback_default=False)
 
 
-def test_load_context(glyphs_dir: Path):
+def test_context(glyphs_dir: Path):
     context = glyph_file_util.load_context(os.fspath(glyphs_dir.joinpath('context')))
+
     assert len(context) == 3
     assert -1 in context
+    assert 0x4E11 in context
+    assert 0x6AA4 in context
+    assert 0x4E10 not in context
+
     group_4e11 = context[0x4E11]
     assert len(group_4e11) == 2
     assert '' in group_4e11
     assert 'zh_cn' in group_4e11
+    assert group_4e11.get_file('zh_hk') is group_4e11.get_file()
+
     group_6aa4 = context[0x6AA4]
     assert len(group_6aa4) == 5
     assert '' in group_6aa4
-    assert group_6aa4['zh_hk'] is group_6aa4['zh_tw']
+    assert group_6aa4.get_file('zh_hk') is group_6aa4.get_file('zh_tw')
+    assert group_6aa4.get_file('zh_tr') is group_6aa4.get_file('ko')

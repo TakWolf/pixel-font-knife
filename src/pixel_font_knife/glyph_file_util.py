@@ -72,38 +72,11 @@ class GlyphFile:
 
 
 class GlyphFlavorGroup(UserDict[str, GlyphFile]):
-    code_point: int
-
-    def __init__(self, code_point: int):
-        super().__init__()
-        self.code_point = code_point
-
-    def add_file(self, glyph_file: GlyphFile):
-        if glyph_file.code_point != self.code_point:
-            raise ValueError(f"'code_point' unequal: 0x{glyph_file.code_point} -> 0x{self.code_point}")
-
-        if len(glyph_file.flavors) > 0:
-            for flavor in glyph_file.flavors:
-                if flavor in self:
-                    raise RuntimeError(f"Flavor '{flavor}' already exists: '{glyph_file.file_path}' -> '{self[flavor].file_path}'")
-                self[flavor] = glyph_file
-        else:
-            if '' in self:
-                raise RuntimeError(f"Default flavor already exists: '{glyph_file.file_path}' -> '{self[''].file_path}'")
-            self[''] = glyph_file
-
-    def get_file(
-            self,
-            flavor: str = '',
-            fallback_default: bool = False,
-            allow_none: bool = False,
-    ) -> GlyphFile | None:
+    def get_file(self, flavor: str = '', fallback_default: bool = True) -> GlyphFile | None:
         if flavor in self:
             return self[flavor]
         if flavor != '' and fallback_default and '' in self:
             return self['']
-        if allow_none:
-            return None
         raise KeyError(flavor)
 
 
@@ -121,9 +94,18 @@ def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
             glyph_file = GlyphFile.load(file_path)
 
             if glyph_file.code_point not in context:
-                flavor_group = GlyphFlavorGroup(glyph_file.code_point)
+                flavor_group = GlyphFlavorGroup()
                 context[glyph_file.code_point] = flavor_group
             else:
                 flavor_group = context[glyph_file.code_point]
-            flavor_group.add_file(glyph_file)
+
+            if len(glyph_file.flavors) > 0:
+                for flavor in glyph_file.flavors:
+                    if flavor in flavor_group:
+                        raise RuntimeError(f"flavor {repr(flavor)} already exists: '{glyph_file.file_path}' -> '{flavor_group[flavor].file_path}'")
+                    flavor_group[flavor] = glyph_file
+            else:
+                if '' in flavor_group:
+                    raise RuntimeError(f"default flavor already exists: '{glyph_file.file_path}' -> '{flavor_group[''].file_path}'")
+                flavor_group[''] = glyph_file
     return context
