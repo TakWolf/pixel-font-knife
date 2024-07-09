@@ -109,3 +109,32 @@ def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
                     raise RuntimeError(f"default flavor already exists: '{glyph_file.file_path}' -> '{flavor_group[''].file_path}'")
                 flavor_group[''] = glyph_file
     return context
+
+
+def get_character_mapping(
+        context: dict[int, GlyphFlavorGroup],
+        flavor: str = '',
+        fallback_default: bool = True,
+) -> dict[int, str]:
+    character_mapping = {}
+    for code_point, flavor_group in context.items():
+        if code_point < 0:
+            continue
+        glyph_file = flavor_group.get_file(flavor, fallback_default)
+        character_mapping[code_point] = glyph_file.glyph_name
+    return character_mapping
+
+
+def get_glyph_sequence(
+        context: dict[int, GlyphFlavorGroup],
+        flavors: list[str] | None = None,
+        fallback_default: bool = True,
+) -> list[GlyphFile]:
+    glyph_sequence = []
+    flavor_group_sequence = sorted(context.items())
+    for flavor in [''] if flavors is None else flavors:
+        for code_point, flavor_group in flavor_group_sequence:
+            glyph_file = flavor_group.get_file(flavor, fallback_default)
+            if glyph_file not in glyph_sequence:
+                glyph_sequence.append(glyph_file)
+    return glyph_sequence

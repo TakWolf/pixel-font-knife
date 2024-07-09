@@ -75,6 +75,9 @@ def test_context(glyphs_dir: Path):
     assert 0x6AA4 in context
     assert 0x4E10 not in context
 
+    group_notdef = context[-1]
+    assert len(group_notdef) == 1
+
     group_4e11 = context[0x4E11]
     assert len(group_4e11) == 2
     assert '' in group_4e11
@@ -86,3 +89,20 @@ def test_context(glyphs_dir: Path):
     assert '' in group_6aa4
     assert group_6aa4.get_file('zh_hk') is group_6aa4.get_file('zh_tw')
     assert group_6aa4.get_file('zh_tr') is group_6aa4.get_file('ko')
+
+    assert glyph_file_util.get_character_mapping(context) == {
+        0x4E11: '4E11',
+        0x6AA4: '6AA4',
+    }
+    assert glyph_file_util.get_character_mapping(context, 'zh_cn') == {
+        0x4E11: '4E11-ZH_CN',
+        0x6AA4: '6AA4',
+    }
+
+    assert glyph_file_util.get_glyph_sequence(context, ['', 'zh_cn', 'zh_hk']) == [
+        GlyphFile.load(glyphs_dir.joinpath('context', 'notdef.png')),
+        GlyphFile.load(glyphs_dir.joinpath('context', '4E11.png')),
+        GlyphFile.load(glyphs_dir.joinpath('context', '6AA4.png')),
+        GlyphFile.load(glyphs_dir.joinpath('context', '4E11 zh_cn.png')),
+        GlyphFile.load(glyphs_dir.joinpath('context', '6AA4 zh_hk,zh_tw.png')),
+    ]
