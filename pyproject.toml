@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pixel-font-knife"
-version = "0.0.3"
+version = "0.0.4"
 description = "A set of pixel font utilities."
 readme = "README.md"
 license = { text = "MIT License" }
