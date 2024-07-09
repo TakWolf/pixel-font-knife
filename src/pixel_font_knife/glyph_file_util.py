@@ -72,6 +72,30 @@ class GlyphFile:
 
 
 class GlyphFlavorGroup(UserDict[str, GlyphFile]):
+    def __contains__(self, flavor: Any) -> bool:
+        if isinstance(flavor, str):
+            flavor = flavor.lower()
+        return super().__contains__(flavor)
+
+    def __getitem__(self, flavor: Any) -> GlyphFile:
+        if isinstance(flavor, str):
+            flavor = flavor.lower()
+        return super().__getitem__(flavor)
+
+    def __setitem__(self, flavor: Any, glyph_file: Any):
+        if not isinstance(flavor, str):
+            raise KeyError(flavor)
+        flavor = flavor.lower()
+
+        if glyph_file is None:
+            self.pop(flavor, None)
+            return
+
+        if not isinstance(glyph_file, GlyphFile):
+            raise ValueError(f"illegal value type: '{type(glyph_file).__name__}'")
+
+        super().__setitem__(flavor, glyph_file)
+
     def get_file(self, flavor: str = '', fallback_default: bool = True) -> GlyphFile | None:
         if flavor in self:
             return self[flavor]

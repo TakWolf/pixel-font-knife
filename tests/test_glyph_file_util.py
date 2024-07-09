@@ -61,6 +61,8 @@ def test_flavor_group():
 
     assert flavor_group.get_file() == flavor_group.get_file('c') == glyph_file_default
     assert flavor_group.get_file('a') == flavor_group.get_file('b') == glyph_file_ab
+    assert flavor_group.get_file('A') == flavor_group.get_file('a') == glyph_file_ab
+    assert flavor_group.get_file('B') == flavor_group.get_file('b') == glyph_file_ab
 
     with pytest.raises(KeyError):
         flavor_group.get_file('c', fallback_default=False)
