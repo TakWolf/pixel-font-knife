@@ -46,7 +46,7 @@ def test_glyph_file_5(glyphs_dir: Path):
 def test_glyph_file_6():
     with pytest.raises(ValueError) as info:
         GlyphFile.load(Path('4E00.txt'))
-    assert info.value.args[0] == "Not a '.png' file: '4E00.txt'"
+    assert info.value.args[0] == "not '.png' file: '4E00.txt'"
 
 
 def test_flavor_group():

@@ -11,7 +11,7 @@ class GlyphFile:
     @staticmethod
     def load(file_path: Path) -> 'GlyphFile':
         if file_path.suffix != '.png':
-            raise ValueError(f"Not a '.png' file: '{file_path}'")
+            raise ValueError(f"not '.png' file: '{file_path}'")
 
         tokens = re.split(r'\s+', file_path.stem.strip(), 1)
         if tokens[0] == 'notdef':
