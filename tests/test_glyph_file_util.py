@@ -17,7 +17,7 @@ def test_glyph_file_1():
 
 def test_glyph_file_2():
     with pytest.raises(ValueError) as info:
-        glyph_file = GlyphFile.load(Path('notdef a,b.png'))
+        GlyphFile.load(Path('notdef a,b.png'))
     assert info.value.args[0] == "'notdef' can't have flavors: 'notdef a,b.png'"
 
 
@@ -29,7 +29,7 @@ def test_glyph_file_3():
 
 
 def test_glyph_file_4():
-    glyph_file = GlyphFile.load(Path('4E00 a,b,c,b,a.png'))
+    glyph_file = GlyphFile.load(Path('4E00 A,b,C,b,a.png'))
     assert glyph_file.code_point == 0x4E00
     assert glyph_file.flavors == ['a', 'b', 'c']
     assert glyph_file.glyph_name == '4E00-A'
