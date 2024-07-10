@@ -154,11 +154,17 @@ def get_glyph_sequence(
         flavors: list[str] | None = None,
         fallback_default: bool = True,
 ) -> list[GlyphFile]:
+    context = sorted(context.items())
+    if flavors is None:
+        flavors = ['']
+
     glyph_sequence = []
-    flavor_group_sequence = sorted(context.items())
-    for flavor in [''] if flavors is None else flavors:
-        for code_point, flavor_group in flavor_group_sequence:
+    glyph_names = set()
+    for flavor in flavors:
+        for code_point, flavor_group in context:
             glyph_file = flavor_group.get_file(flavor, fallback_default)
-            if glyph_file not in glyph_sequence:
+            glyph_name = glyph_file.glyph_name
+            if glyph_name not in glyph_names:
+                glyph_names.add(glyph_name)
                 glyph_sequence.append(glyph_file)
     return glyph_sequence
