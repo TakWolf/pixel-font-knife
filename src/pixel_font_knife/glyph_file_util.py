@@ -39,13 +39,6 @@ class GlyphFile:
         self.flavors = flavors
         self._bitmap = None
 
-    def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, GlyphFile):
-            return False
-        return (self.file_path == other.file_path and
-                self.code_point == other.code_point and
-                self.flavors == other.flavors)
-
     @property
     def bitmap(self) -> MonoBitmap:
         if self._bitmap is None:

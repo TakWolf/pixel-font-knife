@@ -101,10 +101,10 @@ def test_context(glyphs_dir: Path):
         0x6AA4: '6AA4',
     }
 
-    assert glyph_file_util.get_glyph_sequence(context, ['', 'zh_cn', 'zh_hk']) == [
-        GlyphFile.load(glyphs_dir.joinpath('context', 'notdef.png')),
-        GlyphFile.load(glyphs_dir.joinpath('context', '4E11.png')),
-        GlyphFile.load(glyphs_dir.joinpath('context', '6AA4.png')),
-        GlyphFile.load(glyphs_dir.joinpath('context', '4E11 zh_cn.png')),
-        GlyphFile.load(glyphs_dir.joinpath('context', '6AA4 zh_hk,zh_tw.png')),
+    assert [glyph_file.file_path for glyph_file in glyph_file_util.get_glyph_sequence(context, ['', 'zh_cn', 'zh_hk'])] == [
+        glyphs_dir.joinpath('context', 'notdef.png'),
+        glyphs_dir.joinpath('context', '4E11.png'),
+        glyphs_dir.joinpath('context', '6AA4.png'),
+        glyphs_dir.joinpath('context', '4E11 zh_cn.png'),
+        glyphs_dir.joinpath('context', '6AA4 zh_hk,zh_tw.png'),
     ]
