@@ -64,9 +64,6 @@ def test_flavor_group():
     assert flavor_group.get_file('A') == flavor_group.get_file('a') == glyph_file_ab
     assert flavor_group.get_file('B') == flavor_group.get_file('b') == glyph_file_ab
 
-    with pytest.raises(KeyError):
-        flavor_group.get_file('c', fallback_default=False)
-
 
 def test_context(glyphs_dir: Path):
     context = glyph_file_util.load_context(os.fspath(glyphs_dir.joinpath('context')))

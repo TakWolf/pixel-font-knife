@@ -89,10 +89,10 @@ class GlyphFlavorGroup(UserDict[str, GlyphFile]):
 
         super().__setitem__(flavor, glyph_file)
 
-    def get_file(self, flavor: str = '', fallback_default: bool = True) -> GlyphFile | None:
+    def get_file(self, flavor: str = '') -> GlyphFile:
         if flavor in self:
             return self[flavor]
-        if flavor != '' and fallback_default and '' in self:
+        if flavor != '' and '' in self:
             return self['']
         raise KeyError(flavor)
 
@@ -128,25 +128,17 @@ def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
     return context
 
 
-def get_character_mapping(
-        context: dict[int, GlyphFlavorGroup],
-        flavor: str = '',
-        fallback_default: bool = True,
-) -> dict[int, str]:
+def get_character_mapping(context: dict[int, GlyphFlavorGroup], flavor: str = '') -> dict[int, str]:
     character_mapping = {}
     for code_point, flavor_group in context.items():
         if code_point < 0:
             continue
-        glyph_file = flavor_group.get_file(flavor, fallback_default)
+        glyph_file = flavor_group.get_file(flavor)
         character_mapping[code_point] = glyph_file.glyph_name
     return character_mapping
 
 
-def get_glyph_sequence(
-        context: dict[int, GlyphFlavorGroup],
-        flavors: list[str] | None = None,
-        fallback_default: bool = True,
-) -> list[GlyphFile]:
+def get_glyph_sequence(context: dict[int, GlyphFlavorGroup], flavors: list[str] | None = None) -> list[GlyphFile]:
     context = sorted(context.items())
     if flavors is None:
         flavors = ['']
@@ -155,7 +147,7 @@ def get_glyph_sequence(
     glyph_names = set()
     for flavor in flavors:
         for code_point, flavor_group in context:
-            glyph_file = flavor_group.get_file(flavor, fallback_default)
+            glyph_file = flavor_group.get_file(flavor)
             glyph_name = glyph_file.glyph_name
             if glyph_name not in glyph_names:
                 glyph_names.add(glyph_name)
