@@ -120,11 +120,11 @@ def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
             if len(glyph_file.flavors) > 0:
                 for flavor in glyph_file.flavors:
                     if flavor in flavor_group:
-                        raise RuntimeError(f"flavor {repr(flavor)} already exists: '{glyph_file.file_path}' -> '{flavor_group[flavor].file_path}'")
+                        raise RuntimeError(f"flavor {repr(flavor)} already exists:\n'{glyph_file.file_path}'\n'{flavor_group[flavor].file_path}'")
                     flavor_group[flavor] = glyph_file
             else:
                 if None in flavor_group:
-                    raise RuntimeError(f"default flavor already exists: '{glyph_file.file_path}' -> '{flavor_group[None].file_path}'")
+                    raise RuntimeError(f"default flavor already exists:\n'{glyph_file.file_path}'\n'{flavor_group[None].file_path}'")
                 flavor_group[None] = glyph_file
     return context
 
