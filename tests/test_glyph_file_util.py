@@ -53,7 +53,7 @@ def test_flavor_group():
     flavor_group = GlyphFlavorGroup()
 
     glyph_file_default = GlyphFile.load(Path('6000.png'))
-    flavor_group[''] = glyph_file_default
+    flavor_group[None] = glyph_file_default
 
     glyph_file_ab = GlyphFile.load(Path('6000 a,b.png'))
     flavor_group['a'] = glyph_file_ab
@@ -79,13 +79,13 @@ def test_context(glyphs_dir: Path):
 
     group_4e11 = context[0x4E11]
     assert len(group_4e11) == 2
-    assert '' in group_4e11
+    assert None in group_4e11
     assert 'zh_cn' in group_4e11
     assert group_4e11.get_file('zh_hk') is group_4e11.get_file()
 
     group_6aa4 = context[0x6AA4]
     assert len(group_6aa4) == 5
-    assert '' in group_6aa4
+    assert None in group_6aa4
     assert group_6aa4.get_file('zh_hk') is group_6aa4.get_file('zh_tw')
     assert group_6aa4.get_file('zh_tr') is group_6aa4.get_file('ko')
 
@@ -98,7 +98,7 @@ def test_context(glyphs_dir: Path):
         0x6AA4: '6AA4',
     }
 
-    assert [glyph_file.file_path for glyph_file in glyph_file_util.get_glyph_sequence(context, ['', 'zh_cn', 'zh_hk'])] == [
+    assert [glyph_file.file_path for glyph_file in glyph_file_util.get_glyph_sequence(context, [None, 'zh_cn', 'zh_hk'])] == [
         glyphs_dir.joinpath('context', 'notdef.png'),
         glyphs_dir.joinpath('context', '4E11.png'),
         glyphs_dir.joinpath('context', '6AA4.png'),

@@ -76,9 +76,10 @@ class GlyphFlavorGroup(UserDict[str, GlyphFile]):
         return super().__getitem__(flavor)
 
     def __setitem__(self, flavor: Any, glyph_file: Any):
-        if not isinstance(flavor, str):
+        if isinstance(flavor, str):
+            flavor = flavor.lower()
+        elif flavor is not None:
             raise KeyError(flavor)
-        flavor = flavor.lower()
 
         if glyph_file is None:
             self.pop(flavor, None)
@@ -89,11 +90,11 @@ class GlyphFlavorGroup(UserDict[str, GlyphFile]):
 
         super().__setitem__(flavor, glyph_file)
 
-    def get_file(self, flavor: str = '') -> GlyphFile:
+    def get_file(self, flavor: str | None = None) -> GlyphFile:
         if flavor in self:
             return self[flavor]
-        if flavor != '' and '' in self:
-            return self['']
+        if None in self:
+            return self[None]
         raise KeyError(flavor)
 
 
@@ -122,13 +123,13 @@ def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
                         raise RuntimeError(f"flavor {repr(flavor)} already exists: '{glyph_file.file_path}' -> '{flavor_group[flavor].file_path}'")
                     flavor_group[flavor] = glyph_file
             else:
-                if '' in flavor_group:
-                    raise RuntimeError(f"default flavor already exists: '{glyph_file.file_path}' -> '{flavor_group[''].file_path}'")
-                flavor_group[''] = glyph_file
+                if None in flavor_group:
+                    raise RuntimeError(f"default flavor already exists: '{glyph_file.file_path}' -> '{flavor_group[None].file_path}'")
+                flavor_group[None] = glyph_file
     return context
 
 
-def get_character_mapping(context: dict[int, GlyphFlavorGroup], flavor: str = '') -> dict[int, str]:
+def get_character_mapping(context: dict[int, GlyphFlavorGroup], flavor: str | None = None) -> dict[int, str]:
     character_mapping = {}
     for code_point, flavor_group in context.items():
         if code_point < 0:
@@ -141,14 +142,14 @@ def get_character_mapping(context: dict[int, GlyphFlavorGroup], flavor: str = ''
 def get_glyph_sequence(context: dict[int, GlyphFlavorGroup], flavors: list[str] | None = None) -> list[GlyphFile]:
     if -1 in context:
         flavor_group = context[-1]
-        if '' not in flavor_group:
+        if None not in flavor_group:
             raise ValueError("missing default flavor in '.notdef' group")
-        glyph_name = flavor_group[''].glyph_name
+        glyph_name = flavor_group[None].glyph_name
         if glyph_name != '.notdef':
             raise ValueError(f"illegal glyph name for '.notdef': {repr(glyph_name)}")
 
     if flavors is None:
-        flavors = ['']
+        flavors = [None]
     context = sorted(context.items())
 
     glyph_sequence = []
@@ -158,7 +159,7 @@ def get_glyph_sequence(context: dict[int, GlyphFlavorGroup], flavors: list[str] 
             if code_point < -1:
                 continue
             if code_point == -1:
-                glyph_file = flavor_group['']
+                glyph_file = flavor_group[None]
             else:
                 glyph_file = flavor_group.get_file(flavor)
             glyph_name = glyph_file.glyph_name
