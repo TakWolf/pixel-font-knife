@@ -64,7 +64,7 @@ class GlyphFile:
         return name
 
 
-class GlyphFlavorGroup(UserDict[str, GlyphFile]):
+class GlyphFlavorGroup(UserDict[str | None, GlyphFile]):
     def __contains__(self, flavor: Any) -> bool:
         if isinstance(flavor, str):
             flavor = flavor.lower()
