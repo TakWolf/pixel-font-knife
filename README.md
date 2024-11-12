@@ -17,6 +17,7 @@ pip install pixel-font-knife
 
 - [PyPNG](https://gitlab.com/drj11/pypng)
 - [Unidata Blocks](https://github.com/TakWolf/unidata-blocks)
+- [PyYAML](https://github.com/yaml/pyyaml)
 
 ## 许可证
 
