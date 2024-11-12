@@ -5,6 +5,8 @@ from os import PathLike
 from pathlib import Path
 from typing import Any
 
+import unidata_blocks
+
 from pixel_font_knife.mono_bitmap import MonoBitmap
 
 
@@ -127,6 +129,45 @@ def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
                     raise RuntimeError(f"default flavor already exists:\n'{glyph_file.file_path}'\n'{flavor_group[None].file_path}'")
                 flavor_group[None] = glyph_file
     return context
+
+
+def normalize_context(
+        context: dict[int, GlyphFlavorGroup],
+        root_dir: str | PathLike[str],
+        flavors_order: list[str] | None = None,
+):
+    if isinstance(root_dir, str):
+        root_dir = Path(root_dir)
+
+    for code_point, flavor_group in context.items():
+        if code_point == -1:
+            code_name = 'notdef'
+            file_dir = root_dir
+        else:
+            code_name = f'{code_point:04X}'
+            block = unidata_blocks.get_block_by_code_point(code_point)
+            file_dir = root_dir.joinpath(f'{block.code_start:04X}-{block.code_end:04X} {block.name}')
+            if block.name == 'CJK Unified Ideographs':
+                file_dir = file_dir.joinpath(f'{code_name[0:-2]}-')
+
+        for glyph_file in set(flavor_group.values()):
+            if len(glyph_file.flavors) > 0:
+                if flavors_order is None:
+                    flavors = sorted(glyph_file.flavors)
+                else:
+                    flavors = sorted(glyph_file.flavors, key=lambda x: flavors_order.index(x))
+                file_name = f'{code_name} {",".join(flavors)}.png'
+            else:
+                file_name = f'{code_name}.png'
+            file_path = file_dir.joinpath(file_name)
+            if glyph_file.file_path != file_path:
+                if file_path.exists():
+                    raise RuntimeError(f"duplicate glyph files:\n'{glyph_file.file_path}'\n'{file_path}'")
+                file_dir.mkdir(parents=True, exist_ok=True)
+                glyph_file.file_path.rename(file_path)
+                glyph_file.file_path = file_path
+
+            glyph_file.bitmap.save_png(glyph_file.file_path)
 
 
 def get_character_mapping(context: dict[int, GlyphFlavorGroup], flavor: str | None = None) -> dict[int, str]:
