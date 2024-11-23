@@ -42,7 +42,7 @@ class MonoBitmap(UserList[list[int]]):
             self.height = len(bitmap)
             for bitmap_row in bitmap:
                 if self.width != len(bitmap_row):
-                    raise ValueError('Rows with different widths')
+                    raise ValueError('rows with different widths')
                 self.append([0 if alpha == 0 else 1 for alpha in bitmap_row])
 
     def __eq__(self, other: Any) -> bool:
@@ -125,7 +125,7 @@ class MonoBitmap(UserList[list[int]]):
 
     def stroke(self, size: int) -> 'MonoBitmap':
         if size <= 0:
-            raise ValueError(f'The stroke size must be a positive number: {size}')
+            raise ValueError(f'the stroke size must be a positive number: {size}')
 
         bitmap = self.copy()
         for y, source_row in enumerate(self):
