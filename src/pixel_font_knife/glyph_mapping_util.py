@@ -64,30 +64,32 @@ def load_mapping(file_path: str | PathLike[str]) -> dict[int, SourceFlavorGroup]
         file_path = Path(file_path)
 
     mapping = {}
-    for code_point, data in yaml.safe_load(file_path.read_bytes()).items():
-        source_group = SourceFlavorGroup()
-        if data is not None:
-            for key, value in data.items():
-                if key is None:
-                    flavors = []
-                else:
-                    flavors = key.lower().split(',')
-                if isinstance(value, int):
-                    source_glyph = SourceGlyph(value, None)
-                else:
-                    tokens = re.split(r'\s+', value, 1)
-                    source_glyph = SourceGlyph(int(tokens[0], 0), tokens[1].lower())
+    raw_mapping = yaml.safe_load(file_path.read_bytes())
+    if raw_mapping is not None:
+        for code_point, raw_source_group in raw_mapping.items():
+            if raw_source_group is not None:
+                source_group = SourceFlavorGroup()
+                for key, value in raw_source_group.items():
+                    if key is None:
+                        flavors = []
+                    else:
+                        flavors = key.lower().split(',')
+                    if isinstance(value, int):
+                        source_glyph = SourceGlyph(value, None)
+                    else:
+                        tokens = re.split(r'\s+', value, 1)
+                        source_glyph = SourceGlyph(int(tokens[0], 0), tokens[1].lower())
 
-                if len(flavors) > 0:
-                    for flavor in flavors:
-                        if flavor in source_group:
-                            raise RuntimeError(f'0x{code_point:04X} duplicate flavor {repr(flavor)}')
-                        source_group[flavor] = source_glyph
-                else:
-                    if None in source_group:
-                        raise RuntimeError(f'0x{code_point:04X} duplicate default flavor')
-                    source_group[None] = source_glyph
-        mapping[code_point] = source_group
+                    if len(flavors) > 0:
+                        for flavor in flavors:
+                            if flavor in source_group:
+                                raise RuntimeError(f'0x{code_point:04X} duplicate flavor {repr(flavor)}')
+                            source_group[flavor] = source_glyph
+                    else:
+                        if None in source_group:
+                            raise RuntimeError(f'0x{code_point:04X} duplicate default flavor')
+                        source_group[None] = source_glyph
+                mapping[code_point] = source_group
     return mapping
 
 
