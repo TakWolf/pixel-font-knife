@@ -25,14 +25,14 @@ def test_glyph_file_3():
     glyph_file = GlyphFile.load(Path('4E00.png'))
     assert glyph_file.code_point == 0x4E00
     assert len(glyph_file.flavors) == 0
-    assert glyph_file.glyph_name == '4E00'
+    assert glyph_file.glyph_name == 'u4E00'
 
 
 def test_glyph_file_4():
     glyph_file = GlyphFile.load(Path('4E00 A,b,C,b,a.png'))
     assert glyph_file.code_point == 0x4E00
     assert glyph_file.flavors == ['a', 'b', 'c']
-    assert glyph_file.glyph_name == '4E00-A'
+    assert glyph_file.glyph_name == 'u4E00-A'
 
 
 def test_glyph_file_5(glyphs_dir: Path):
@@ -90,12 +90,12 @@ def test_context(glyphs_dir: Path):
     assert group_6aa4.get_file('zh_tr') is group_6aa4.get_file('ko')
 
     assert glyph_file_util.get_character_mapping(context) == {
-        0x4E11: '4E11',
-        0x6AA4: '6AA4',
+        0x4E11: 'u4E11',
+        0x6AA4: 'u6AA4',
     }
     assert glyph_file_util.get_character_mapping(context, 'zh_cn') == {
-        0x4E11: '4E11-ZH_CN',
-        0x6AA4: '6AA4',
+        0x4E11: 'u4E11-ZH_CN',
+        0x6AA4: 'u6AA4',
     }
 
     assert [glyph_file.file_path for glyph_file in glyph_file_util.get_glyph_sequence(context, [None, 'zh_cn', 'zh_hk'])] == [

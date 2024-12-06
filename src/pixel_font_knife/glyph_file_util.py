@@ -60,7 +60,7 @@ class GlyphFile:
         if self.code_point == -1:
             return '.notdef'
 
-        name = f'{self.code_point:04X}'
+        name = f'u{self.code_point:04X}'
         if len(self.flavors) > 0:
             name = f'{name}-{self.flavors[0].upper()}'
         return name
