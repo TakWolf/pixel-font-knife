@@ -8,12 +8,12 @@ import png
 
 class MonoBitmap(UserList[list[int]]):
     @staticmethod
-    def create(width: int, height: int, alpha: int = 0) -> 'MonoBitmap':
+    def create(width: int, height: int, filled: bool = False) -> 'MonoBitmap':
         bitmap = MonoBitmap()
         bitmap.width = width
         bitmap.height = height
         for _ in range(height):
-            bitmap.append([0 if alpha == 0 else 1] * width)
+            bitmap.append([1 if filled else 0] * width)
         return bitmap
 
     @staticmethod
@@ -43,7 +43,7 @@ class MonoBitmap(UserList[list[int]]):
             for bitmap_row in bitmap:
                 if self.width != len(bitmap_row):
                     raise ValueError('rows with different widths')
-                self.append([0 if alpha == 0 else 1 for alpha in bitmap_row])
+                self.append([0 if color == 0 else 1 for color in bitmap_row])
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, MonoBitmap):
@@ -101,11 +101,11 @@ class MonoBitmap(UserList[list[int]]):
             ty = oy + y
             if not bitmap.is_y_inside(ty):
                 continue
-            for ox, alpha in enumerate(other_row):
+            for ox, color in enumerate(other_row):
                 tx = ox + x
                 if not bitmap.is_x_inside(tx):
                     continue
-                if alpha != 0:
+                if color != 0:
                     bitmap[ty][tx] = 1
         return bitmap
 
@@ -115,11 +115,11 @@ class MonoBitmap(UserList[list[int]]):
             ty = oy + y
             if not bitmap.is_y_inside(ty):
                 continue
-            for ox, alpha in enumerate(other_row):
+            for ox, color in enumerate(other_row):
                 tx = ox + x
                 if not bitmap.is_x_inside(tx):
                     continue
-                if alpha != 0:
+                if color != 0:
                     bitmap[ty][tx] = 0
         return bitmap
 
@@ -129,8 +129,8 @@ class MonoBitmap(UserList[list[int]]):
 
         bitmap = self.copy()
         for y, source_row in enumerate(self):
-            for x, alpha in enumerate(source_row):
-                if alpha == 0:
+            for x, color in enumerate(source_row):
+                if color == 0:
                     continue
                 for ty in range(y - size, y + size + 1):
                     if not bitmap.is_y_inside(ty):
@@ -157,8 +157,8 @@ class MonoBitmap(UserList[list[int]]):
     def draw(self, white: str = '  ', black: str = '██', end: str | None = None) -> str:
         text = StringIO()
         for bitmap_row in self:
-            for alpha in bitmap_row:
-                text.write(white if alpha == 0 else black)
+            for color in bitmap_row:
+                text.write(white if color == 0 else black)
             if end is not None:
                 text.write(end)
             text.write('\n')
@@ -169,11 +169,11 @@ class MonoBitmap(UserList[list[int]]):
         pixels = []
         for bitmap_row in self:
             pixels_row = []
-            for alpha in bitmap_row:
+            for color in bitmap_row:
                 pixels_row.append(red)
                 pixels_row.append(green)
                 pixels_row.append(blue)
-                pixels_row.append(255 if alpha != 0 else 0)
+                pixels_row.append(255 if color != 0 else 0)
             pixels.append(pixels_row)
         return png.from_array(pixels, 'RGBA')
 

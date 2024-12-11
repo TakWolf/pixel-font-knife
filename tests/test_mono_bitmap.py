@@ -36,7 +36,7 @@ def test_create():
         [0, 0, 0],
     ]
 
-    bitmap = MonoBitmap.create(2, 3, alpha=2)
+    bitmap = MonoBitmap.create(2, 3, filled=True)
     assert bitmap.width == 2
     assert bitmap.height == 3
     assert bitmap == [
