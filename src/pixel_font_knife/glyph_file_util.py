@@ -5,9 +5,86 @@ from os import PathLike
 from pathlib import Path
 from typing import Any
 
+import png
 import unidata_blocks
 
 from pixel_font_knife.mono_bitmap import MonoBitmap
+
+
+class GlyphData:
+    @staticmethod
+    def load_png(file_path: str | PathLike[str]) -> 'GlyphData':
+        width, height, pixels, _ = png.Reader(filename=file_path).read()
+        bitmap = MonoBitmap()
+        bitmap.width = width
+        bitmap.height = height
+        mask = MonoBitmap()
+        mask.width = width
+        mask.height = height
+        for pixels_row in pixels:
+            bitmap_row = []
+            mask_row = []
+            for i in range(0, width * 4, 4):
+                red = pixels_row[i]
+                green = pixels_row[i + 1]
+                blue = pixels_row[i + 2]
+                alpha = pixels_row[i + 3]
+                if red == 255 and green == 0 and blue == 255:
+                    bitmap_color = 0
+                    mask_color = 1
+                elif alpha > 127:
+                    bitmap_color = 1
+                    mask_color = 0
+                else:
+                    bitmap_color = 0
+                    mask_color = 0
+                bitmap_row.append(bitmap_color)
+                mask_row.append(mask_color)
+            bitmap.append(bitmap_row)
+            mask.append(mask_row)
+        return GlyphData(bitmap, mask)
+
+    bitmap: MonoBitmap
+    mask: MonoBitmap
+
+    def __init__(self, bitmap: MonoBitmap, mask: MonoBitmap):
+        self.bitmap = bitmap
+        self.mask = mask
+
+    @property
+    def width(self) -> int:
+        return self.bitmap.width
+
+    @property
+    def height(self) -> int:
+        return self.bitmap.height
+
+    def save_png(self, file_path: str | PathLike[str]):
+        pixels = []
+        for bitmap_row, mask_row in zip(self.bitmap, self.mask):
+            pixels_row = []
+            for bitmap_color, mask_color in zip(bitmap_row, mask_row):
+                if bitmap_color != 0:
+                    red = 0
+                    green = 0
+                    blue = 0
+                    alpha = 255
+                elif mask_color != 0:
+                    red = 255
+                    green = 0
+                    blue = 255
+                    alpha = 255
+                else:
+                    red = 0
+                    green = 0
+                    blue = 0
+                    alpha = 0
+                pixels_row.append(red)
+                pixels_row.append(green)
+                pixels_row.append(blue)
+                pixels_row.append(alpha)
+            pixels.append(pixels_row)
+        return png.from_array(pixels, 'RGBA').save(file_path)
 
 
 class GlyphFile:
@@ -33,27 +110,33 @@ class GlyphFile:
     file_path: Path
     code_point: int
     flavors: list[str]
-    _bitmap: MonoBitmap | None
+    data: GlyphData | None
 
     def __init__(self, file_path: Path, code_point: int, flavors: list[str]):
         self.file_path = file_path
         self.code_point = code_point
         self.flavors = flavors
-        self._bitmap = None
+        self.data = None
 
     @property
     def bitmap(self) -> MonoBitmap:
-        if self._bitmap is None:
-            self._bitmap = MonoBitmap.load_png(self.file_path)
-        return self._bitmap
+        if self.data is None:
+            self.data = GlyphData.load_png(self.file_path)
+        return self.data.bitmap
+
+    @property
+    def mask(self) -> MonoBitmap:
+        if self.data is None:
+            self.data = GlyphData.load_png(self.file_path)
+        return self.data.mask
 
     @property
     def width(self) -> int:
-        return self.bitmap.width
+        return self.data.width
 
     @property
     def height(self) -> int:
-        return self.bitmap.height
+        return self.data.height
 
     @property
     def glyph_name(self) -> str:
@@ -64,6 +147,9 @@ class GlyphFile:
         if len(self.flavors) > 0:
             name = f'{name}-{self.flavors[0].upper()}'
         return name
+
+    def save(self):
+        self.data.save_png(self.file_path)
 
 
 class GlyphFlavorGroup(UserDict[str | None, GlyphFile]):
@@ -167,7 +253,7 @@ def normalize_context(
                 glyph_file.file_path.rename(file_path)
                 glyph_file.file_path = file_path
 
-            glyph_file.bitmap.save_png(glyph_file.file_path)
+            glyph_file.save()
 
 
 def get_character_mapping(context: dict[int, GlyphFlavorGroup], flavor: str | None = None) -> dict[int, str]:
