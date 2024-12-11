@@ -110,24 +110,26 @@ class GlyphFile:
     file_path: Path
     code_point: int
     flavors: list[str]
-    data: GlyphData | None
+    _data: GlyphData | None
 
     def __init__(self, file_path: Path, code_point: int, flavors: list[str]):
         self.file_path = file_path
         self.code_point = code_point
         self.flavors = flavors
-        self.data = None
+        self._data = None
+
+    @property
+    def data(self) -> GlyphData:
+        if self._data is None:
+            self._data = GlyphData.load_png(self.file_path)
+        return self._data
 
     @property
     def bitmap(self) -> MonoBitmap:
-        if self.data is None:
-            self.data = GlyphData.load_png(self.file_path)
         return self.data.bitmap
 
     @property
     def mask(self) -> MonoBitmap:
-        if self.data is None:
-            self.data = GlyphData.load_png(self.file_path)
         return self.data.mask
 
     @property
