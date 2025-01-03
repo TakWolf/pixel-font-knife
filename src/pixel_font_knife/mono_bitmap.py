@@ -42,7 +42,7 @@ class MonoBitmap(UserList[list[int]]):
             self.height = len(bitmap)
             for bitmap_row in bitmap:
                 if self.width != len(bitmap_row):
-                    raise ValueError('rows with different widths')
+                    raise ValueError('rows with and widths are not equal')
                 self.append([0 if color == 0 else 1 for color in bitmap_row])
 
     def __eq__(self, other: Any) -> bool:
