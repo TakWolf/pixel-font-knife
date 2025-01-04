@@ -78,6 +78,24 @@ def test_inside():
     assert not bitmap.is_inside(15, 90)
 
 
+def test_calculate_padding():
+    bitmap = MonoBitmap([
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 1, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 1, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+    ])
+    assert bitmap.calculate_left_padding() == 1
+    assert bitmap.calculate_right_padding() == 2
+    assert bitmap.calculate_top_padding() == 3
+    assert bitmap.calculate_bottom_padding() == 1
+
+
 def test_copy():
     bitmap = MonoBitmap([
         [0, 0, 0],

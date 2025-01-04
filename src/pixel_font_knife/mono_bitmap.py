@@ -61,6 +61,38 @@ class MonoBitmap(UserList[list[int]]):
     def is_inside(self, x: int, y: int) -> bool:
         return self.is_x_inside(x) and self.is_y_inside(y)
 
+    def calculate_left_padding(self) -> int:
+        padding = 0
+        for i in range(self.width):
+            if any(bitmap_row[i] for bitmap_row in self) != 0:
+                break
+            padding += 1
+        return padding
+
+    def calculate_right_padding(self) -> int:
+        padding = 0
+        for i in range(self.width):
+            if any(bitmap_row[-1 - i] for bitmap_row in self) != 0:
+                break
+            padding += 1
+        return padding
+
+    def calculate_top_padding(self) -> int:
+        padding = 0
+        for bitmap_row in self:
+            if any(bitmap_row) != 0:
+                break
+            padding += 1
+        return padding
+
+    def calculate_bottom_padding(self) -> int:
+        padding = 0
+        for bitmap_row in reversed(self):
+            if any(bitmap_row) != 0:
+                break
+            padding += 1
+        return padding
+
     def copy(self) -> 'MonoBitmap':
         bitmap = MonoBitmap()
         for bitmap_row in self:
