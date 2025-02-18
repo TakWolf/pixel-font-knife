@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "pixel-font-knife"
 version = "0.0.11"
-description = "A set of pixel font utilities."
+description = "A set of pixel font utilities"
 readme = "README.md"
 license = { text = "MIT License" }
 requires-python = ">=3.10"
