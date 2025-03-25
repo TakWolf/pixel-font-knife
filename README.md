@@ -21,4 +21,4 @@ pip install pixel-font-knife
 
 ## 许可证
 
-基于 [MIT 许可证](LICENSE)。
+[MIT License](LICENSE)
