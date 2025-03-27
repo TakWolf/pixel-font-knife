@@ -26,30 +26,35 @@ class SourceGlyph:
 
 
 class SourceFlavorGroup(UserDict[str | None, SourceGlyph]):
-    def __contains__(self, flavor: Any) -> bool:
-        if isinstance(flavor, str):
-            flavor = flavor.lower()
-        return super().__contains__(flavor)
-
     def __getitem__(self, flavor: Any) -> SourceGlyph:
         if isinstance(flavor, str):
             flavor = flavor.lower()
         return super().__getitem__(flavor)
 
     def __setitem__(self, flavor: Any, source_glyph: Any):
+        if source_glyph is None:
+            self.pop(flavor, None)
+            return
+
         if isinstance(flavor, str):
             flavor = flavor.lower()
         elif flavor is not None:
             raise KeyError(flavor)
 
-        if source_glyph is None:
-            self.pop(flavor, None)
-            return
-
         if not isinstance(source_glyph, SourceGlyph):
             raise ValueError(f"illegal value type: '{type(source_glyph).__name__}'")
 
         super().__setitem__(flavor, source_glyph)
+
+    def __delitem__(self, flavor: Any):
+        if isinstance(flavor, str):
+            flavor = flavor.lower()
+        super().__delitem__(flavor)
+
+    def __contains__(self, flavor: Any) -> bool:
+        if isinstance(flavor, str):
+            flavor = flavor.lower()
+        return super().__contains__(flavor)
 
     def get_source(self, flavor: str | None = None) -> SourceGlyph:
         if flavor in self:
