@@ -64,7 +64,7 @@ class MonoBitmap(UserList[list[int]]):
     def calculate_left_padding(self) -> int:
         padding = 0
         for i in range(self.width):
-            if any(bitmap_row[i] for bitmap_row in self) != 0:
+            if any(bitmap_row[i] != 0 for bitmap_row in self):
                 break
             padding += 1
         return padding
@@ -72,7 +72,7 @@ class MonoBitmap(UserList[list[int]]):
     def calculate_right_padding(self) -> int:
         padding = 0
         for i in range(self.width):
-            if any(bitmap_row[-1 - i] for bitmap_row in self) != 0:
+            if any(bitmap_row[-1 - i] != 0 for bitmap_row in self):
                 break
             padding += 1
         return padding
@@ -80,7 +80,7 @@ class MonoBitmap(UserList[list[int]]):
     def calculate_top_padding(self) -> int:
         padding = 0
         for bitmap_row in self:
-            if any(bitmap_row) != 0:
+            if any(color != 0 for color in bitmap_row):
                 break
             padding += 1
         return padding
@@ -88,7 +88,7 @@ class MonoBitmap(UserList[list[int]]):
     def calculate_bottom_padding(self) -> int:
         padding = 0
         for bitmap_row in reversed(self):
-            if any(bitmap_row) != 0:
+            if any(color != 0 for color in bitmap_row):
                 break
             padding += 1
         return padding
