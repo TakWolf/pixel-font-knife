@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import UserList
 from io import StringIO
 from os import PathLike
@@ -8,7 +10,7 @@ import png
 
 class MonoBitmap(UserList[list[int]]):
     @staticmethod
-    def create(width: int, height: int, filled: bool = False) -> 'MonoBitmap':
+    def create(width: int, height: int, filled: bool = False) -> MonoBitmap:
         bitmap = MonoBitmap()
         bitmap.width = width
         bitmap.height = height
@@ -17,7 +19,7 @@ class MonoBitmap(UserList[list[int]]):
         return bitmap
 
     @staticmethod
-    def load_png(file_path: str | PathLike[str]) -> 'MonoBitmap':
+    def load_png(file_path: str | PathLike[str]) -> MonoBitmap:
         width, height, pixels, _ = png.Reader(filename=file_path).read()
         bitmap = MonoBitmap()
         bitmap.width = width
@@ -93,7 +95,7 @@ class MonoBitmap(UserList[list[int]]):
             padding += 1
         return padding
 
-    def copy(self) -> 'MonoBitmap':
+    def copy(self) -> MonoBitmap:
         bitmap = MonoBitmap()
         for bitmap_row in self:
             bitmap.append(bitmap_row[:])
@@ -101,7 +103,7 @@ class MonoBitmap(UserList[list[int]]):
         bitmap.height = self.height
         return bitmap
 
-    def resize(self, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> 'MonoBitmap':
+    def resize(self, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> MonoBitmap:
         bitmap = MonoBitmap()
         bitmap.width = self.width + left + right
         bitmap.height = self.height + top + bottom
@@ -114,7 +116,7 @@ class MonoBitmap(UserList[list[int]]):
             bitmap.append(bitmap_row)
         return bitmap
 
-    def scale(self, scale_x: float = 1, scale_y: float = 1) -> 'MonoBitmap':
+    def scale(self, scale_x: float = 1, scale_y: float = 1) -> MonoBitmap:
         bitmap = MonoBitmap()
         bitmap.width = int(self.width * scale_x)
         bitmap.height = int(self.height * scale_y)
@@ -127,7 +129,7 @@ class MonoBitmap(UserList[list[int]]):
             bitmap.append(bitmap_row)
         return bitmap
 
-    def plus(self, other: 'MonoBitmap', x: int = 0, y: int = 0) -> 'MonoBitmap':
+    def plus(self, other: MonoBitmap, x: int = 0, y: int = 0) -> MonoBitmap:
         bitmap = self.copy()
         for oy, other_row in enumerate(other):
             ty = oy + y
@@ -141,7 +143,7 @@ class MonoBitmap(UserList[list[int]]):
                     bitmap[ty][tx] = 1
         return bitmap
 
-    def minus(self, other: 'MonoBitmap', x: int = 0, y: int = 0) -> 'MonoBitmap':
+    def minus(self, other: MonoBitmap, x: int = 0, y: int = 0) -> MonoBitmap:
         bitmap = self.copy()
         for oy, other_row in enumerate(other):
             ty = oy + y
@@ -155,7 +157,7 @@ class MonoBitmap(UserList[list[int]]):
                     bitmap[ty][tx] = 0
         return bitmap
 
-    def stroke(self, size: int) -> 'MonoBitmap':
+    def stroke(self, size: int) -> MonoBitmap:
         if size <= 0:
             raise ValueError(f'the stroke size must be a positive number: {size}')
 
@@ -173,7 +175,7 @@ class MonoBitmap(UserList[list[int]]):
                         bitmap[ty][tx] = 1
         return bitmap
 
-    def crop(self, x: int, y: int, width: int, height: int) -> 'MonoBitmap':
+    def crop(self, x: int, y: int, width: int, height: int) -> MonoBitmap:
         bitmap = MonoBitmap()
         bitmap.width = width
         bitmap.height = height

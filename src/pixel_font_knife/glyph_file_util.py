@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import re
 from collections import UserDict
@@ -13,7 +15,7 @@ from pixel_font_knife.mono_bitmap import MonoBitmap
 
 class GlyphData:
     @staticmethod
-    def load_png(file_path: str | PathLike[str]) -> 'GlyphData':
+    def load_png(file_path: str | PathLike[str]) -> GlyphData:
         width, height, pixels, _ = png.Reader(filename=file_path).read()
         bitmap = MonoBitmap()
         bitmap.width = width
@@ -89,7 +91,7 @@ class GlyphData:
 
 class GlyphFile:
     @staticmethod
-    def load(file_path: Path) -> 'GlyphFile':
+    def load(file_path: Path) -> GlyphFile:
         if file_path.suffix != '.png':
             raise ValueError(f"not '.png' file: '{file_path}'")
 
