@@ -39,7 +39,7 @@ class SourceFlavorGroup(UserDict[str | None, SourceGlyph]):
         if isinstance(flavor, str):
             flavor = flavor.lower()
         elif flavor is not None:
-            raise KeyError(flavor)
+            raise KeyError(f"illegal flavor type: '{type(flavor).__name__}'")
 
         if not isinstance(source_glyph, SourceGlyph):
             raise ValueError(f"illegal value type: '{type(source_glyph).__name__}'")
@@ -61,7 +61,7 @@ class SourceFlavorGroup(UserDict[str | None, SourceGlyph]):
             return self[flavor]
         if None in self:
             return self[None]
-        raise KeyError(flavor)
+        raise KeyError(f'no flavor source: {repr(flavor)}')
 
 
 def load_mapping(file_path: str | PathLike[str]) -> dict[int, SourceFlavorGroup]:

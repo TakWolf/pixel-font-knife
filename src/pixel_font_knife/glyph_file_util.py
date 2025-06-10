@@ -170,7 +170,7 @@ class GlyphFlavorGroup(UserDict[str | None, GlyphFile]):
         if isinstance(flavor, str):
             flavor = flavor.lower()
         elif flavor is not None:
-            raise KeyError(flavor)
+            raise KeyError(f"illegal flavor type: '{type(flavor).__name__}'")
 
         if not isinstance(glyph_file, GlyphFile):
             raise ValueError(f"illegal value type: '{type(glyph_file).__name__}'")
@@ -192,7 +192,7 @@ class GlyphFlavorGroup(UserDict[str | None, GlyphFile]):
             return self[flavor]
         if None in self:
             return self[None]
-        raise KeyError(flavor)
+        raise KeyError(f'no flavor file: {repr(flavor)}')
 
 
 def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
