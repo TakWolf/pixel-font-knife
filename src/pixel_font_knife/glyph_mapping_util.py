@@ -149,7 +149,10 @@ def save_mapping(
     file_path.write_text(buffer.getvalue(), 'utf-8')
 
 
-def apply_mapping(context: dict[int, GlyphFlavorGroup], mapping: dict[int, SourceFlavorGroup]):
+def apply_mapping(
+        context: dict[int, GlyphFlavorGroup],
+        mapping: dict[int, SourceFlavorGroup],
+):
     context_patch = {}
     for code_point, source_group in mapping.items():
         if len(source_group) == 0:

@@ -265,7 +265,10 @@ def normalize_context(
             glyph_file.save()
 
 
-def get_character_mapping(context: dict[int, GlyphFlavorGroup], flavor: str | None = None) -> dict[int, str]:
+def get_character_mapping(
+        context: dict[int, GlyphFlavorGroup],
+        flavor: str | None = None,
+) -> dict[int, str]:
     character_mapping = {}
     for code_point, flavor_group in context.items():
         if code_point < 0:
@@ -275,7 +278,10 @@ def get_character_mapping(context: dict[int, GlyphFlavorGroup], flavor: str | No
     return character_mapping
 
 
-def get_glyph_sequence(context: dict[int, GlyphFlavorGroup], flavors: list[str] | None = None) -> list[GlyphFile]:
+def get_glyph_sequence(
+        context: dict[int, GlyphFlavorGroup],
+        flavors: list[str] | None = None,
+) -> list[GlyphFile]:
     if -1 in context:
         flavor_group = context[-1]
         if None not in flavor_group:
