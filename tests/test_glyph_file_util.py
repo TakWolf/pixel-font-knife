@@ -4,29 +4,8 @@ from pathlib import Path
 import pytest
 
 from pixel_font_knife import glyph_file_util
-from pixel_font_knife.glyph_file_util import GlyphData, GlyphFile, GlyphFlavorGroup
+from pixel_font_knife.glyph_file_util import GlyphFile, GlyphFlavorGroup
 from pixel_font_knife.mono_bitmap import MonoBitmap
-
-
-def test_glyph_data(glyphs_dir: Path, tmp_path: Path):
-    load_path = glyphs_dir.joinpath('data-with-mask', 'test.png')
-    save_path = tmp_path.joinpath('test.png')
-
-    data = GlyphData.load_png(load_path)
-    assert data.bitmap == MonoBitmap([
-        [0, 1, 1, 0],
-        [1, 0, 0, 1],
-        [1, 0, 0, 1],
-        [0, 1, 1, 0],
-    ])
-    assert data.mask == MonoBitmap([
-        [0, 0, 0, 1],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [1, 0, 0, 0],
-    ])
-    data.save_png(save_path)
-    assert load_path.read_bytes() == save_path.read_bytes()
 
 
 def test_glyph_file_1():

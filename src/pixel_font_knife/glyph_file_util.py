@@ -7,86 +7,9 @@ from os import PathLike
 from pathlib import Path
 from typing import Any
 
-import png
 import unidata_blocks
 
 from pixel_font_knife.mono_bitmap import MonoBitmap
-
-
-class GlyphData:
-    @staticmethod
-    def load_png(file_path: str | PathLike[str]) -> GlyphData:
-        width, height, pixels, _ = png.Reader(filename=file_path).read()
-        bitmap = MonoBitmap()
-        bitmap.width = width
-        bitmap.height = height
-        mask = MonoBitmap()
-        mask.width = width
-        mask.height = height
-        for pixels_row in pixels:
-            bitmap_row = []
-            mask_row = []
-            for i in range(0, width * 4, 4):
-                red = pixels_row[i]
-                green = pixels_row[i + 1]
-                blue = pixels_row[i + 2]
-                alpha = pixels_row[i + 3]
-                if red == 255 and green == 0 and blue == 255:
-                    bitmap_color = 0
-                    mask_color = 1
-                elif alpha > 127:
-                    bitmap_color = 1
-                    mask_color = 0
-                else:
-                    bitmap_color = 0
-                    mask_color = 0
-                bitmap_row.append(bitmap_color)
-                mask_row.append(mask_color)
-            bitmap.append(bitmap_row)
-            mask.append(mask_row)
-        return GlyphData(bitmap, mask)
-
-    bitmap: MonoBitmap
-    mask: MonoBitmap
-
-    def __init__(self, bitmap: MonoBitmap, mask: MonoBitmap):
-        self.bitmap = bitmap
-        self.mask = mask
-
-    @property
-    def width(self) -> int:
-        return self.bitmap.width
-
-    @property
-    def height(self) -> int:
-        return self.bitmap.height
-
-    def save_png(self, file_path: str | PathLike[str]):
-        pixels = []
-        for bitmap_row, mask_row in zip(self.bitmap, self.mask):
-            pixels_row = []
-            for bitmap_color, mask_color in zip(bitmap_row, mask_row):
-                if bitmap_color != 0:
-                    red = 0
-                    green = 0
-                    blue = 0
-                    alpha = 255
-                elif mask_color != 0:
-                    red = 255
-                    green = 0
-                    blue = 255
-                    alpha = 255
-                else:
-                    red = 0
-                    green = 0
-                    blue = 0
-                    alpha = 0
-                pixels_row.append(red)
-                pixels_row.append(green)
-                pixels_row.append(blue)
-                pixels_row.append(alpha)
-            pixels.append(pixels_row)
-        return png.from_array(pixels, 'RGBA').save(file_path)
 
 
 class GlyphFile:
@@ -112,35 +35,32 @@ class GlyphFile:
     file_path: Path
     code_point: int
     flavors: list[str]
-    _data: GlyphData | None
+    _bitmap: MonoBitmap | None
 
-    def __init__(self, file_path: Path, code_point: int, flavors: list[str]):
+    def __init__(
+            self,
+            file_path: Path,
+            code_point: int,
+            flavors: list[str],
+    ):
         self.file_path = file_path
         self.code_point = code_point
         self.flavors = flavors
-        self._data = None
-
-    @property
-    def data(self) -> GlyphData:
-        if self._data is None:
-            self._data = GlyphData.load_png(self.file_path)
-        return self._data
+        self._bitmap = None
 
     @property
     def bitmap(self) -> MonoBitmap:
-        return self.data.bitmap
-
-    @property
-    def mask(self) -> MonoBitmap:
-        return self.data.mask
+        if self._bitmap is None:
+            self._bitmap = MonoBitmap.load_png(self.file_path)
+        return self._bitmap
 
     @property
     def width(self) -> int:
-        return self.data.width
+        return self.bitmap.width
 
     @property
     def height(self) -> int:
-        return self.data.height
+        return self.bitmap.height
 
     @property
     def glyph_name(self) -> str:
@@ -153,7 +73,7 @@ class GlyphFile:
         return name
 
     def save(self):
-        self.data.save_png(self.file_path)
+        self.bitmap.save_png(self.file_path)
 
 
 class GlyphFlavorGroup(UserDict[str | None, GlyphFile]):
