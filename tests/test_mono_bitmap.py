@@ -13,10 +13,10 @@ def test_init():
     ])
     assert bitmap.width == 4
     assert bitmap.height == 2
-    assert bitmap == [
+    assert bitmap == MonoBitmap([
         [0, 1, 1, 1],
         [1, 0, 0, 1],
-    ]
+    ])
 
     with pytest.raises(ValueError):
         MonoBitmap([
@@ -29,31 +29,31 @@ def test_create():
     bitmap = MonoBitmap.create(3, 4)
     assert bitmap.width == 3
     assert bitmap.height == 4
-    assert bitmap == [
+    assert bitmap == MonoBitmap([
         [0, 0, 0],
         [0, 0, 0],
         [0, 0, 0],
         [0, 0, 0],
-    ]
+    ])
 
     bitmap = MonoBitmap.create(2, 3, filled=True)
     assert bitmap.width == 2
     assert bitmap.height == 3
-    assert bitmap == [
+    assert bitmap == MonoBitmap([
         [1, 1],
         [1, 1],
         [1, 1],
-    ]
+    ])
 
 
 def test_eq():
     assert MonoBitmap([
         [0, 1],
         [1, 0],
-    ]) == [
+    ]) == MonoBitmap([
         [0, 1],
         [1, 0],
-    ]
+    ])
 
     bitmap_1 = MonoBitmap([
         [1, 1, 1],
@@ -152,21 +152,21 @@ def test_plus_minus():
     assert bitmap.plus(MonoBitmap([
         [1, 1, 1],
         [1, 1, 1],
-    ]), x=-1, y=1) == [
+    ]), x=-1, y=1) == MonoBitmap([
         [1, 1, 1, 1],
         [1, 1, 0, 1],
         [1, 1, 0, 1],
         [1, 1, 1, 1],
-    ]
+    ])
     assert bitmap.minus(MonoBitmap([
         [1, 1, 1],
         [1, 1, 1],
-    ]), x=-1, y=1) == [
+    ]), x=-1, y=1) == MonoBitmap([
         [1, 1, 1, 1],
         [0, 0, 0, 1],
         [0, 0, 0, 1],
         [1, 1, 1, 1],
-    ]
+    ])
 
 
 def test_stroke():
@@ -182,7 +182,7 @@ def test_stroke():
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ])
-    assert bitmap.stroke(1) == [
+    assert bitmap.stroke(1) == MonoBitmap([
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
@@ -193,7 +193,7 @@ def test_stroke():
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-    ]
+    ])
 
 
 def test_crop():
@@ -209,12 +209,12 @@ def test_crop():
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ])
-    assert bitmap.crop(x=1, y=2, width=6, height=4) == [
+    assert bitmap.crop(x=1, y=2, width=6, height=4) == MonoBitmap([
         [0, 0, 0, 1, 0, 0],
         [0, 0, 0, 1, 0, 0],
         [0, 1, 1, 1, 1, 1],
         [0, 0, 0, 1, 0, 0],
-    ]
+    ])
 
 
 def test_draw():

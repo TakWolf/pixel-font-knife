@@ -48,11 +48,11 @@ class MonoBitmap(UserList[list[int]]):
                 self.append([0 if color == 0 else 1 for color in bitmap_row])
 
     def __eq__(self, other: Any) -> bool:
-        if isinstance(other, MonoBitmap):
-            return (self.width == other.width and
-                    self.height == other.height and
-                    super().__eq__(other))
-        return super().__eq__(other)
+        if not isinstance(other, MonoBitmap):
+            return NotImplemented
+        return (self.width == other.width and
+                self.height == other.height and
+                super().__eq__(other))
 
     def is_x_inside(self, x: int) -> bool:
         return 0 <= x < self.width
