@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 from collections import UserDict
 from os import PathLike
 from pathlib import Path
@@ -9,6 +10,7 @@ from typing import Any
 
 import unidata_blocks
 
+from pixel_font_knife import fs_util
 from pixel_font_knife.mono_bitmap import MonoBitmap
 
 
@@ -183,6 +185,10 @@ def normalize_context(
                 glyph_file.file_path = file_path
 
             glyph_file.save()
+
+    for file_dir, _, _ in root_dir.walk(top_down=False):
+        if fs_util.is_empty_dir(file_dir):
+            shutil.rmtree(file_dir)
 
 
 def get_character_mapping(
