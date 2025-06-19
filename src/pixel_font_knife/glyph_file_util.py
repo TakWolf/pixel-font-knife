@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import re
 import shutil
 from collections import UserDict
@@ -16,7 +15,10 @@ from pixel_font_knife.mono_bitmap import MonoBitmap
 
 class GlyphFile:
     @staticmethod
-    def load(file_path: Path) -> GlyphFile:
+    def load(file_path: str | PathLike[str]) -> GlyphFile:
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+
         if file_path.suffix != '.png':
             raise ValueError(f"not '.png' file: '{file_path}'")
 
@@ -122,8 +124,7 @@ def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
         root_dir = Path(root_dir)
 
     context = {}
-    for file_dir, _, file_names in os.walk(root_dir):
-        file_dir = Path(file_dir)
+    for file_dir, _, file_names in root_dir.walk():
         for file_name in file_names:
             if not file_name.endswith('.png'):
                 continue
