@@ -8,7 +8,7 @@ version = "0.0.14"
 description = "A set of pixel font utilities"
 readme = "README.md"
 license = { text = "MIT License" }
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [
     { name = "TakWolf" },
 ]

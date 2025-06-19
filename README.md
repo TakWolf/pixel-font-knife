@@ -1,6 +1,6 @@
 # Pixel Font Knife
 
-[![Python](https://img.shields.io/badge/python-3.10-brightgreen)](https://www.python.org)
+[![Python](https://img.shields.io/badge/python-3.12-brightgreen)](https://www.python.org)
 [![PyPI](https://img.shields.io/pypi/v/pixel-font-knife)](https://pypi.org/project/pixel-font-knife/)
 
 一组像素字体实用工具。
