@@ -18,12 +18,6 @@ class SourceGlyph:
         self.code_point = code_point
         self.flavor = flavor
 
-    def __str__(self) -> str:
-        if self.flavor is None:
-            return f'0x{self.code_point:04X}'
-        else:
-            return f'0x{self.code_point:04X} {self.flavor}'
-
 
 class SourceFlavorGroup(UserDict[str | None, SourceGlyph]):
     def __getitem__(self, flavor: Any) -> SourceGlyph:
@@ -115,33 +109,44 @@ def save_mapping(
 
         source_pending = {}
         for flavor, source_glyph in source_group.items():
-            source_str = str(source_glyph)
-            if source_str in source_pending:
-                flavors = source_pending[source_str]
+            key = source_glyph.code_point, source_glyph.flavor
+            if key in source_pending:
+                flavors = source_pending[key]
             else:
                 flavors = []
-                source_pending[source_str] = flavors
+                source_pending[key] = flavors
             flavors.append(flavor)
 
         flavor_pending = []
-        default_source_str = None
-        for source_str, flavors in source_pending.items():
+        default_source = None
+        for (source_code_point, source_flavor), flavors in source_pending.items():
+            source_str = f'0x{source_code_point:04X}'
+            if source_flavor is not None:
+                source_str = f'{source_str} {source_flavor}'
+
+            source_c = chr(source_code_point)
+            if not source_c.isprintable():
+                source_c = f'0x{source_code_point:04X}'
+
             if None in flavors:
-                default_source_str = source_str
+                default_source = source_str, source_c
                 continue
             if flavors_order is None:
                 flavors.sort()
             else:
                 flavors.sort(key=lambda x: flavors_order.index(x))
-            flavor_pending.append((flavors[0], ','.join(flavors), source_str))
+            flavor_pending.append((flavors[0], ','.join(flavors), (source_str, source_c)))
         if flavors_order is None:
             flavor_pending.sort()
         else:
             flavor_pending.sort(key=lambda x: flavors_order.index(x[0]))
 
-        if default_source_str is not None:
+        if default_source is not None:
+            default_source_str, default_source_c = default_source
+            buffer.write(f'  # {default_source_c}\n')
             buffer.write(f'  ~: {default_source_str}\n')
-        for _, flavors_str, source_str in flavor_pending:
+        for _, flavors_str, (source_str, source_c) in flavor_pending:
+            buffer.write(f'  # {source_c}\n')
             buffer.write(f'  {flavors_str}: {source_str}\n')
 
     if isinstance(file_path, str):
