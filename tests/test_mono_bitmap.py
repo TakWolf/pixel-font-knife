@@ -297,5 +297,6 @@ def test_inflation_bolding(glyphs_dir: Path):
         bitmap = MonoBitmap.load_png(file_path)
         result_bitmap = bitmap.scale(scale_x=4, scale_y=4).resize(left=1, right=1, top=1, bottom=1).pixel_expand(1)
         result_bitmap = result_bitmap.scale(scale_x=0.5, scale_y=0.5)
+        result_bitmap = result_bitmap.resize(left=1, right=-1, top=-1, bottom=1)
         bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('inflation-bolding', file_path.name))
         assert result_bitmap == bold_bitmap
