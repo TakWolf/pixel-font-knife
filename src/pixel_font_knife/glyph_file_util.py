@@ -128,6 +128,7 @@ def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
         for file_name in file_names:
             if not file_name.endswith('.png'):
                 continue
+
             file_path = file_dir.joinpath(file_name)
             glyph_file = GlyphFile.load(file_path)
 

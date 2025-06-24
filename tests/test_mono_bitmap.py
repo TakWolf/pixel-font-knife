@@ -133,6 +133,9 @@ def test_resize():
 
 def test_scale(glyphs_dir: Path):
     for file_path in glyphs_dir.joinpath('black').iterdir():
+        if file_path.suffix != '.png':
+            continue
+
         x1_bitmap = MonoBitmap.load_png(file_path)
         x3_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('x3', file_path.name))
         x1_5_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('x1.5', file_path.name))
@@ -237,6 +240,9 @@ def test_load_dump_save(glyphs_dir: Path, tmp_path: Path):
     red_save_dir.mkdir()
 
     for black_load_path, red_load_path in zip(sorted(black_load_dir.iterdir()), sorted(red_load_dir.iterdir())):
+        if black_load_path.suffix != '.png' or red_load_path.suffix != '.png':
+            continue
+
         assert black_load_path.name == red_load_path.name
         black_bitmap = MonoBitmap.load_png(black_load_path)
         red_bitmap = MonoBitmap.load_png(red_load_path)
@@ -259,6 +265,9 @@ def test_load_dump_save(glyphs_dir: Path, tmp_path: Path):
 
 def test_move_right_and_overlap_bolding(glyphs_dir: Path):
     for file_path in glyphs_dir.joinpath('black').iterdir():
+        if file_path.suffix != '.png':
+            continue
+
         bitmap = MonoBitmap.load_png(file_path)
         solid_bitmap = bitmap.resize(left=1).plus(bitmap)
         shadow_bitmap = solid_bitmap.minus(bitmap).resize(left=1)
@@ -269,6 +278,9 @@ def test_move_right_and_overlap_bolding(glyphs_dir: Path):
 
 def test_move_left_and_overlap_bolding(glyphs_dir: Path):
     for file_path in glyphs_dir.joinpath('black').iterdir():
+        if file_path.suffix != '.png':
+            continue
+
         bitmap = MonoBitmap.load_png(file_path)
         solid_bitmap = bitmap.resize(right=1).plus(bitmap, x=1)
         shadow_bitmap = solid_bitmap.minus(bitmap, x=1).resize(left=-1)
@@ -279,6 +291,9 @@ def test_move_left_and_overlap_bolding(glyphs_dir: Path):
 
 def test_inflation_bolding(glyphs_dir: Path):
     for file_path in glyphs_dir.joinpath('black').iterdir():
+        if file_path.suffix != '.png':
+            continue
+
         bitmap = MonoBitmap.load_png(file_path)
         result_bitmap = bitmap.scale(scale_x=4, scale_y=4).resize(left=1, right=1, top=1, bottom=1).pixel_expand(1)
         result_bitmap = result_bitmap.scale(scale_x=0.5, scale_y=0.5)
