@@ -169,7 +169,7 @@ def test_plus_minus():
     ])
 
 
-def test_stroke():
+def test_pixel_expand():
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
@@ -182,7 +182,7 @@ def test_stroke():
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ])
-    assert bitmap.stroke(1) == MonoBitmap([
+    assert bitmap.pixel_expand(1) == MonoBitmap([
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
@@ -257,29 +257,30 @@ def test_load_dump_save(glyphs_dir: Path, tmp_path: Path):
         assert red_load_path.read_bytes() == red_save_path.read_bytes() == red_stream.getvalue()
 
 
-def test_bold_s4_r1_e1(glyphs_dir: Path):
-    for file_path in glyphs_dir.joinpath('black').iterdir():
-        bitmap = MonoBitmap.load_png(file_path)
-        result_bitmap = bitmap.scale(scale_x=4, scale_y=4).resize(left=1, right=1, top=1, bottom=1).stroke(1)
-        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('bold-s4-r1-e1', file_path.name))
-        assert result_bitmap == bold_bitmap
-
-
-def test_bold_left_os(glyphs_dir: Path):
-    for file_path in glyphs_dir.joinpath('black').iterdir():
-        bitmap = MonoBitmap.load_png(file_path)
-        solid_bitmap = bitmap.resize(right=1).plus(bitmap, x=1)
-        shadow_bitmap = solid_bitmap.minus(bitmap, x=1).resize(left=-1)
-        result_bitmap = solid_bitmap.minus(shadow_bitmap)
-        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('bold-left-os', file_path.name))
-        assert result_bitmap == bold_bitmap
-
-
-def test_bold_right_os(glyphs_dir: Path):
+def test_move_right_and_overlap_bolding(glyphs_dir: Path):
     for file_path in glyphs_dir.joinpath('black').iterdir():
         bitmap = MonoBitmap.load_png(file_path)
         solid_bitmap = bitmap.resize(left=1).plus(bitmap)
         shadow_bitmap = solid_bitmap.minus(bitmap).resize(left=1)
         result_bitmap = solid_bitmap.minus(shadow_bitmap)
-        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('bold-right-os', file_path.name))
+        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('move-right-and-overlap-bolding', file_path.name))
+        assert result_bitmap == bold_bitmap
+
+
+def test_move_left_and_overlap_bolding(glyphs_dir: Path):
+    for file_path in glyphs_dir.joinpath('black').iterdir():
+        bitmap = MonoBitmap.load_png(file_path)
+        solid_bitmap = bitmap.resize(right=1).plus(bitmap, x=1)
+        shadow_bitmap = solid_bitmap.minus(bitmap, x=1).resize(left=-1)
+        result_bitmap = solid_bitmap.minus(shadow_bitmap)
+        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('move-left-and-overlap-bolding', file_path.name))
+        assert result_bitmap == bold_bitmap
+
+
+def test_inflation_bolding(glyphs_dir: Path):
+    for file_path in glyphs_dir.joinpath('black').iterdir():
+        bitmap = MonoBitmap.load_png(file_path)
+        result_bitmap = bitmap.scale(scale_x=4, scale_y=4).resize(left=1, right=1, top=1, bottom=1).pixel_expand(1)
+        result_bitmap = result_bitmap.scale(scale_x=0.5, scale_y=0.5)
+        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('inflation-bolding', file_path.name))
         assert result_bitmap == bold_bitmap

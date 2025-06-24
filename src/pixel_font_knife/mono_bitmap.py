@@ -157,7 +157,7 @@ class MonoBitmap(UserList[list[int]]):
                     bitmap[ty][tx] = 0
         return bitmap
 
-    def stroke(self, size: int) -> MonoBitmap:
+    def pixel_expand(self, size: int) -> MonoBitmap:
         if size <= 0:
             raise ValueError(f'the stroke size must be a positive number: {size}')
 
