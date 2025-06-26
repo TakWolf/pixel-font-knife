@@ -1,5 +1,5 @@
 pypng==0.20220715.0
-unidata-blocks==0.0.16
-pyyaml==6.0.2
+unidata-blocks==0.0.18
+pyyaml==6.0.3
 
-pytest==8.4.1
+pytest==8.4.2
