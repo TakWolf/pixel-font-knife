@@ -157,6 +157,19 @@ class MonoBitmap(UserList[list[int]]):
                     bitmap[ty][tx] = 0
         return bitmap
 
+    def is_overlapped(self, other: MonoBitmap, x: int = 0, y: int = 0) -> bool:
+        for oy, other_row in enumerate(other):
+            ty = oy + y
+            if not self.is_y_inside(ty):
+                continue
+            for ox, color in enumerate(other_row):
+                tx = ox + x
+                if not self.is_x_inside(tx):
+                    continue
+                if color != 0 and self[ty][tx] != 0:
+                    return True
+        return False
+
     def pixel_expand(self, size: int) -> MonoBitmap:
         if size <= 0:
             raise ValueError(f'the stroke size must be a positive number: {size}')
