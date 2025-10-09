@@ -193,19 +193,6 @@ def normalize_context(
             shutil.rmtree(file_dir)
 
 
-def get_character_mapping(
-        context: dict[int, GlyphFlavorGroup],
-        flavor: str | None = None,
-) -> dict[int, str]:
-    character_mapping = {}
-    for code_point, flavor_group in context.items():
-        if code_point < 0:
-            continue
-        glyph_file = flavor_group.get_file(flavor)
-        character_mapping[code_point] = glyph_file.glyph_name
-    return character_mapping
-
-
 def get_glyph_sequence(
         context: dict[int, GlyphFlavorGroup],
         flavors: list[str] | None = None,
@@ -237,3 +224,16 @@ def get_glyph_sequence(
                 glyph_names.add(glyph_name)
                 glyph_sequence.append(glyph_file)
     return glyph_sequence
+
+
+def get_character_mapping(
+        context: dict[int, GlyphFlavorGroup],
+        flavor: str | None = None,
+) -> dict[int, str]:
+    character_mapping = {}
+    for code_point, flavor_group in context.items():
+        if code_point < 0:
+            continue
+        glyph_file = flavor_group.get_file(flavor)
+        character_mapping[code_point] = glyph_file.glyph_name
+    return character_mapping
