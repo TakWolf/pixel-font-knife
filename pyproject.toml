@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "pixel-font-knife"
-version = "0.0.18"
+version = "0.0.19"
 description = "A set of pixel font utilities"
 readme = "README.md"
 license = "MIT"
