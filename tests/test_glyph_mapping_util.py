@@ -4,8 +4,8 @@ from pixel_font_knife import glyph_mapping_util, glyph_file_util
 
 
 def test_load(assets_dir: Path, glyphs_dir: Path, tmp_path: Path):
-    load_path = assets_dir.joinpath('example-mapping.yml')
-    save_path = tmp_path.joinpath('example-mapping.yml')
+    load_path = assets_dir.joinpath('mapping-example.yml')
+    save_path = tmp_path.joinpath('mapping-example.yml')
 
     mapping = glyph_mapping_util.load_mapping(load_path)
     glyph_mapping_util.save_mapping(mapping, save_path)
