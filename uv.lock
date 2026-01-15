@@ -40,7 +40,7 @@ wheels = [
 
 [[package]]
 name = "pixel-font-knife"
-version = "0.0.20"
+version = "0.0.21"
 source = { editable = "." }
 dependencies = [
     { name = "pypng" },
