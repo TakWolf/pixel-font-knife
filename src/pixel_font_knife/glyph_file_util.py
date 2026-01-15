@@ -172,7 +172,7 @@ def normalize_context(
         for glyph_file in set(flavor_group.values()):
             if len(glyph_file.flavors) > 0:
                 if flavors_order is None:
-                    flavors = sorted(glyph_file.flavors)
+                    flavors = glyph_file.flavors
                 else:
                     flavors = sorted(glyph_file.flavors, key=lambda x: flavors_order.index(x))
                 file_name = f'{code_name} {",".join(flavors)}.png'
