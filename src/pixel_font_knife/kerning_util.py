@@ -47,6 +47,7 @@ class KerningConfig:
 def calculate_kerning_values(
         kerning_config: KerningConfig,
         context: dict[int, GlyphFlavorGroup],
+        flavor: str | None = None,
 ) -> dict[tuple[str, str], int]:
     kerning_values = {}
     for (left_group_name, right_group_name), offset in kerning_config.templates.items():
@@ -60,14 +61,14 @@ def calculate_kerning_values(
             left_code_point = ord(left_c)
             if left_code_point not in context:
                 continue
-            left_file = context[left_code_point].get_file()
+            left_file = context[left_code_point].get_file(flavor)
             left_bitmap_mask = left_file.bitmap.pixel_expand(1)
 
             for right_c in right_group:
                 right_code_point = ord(right_c)
                 if right_code_point not in context:
                     continue
-                right_file = context[right_code_point].get_file()
+                right_file = context[right_code_point].get_file(flavor)
 
                 actual_offset = offset
                 while actual_offset < 0:
