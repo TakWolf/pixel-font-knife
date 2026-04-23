@@ -1,6 +1,6 @@
 [project]
 name = "pixel-font-knife"
-version = "0.0.22"
+version = "0.0.23"
 description = "A set of pixel font utilities"
 readme = "README.md"
 license = "MIT"
