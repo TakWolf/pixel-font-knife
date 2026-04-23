@@ -3,10 +3,9 @@ from __future__ import annotations
 from collections import UserList
 from io import StringIO
 from os import PathLike
-from pathlib import Path
 from typing import Any, BinaryIO
 
-from pixel_font_knife.internal.png import MiniPNGReader, MiniPNGWriter
+from pixel_font_knife.internal import png
 
 
 class MonoBitmap(UserList[list[int]]):
@@ -21,17 +20,15 @@ class MonoBitmap(UserList[list[int]]):
 
     @staticmethod
     def load_png(file_path: str | PathLike[str]) -> MonoBitmap:
-        if isinstance(file_path, str):
-            file_path = Path(file_path)
-
-        reader = MiniPNGReader(file_path.read_bytes())
-        width, height, rows = reader.parse()
-
+        width, height, rows, _ = png.Reader(filename=file_path).read()
         bitmap = MonoBitmap()
         bitmap.width = width
         bitmap.height = height
         for row in rows:
-            bitmap.append([1 if row[i * 4 + 3] > 127 else 0 for i in range(width)])
+            bitmap_row = []
+            for i in range(0, width * 4, 4):
+                bitmap_row.append(1 if row[i + 3] > 127 else 0)
+            bitmap.append(bitmap_row)
         return bitmap
 
     width: int
@@ -214,9 +211,8 @@ class MonoBitmap(UserList[list[int]]):
             text.write('\n')
         return text.getvalue()
 
-    def _build_png(self, color: tuple[int, int, int]) -> bytes:
+    def _build_png(self, color: tuple[int, int, int]) -> png.Image:
         red, green, blue = color
-
         rows = []
         for bitmap_row in self:
             row = []
@@ -226,18 +222,10 @@ class MonoBitmap(UserList[list[int]]):
                 row.append(blue)
                 row.append(255 if color != 0 else 0)
             rows.append(row)
-
-        writer = MiniPNGWriter(self.width, self.height)
-        writer.build_ihdr()
-        writer.build_idat(rows)
-        writer.build_iend()
-        return writer.dump()
+        return png.from_array(rows, 'RGBA')
 
     def dump_png(self, stream: BinaryIO, color: tuple[int, int, int] = (0, 0, 0)):
-        stream.write(self._build_png(color))
+        self._build_png(color).write(stream)
 
     def save_png(self, file_path: str | PathLike[str], color: tuple[int, int, int] = (0, 0, 0)):
-        if isinstance(file_path, str):
-            file_path = Path(file_path)
-
-        file_path.write_bytes(self._build_png(color))
+        self._build_png(color).save(file_path)
