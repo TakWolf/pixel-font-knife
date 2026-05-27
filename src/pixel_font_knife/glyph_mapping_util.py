@@ -76,8 +76,8 @@ def load_mapping(file_path: str | PathLike[str]) -> dict[int, SourceFlavorGroup]
                     if isinstance(value, int):
                         source_glyph = SourceGlyph(value, None)
                     else:
-                        tokens = re.split(r'\s+', value, 1)
-                        source_glyph = SourceGlyph(int(tokens[0], 0), tokens[1].lower())
+                        parts = re.split(r'\s+', value, 1)
+                        source_glyph = SourceGlyph(int(parts[0], 0), parts[1].lower())
 
                     if len(flavors) > 0:
                         for flavor in flavors:

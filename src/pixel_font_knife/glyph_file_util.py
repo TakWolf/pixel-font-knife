@@ -22,16 +22,16 @@ class GlyphFile:
         if file_path.suffix != '.png':
             raise ValueError(f"not '.png' file: '{file_path}'")
 
-        tokens = re.split(r'\s+', file_path.stem.strip(), 1)
-        if tokens[0] == 'notdef':
-            if len(tokens) > 1:
+        parts = re.split(r'\s+', file_path.stem.strip(), 1)
+        if parts[0] == 'notdef':
+            if len(parts) > 1:
                 raise ValueError(f"'notdef' can't have flavors: '{file_path}'")
             return GlyphFile(file_path, -1, [])
 
-        code_point = int(tokens[0], 16)
+        code_point = int(parts[0], 16)
         flavors = []
-        if len(tokens) > 1:
-            for flavor in tokens[1].lower().split(','):
+        if len(parts) > 1:
+            for flavor in parts[1].lower().split(','):
                 if flavor not in flavors:
                     flavors.append(flavor)
         return GlyphFile(file_path, code_point, flavors)
