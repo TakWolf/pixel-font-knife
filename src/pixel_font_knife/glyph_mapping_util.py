@@ -1,4 +1,3 @@
-import re
 from collections import UserDict
 from io import StringIO
 from os import PathLike
@@ -76,7 +75,7 @@ def load_mapping(file_path: str | PathLike[str]) -> dict[int, SourceFlavorGroup]
                     if isinstance(value, int):
                         source_glyph = SourceGlyph(value, None)
                     else:
-                        parts = re.split(r'\s+', value, 1)
+                        parts = value.split(maxsplit=1)
                         source_glyph = SourceGlyph(int(parts[0], 0), parts[1].lower())
 
                     if len(flavors) > 0:

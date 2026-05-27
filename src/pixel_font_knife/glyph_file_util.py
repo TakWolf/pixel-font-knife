@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 import shutil
 from collections import UserDict
 from os import PathLike
@@ -22,7 +21,7 @@ class GlyphFile:
         if file_path.suffix != '.png':
             raise ValueError(f"not '.png' file: '{file_path}'")
 
-        parts = re.split(r'\s+', file_path.stem.strip(), 1)
+        parts = file_path.stem.split(maxsplit=1)
         if parts[0] == 'notdef':
             if len(parts) > 1:
                 raise ValueError(f"'notdef' can't have flavors: '{file_path}'")
