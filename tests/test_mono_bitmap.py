@@ -258,9 +258,10 @@ def test_load_dump_save(glyphs_dir: Path, tmp_path: Path):
     red_save_dir = tmp_path.joinpath('red')
     red_save_dir.mkdir()
 
-    for black_load_path, red_load_path in zip(sorted(black_load_dir.iterdir()), sorted(red_load_dir.iterdir())):
-        if black_load_path.suffix != '.png' or red_load_path.suffix != '.png':
+    for black_load_path in black_load_dir.iterdir():
+        if black_load_path.suffix != '.png':
             continue
+        red_load_path = red_load_dir.joinpath(black_load_path.name)
 
         assert black_load_path.name == red_load_path.name
         black_bitmap = MonoBitmap.load_png(black_load_path)
