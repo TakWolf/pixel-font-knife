@@ -54,7 +54,7 @@ class SourceFlavorGroup(UserDict[str | None, SourceGlyph]):
             return self[flavor]
         if None in self:
             return self[None]
-        raise KeyError(f'no flavor source: {repr(flavor)}')
+        raise KeyError(f'no flavor source: {flavor!r}')
 
 
 def load_mapping(file_path: str | PathLike[str]) -> dict[int, SourceFlavorGroup]:
@@ -81,7 +81,7 @@ def load_mapping(file_path: str | PathLike[str]) -> dict[int, SourceFlavorGroup]
                     if len(flavors) > 0:
                         for flavor in flavors:
                             if flavor in source_group:
-                                raise RuntimeError(f'0x{code_point:04X} duplicate flavor {repr(flavor)}')
+                                raise RuntimeError(f'0x{code_point:04X} duplicate flavor {flavor!r}')
                             source_group[flavor] = source_glyph
                     else:
                         if None in source_group:

@@ -115,7 +115,7 @@ class GlyphFlavorGroup(UserDict[str | None, GlyphFile]):
             return self[flavor]
         if None in self:
             return self[None]
-        raise KeyError(f'no flavor file: {repr(flavor)}')
+        raise KeyError(f'no flavor file: {flavor!r}')
 
 
 def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
@@ -140,7 +140,7 @@ def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
             if len(glyph_file.flavors) > 0:
                 for flavor in glyph_file.flavors:
                     if flavor in flavor_group:
-                        raise RuntimeError(f"flavor {repr(flavor)} already exists:\n'{glyph_file.file_path}'\n'{flavor_group[flavor].file_path}'")
+                        raise RuntimeError(f"flavor {flavor!r} already exists:\n'{glyph_file.file_path}'\n'{flavor_group[flavor].file_path}'")
                     flavor_group[flavor] = glyph_file
             else:
                 if None in flavor_group:
@@ -202,7 +202,7 @@ def get_glyph_sequence(
             raise ValueError("missing default flavor in '.notdef' group")
         glyph_name = flavor_group[None].glyph_name
         if glyph_name != '.notdef':
-            raise ValueError(f"illegal glyph name for '.notdef': {repr(glyph_name)}")
+            raise ValueError(f"illegal glyph name for '.notdef': {glyph_name!r}")
 
     if flavors is None:
         flavors = [None]
