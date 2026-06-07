@@ -47,6 +47,12 @@ class MonoBitmap(UserList[list[int]]):
                     raise ValueError('inconsistent row widths')
                 self.append([0 if color == 0 else 1 for color in bitmap_row])
 
+    def __copy__(self) -> MonoBitmap:
+        return self.copy()
+
+    def __deepcopy__(self, memo: dict[int, Any]) -> MonoBitmap:
+        return self.deepcopy()
+
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, MonoBitmap):
             return NotImplemented
@@ -94,14 +100,6 @@ class MonoBitmap(UserList[list[int]]):
                 break
             padding += 1
         return padding
-
-    def copy(self) -> MonoBitmap:
-        bitmap = MonoBitmap()
-        for bitmap_row in self:
-            bitmap.append(bitmap_row[:])
-        bitmap.width = self.width
-        bitmap.height = self.height
-        return bitmap
 
     def resize(self, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> MonoBitmap:
         bitmap = MonoBitmap()
@@ -229,3 +227,14 @@ class MonoBitmap(UserList[list[int]]):
 
     def save_png(self, file_path: str | PathLike[str], color: tuple[int, int, int] = (0, 0, 0)):
         self._build_png(color).save(file_path)
+
+    def copy(self) -> MonoBitmap:
+        bitmap = MonoBitmap()
+        for bitmap_row in self:
+            bitmap.append(bitmap_row.copy())
+        bitmap.width = self.width
+        bitmap.height = self.height
+        return bitmap
+
+    def deepcopy(self) -> MonoBitmap:
+        return self.copy()
