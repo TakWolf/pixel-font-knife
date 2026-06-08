@@ -1,3 +1,4 @@
+from copy import copy, deepcopy
 from io import BytesIO
 from pathlib import Path
 
@@ -46,25 +47,6 @@ def test_create():
     ])
 
 
-def test_eq():
-    assert MonoBitmap([
-        [0, 1],
-        [1, 0],
-    ]) == MonoBitmap([
-        [0, 1],
-        [1, 0],
-    ])
-
-    bitmap_1 = MonoBitmap([
-        [1, 1, 1],
-        [0, 0, 0],
-    ])
-    bitmap_2 = bitmap_1.copy()
-    bitmap_2.width = 2
-    bitmap_2.height = 3
-    assert bitmap_1 != bitmap_2
-
-
 def test_inside():
     bitmap = MonoBitmap.create(50, 50)
     assert bitmap.is_x_inside(10)
@@ -94,17 +76,6 @@ def test_calculate_padding():
     assert bitmap.calculate_right_padding() == 2
     assert bitmap.calculate_top_padding() == 3
     assert bitmap.calculate_bottom_padding() == 1
-
-
-def test_copy():
-    bitmap = MonoBitmap([
-        [0, 0, 0],
-        [1, 0, 1],
-        [0, 1, 0],
-    ])
-    copy_bitmap = bitmap.copy()
-    assert bitmap == copy_bitmap
-    assert bitmap is not copy_bitmap
 
 
 def test_resize():
@@ -247,6 +218,36 @@ def test_draw():
     text = ('████    *\n'
             '    ████*\n')
     assert bitmap.draw(end='*') == text
+
+
+def test_copy():
+    bitmap_1 = MonoBitmap([
+        [0, 1],
+        [1, 0],
+    ])
+    bitmap_2 = copy(bitmap_1)
+    bitmap_3 = deepcopy(bitmap_1)
+
+    assert bitmap_1 == bitmap_2
+    assert bitmap_1 == bitmap_3
+    assert bitmap_1 is not bitmap_2
+    assert bitmap_1 is not bitmap_3
+
+    for bitmap_row_1, bitmap_row_2, bitmap_row_3 in zip(bitmap_1, bitmap_2, bitmap_3):
+        assert bitmap_row_1 is not bitmap_row_2
+        assert bitmap_row_1 is not bitmap_row_3
+
+
+def test_eq():
+    bitmap_1 = MonoBitmap([
+        [0, 1],
+        [1, 0],
+    ])
+    bitmap_2 = MonoBitmap([
+        [0, 1],
+        [1, 0],
+    ])
+    assert bitmap_1 == bitmap_2
 
 
 def test_load_dump_save(glyphs_dir: Path, tmp_path: Path):
