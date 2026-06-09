@@ -45,7 +45,7 @@ class MonoBitmap(UserList[list[int]]):
             for bitmap_row in bitmap:
                 if self.width != len(bitmap_row):
                     raise ValueError('inconsistent row widths')
-                self.append([0 if color == 0 else 1 for color in bitmap_row])
+                self.append([0 if pixel == 0 else 1 for pixel in bitmap_row])
 
     def __copy__(self) -> MonoBitmap:
         return self.copy()
@@ -88,7 +88,7 @@ class MonoBitmap(UserList[list[int]]):
     def calculate_top_padding(self) -> int:
         padding = 0
         for bitmap_row in self:
-            if any(color != 0 for color in bitmap_row):
+            if any(pixel != 0 for pixel in bitmap_row):
                 break
             padding += 1
         return padding
@@ -96,7 +96,7 @@ class MonoBitmap(UserList[list[int]]):
     def calculate_bottom_padding(self) -> int:
         padding = 0
         for bitmap_row in reversed(self):
-            if any(color != 0 for color in bitmap_row):
+            if any(pixel != 0 for pixel in bitmap_row):
                 break
             padding += 1
         return padding
@@ -133,11 +133,11 @@ class MonoBitmap(UserList[list[int]]):
             ty = oy + y
             if not bitmap.is_y_inside(ty):
                 continue
-            for ox, color in enumerate(other_row):
+            for ox, pixel in enumerate(other_row):
                 tx = ox + x
                 if not bitmap.is_x_inside(tx):
                     continue
-                if color != 0:
+                if pixel != 0:
                     bitmap[ty][tx] = 1
         return bitmap
 
@@ -147,11 +147,11 @@ class MonoBitmap(UserList[list[int]]):
             ty = oy + y
             if not bitmap.is_y_inside(ty):
                 continue
-            for ox, color in enumerate(other_row):
+            for ox, pixel in enumerate(other_row):
                 tx = ox + x
                 if not bitmap.is_x_inside(tx):
                     continue
-                if color != 0:
+                if pixel != 0:
                     bitmap[ty][tx] = 0
         return bitmap
 
@@ -160,11 +160,11 @@ class MonoBitmap(UserList[list[int]]):
             ty = oy + y
             if not self.is_y_inside(ty):
                 continue
-            for ox, color in enumerate(other_row):
+            for ox, pixel in enumerate(other_row):
                 tx = ox + x
                 if not self.is_x_inside(tx):
                     continue
-                if color != 0 and self[ty][tx] != 0:
+                if pixel != 0 and self[ty][tx] != 0:
                     return True
         return False
 
@@ -174,8 +174,8 @@ class MonoBitmap(UserList[list[int]]):
 
         bitmap = self.copy()
         for y, source_row in enumerate(self):
-            for x, color in enumerate(source_row):
-                if color == 0:
+            for x, pixel in enumerate(source_row):
+                if pixel == 0:
                     continue
                 for ty in range(y - size, y + size + 1):
                     if not bitmap.is_y_inside(ty):
@@ -202,8 +202,8 @@ class MonoBitmap(UserList[list[int]]):
     def draw(self, white: str = '  ', black: str = '██', end: str | None = None) -> str:
         text = StringIO()
         for bitmap_row in self:
-            for color in bitmap_row:
-                text.write(white if color == 0 else black)
+            for pixel in bitmap_row:
+                text.write(white if pixel == 0 else black)
             if end is not None:
                 text.write(end)
             text.write('\n')
@@ -214,11 +214,11 @@ class MonoBitmap(UserList[list[int]]):
         rows = []
         for bitmap_row in self:
             row = []
-            for color in bitmap_row:
+            for pixel in bitmap_row:
                 row.append(red)
                 row.append(green)
                 row.append(blue)
-                row.append(255 if color != 0 else 0)
+                row.append(255 if pixel != 0 else 0)
             rows.append(row)
         return png.from_array(rows, 'RGBA')
 
