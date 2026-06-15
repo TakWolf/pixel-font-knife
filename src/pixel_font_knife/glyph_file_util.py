@@ -24,7 +24,7 @@ class GlyphFile:
         parts = file_path.stem.split(maxsplit=1)
         if parts[0] == 'notdef':
             if len(parts) > 1:
-                raise ValueError(f"'notdef' can't have flavors: '{file_path}'")
+                raise ValueError(f"'notdef' must be no flavor: '{file_path}'")
             return GlyphFile(file_path, -1, [])
 
         code_point = int(parts[0], 16)

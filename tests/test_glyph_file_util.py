@@ -17,7 +17,7 @@ def test_glyph_file_1():
 def test_glyph_file_2():
     with pytest.raises(ValueError) as info:
         GlyphFile.load(Path('notdef a,b.png'))
-    assert info.value.args[0] == "'notdef' can't have flavors: 'notdef a,b.png'"
+    assert info.value.args[0] == "'notdef' must be no flavor: 'notdef a,b.png'"
 
 
 def test_glyph_file_3():
