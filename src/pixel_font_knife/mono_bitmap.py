@@ -53,7 +53,7 @@ class MonoBitmap(UserList[list[int]]):
     def __deepcopy__(self, memo: dict[int, Any]) -> MonoBitmap:
         return self.deepcopy()
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, MonoBitmap):
             return NotImplemented
         return (self.width == other.width and
