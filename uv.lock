@@ -40,7 +40,7 @@ wheels = [
 
 [[package]]
 name = "pixel-font-knife"
-version = "0.0.24"
+version = "0.0.25"
 source = { editable = "." }
 dependencies = [
     { name = "pyyaml" },
