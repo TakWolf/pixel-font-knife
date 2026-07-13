@@ -49,13 +49,6 @@ class SourceFlavorGroup(UserDict[str | None, SourceGlyph]):
             flavor = flavor.lower()
         return super().__contains__(flavor)
 
-    def get_source(self, flavor: str | None = None) -> SourceGlyph:
-        if flavor in self:
-            return self[flavor]
-        if None in self:
-            return self[None]
-        raise KeyError(f'no flavor source: {flavor!r}')
-
 
 def load_mapping(file_path: str | PathLike[str]) -> dict[int, SourceFlavorGroup]:
     if isinstance(file_path, str):
@@ -67,26 +60,37 @@ def load_mapping(file_path: str | PathLike[str]) -> dict[int, SourceFlavorGroup]
         for code_point, raw_source_group in raw_mapping.items():
             if raw_source_group is not None:
                 source_group = SourceFlavorGroup()
-                for key, value in raw_source_group.items():
-                    if key is None:
-                        flavors = []
-                    else:
-                        flavors = key.lower().split(',')
-                    if isinstance(value, int):
-                        source_glyph = SourceGlyph(value, None)
-                    else:
-                        parts = value.split(maxsplit=1)
-                        source_glyph = SourceGlyph(int(parts[0], 0), parts[1].lower())
+                if '*' in raw_source_group:
+                    if len(raw_source_group) > 1:
+                        raise RuntimeError(f'0x{code_point:04X} wildcard flavor cannot be mixed with explicit flavors')
 
-                    if len(flavors) > 0:
-                        for flavor in flavors:
-                            if flavor in source_group:
-                                raise RuntimeError(f'0x{code_point:04X} duplicate flavor {flavor!r}')
-                            source_group[flavor] = source_glyph
-                    else:
-                        if None in source_group:
-                            raise RuntimeError(f'0x{code_point:04X} duplicate default flavor')
-                        source_group[None] = source_glyph
+                    value = raw_source_group['*']
+                    if not isinstance(value, int):
+                        raise RuntimeError(f'0x{code_point:04X} wildcard flavor source must be a code point')
+
+                    source_group['*'] = SourceGlyph(value, None)
+                else:
+                    for key, value in raw_source_group.items():
+                        if key is None:
+                            flavors = []
+                        else:
+                            flavors = key.lower().split(',')
+
+                        if isinstance(value, int):
+                            source_glyph = SourceGlyph(value, None)
+                        else:
+                            parts = value.split(maxsplit=1)
+                            source_glyph = SourceGlyph(int(parts[0], 0), parts[1].lower())
+
+                        if len(flavors) > 0:
+                            for flavor in flavors:
+                                if flavor in source_group:
+                                    raise RuntimeError(f'0x{code_point:04X} duplicate flavor {flavor!r}')
+                                source_group[flavor] = source_glyph
+                        else:
+                            if None in source_group:
+                                raise RuntimeError(f'0x{code_point:04X} duplicate default flavor')
+                            source_group[None] = source_glyph
                 mapping[code_point] = source_group
     return mapping
 
@@ -97,6 +101,7 @@ def save_mapping(
         flavors_order: list[str] | None = None,
 ):
     buffer = StringIO()
+
     for code_point, source_group in sorted(mapping.items()):
         buffer.write('\n')
         c = chr(code_point)
@@ -106,47 +111,63 @@ def save_mapping(
             buffer.write(f'# 0x{code_point:04X}\n')
         buffer.write(f'0x{code_point:04X}:\n')
 
-        source_pending = {}
-        for flavor, source_glyph in source_group.items():
-            key = source_glyph.code_point, source_glyph.flavor
-            if key in source_pending:
-                flavors = source_pending[key]
-            else:
-                flavors = []
-                source_pending[key] = flavors
-            flavors.append(flavor)
+        if '*' in source_group:
+            if len(source_group) > 1:
+                raise RuntimeError(f'0x{code_point:04X} wildcard flavor cannot be mixed with explicit flavors')
 
-        flavor_pending = []
-        default_source = None
-        for (source_code_point, source_flavor), flavors in source_pending.items():
-            source_str = f'0x{source_code_point:04X}'
-            if source_flavor is not None:
-                source_str = f'{source_str} {source_flavor}'
+            source_glyph = source_group['*']
+            if source_glyph.flavor is not None:
+                raise RuntimeError(f'0x{code_point:04X} wildcard flavor source must be a code point')
 
-            source_c = chr(source_code_point)
+            source_c = chr(source_glyph.code_point)
             if not source_c.isprintable():
-                source_c = f'0x{source_code_point:04X}'
+                source_c = f'0x{source_glyph.code_point:04X}'
+            source_str = f'0x{source_glyph.code_point:04X}'
 
-            if None in flavors:
-                default_source = source_str, source_c
-                continue
-            if flavors_order is None:
-                flavors.sort()
-            else:
-                flavors.sort(key=lambda x: flavors_order.index(x))
-            flavor_pending.append((flavors[0], ','.join(flavors), (source_str, source_c)))
-        if flavors_order is None:
-            flavor_pending.sort()
-        else:
-            flavor_pending.sort(key=lambda x: flavors_order.index(x[0]))
-
-        if default_source is not None:
-            default_source_str, default_source_c = default_source
-            buffer.write(f'  # {default_source_c}\n')
-            buffer.write(f'  ~: {default_source_str}\n')
-        for _, flavors_str, (source_str, source_c) in flavor_pending:
             buffer.write(f'  # {source_c}\n')
-            buffer.write(f'  {flavors_str}: {source_str}\n')
+            buffer.write(f'  "*": {source_str}\n')
+        else:
+            source_pending = {}
+            for flavor, source_glyph in source_group.items():
+                key = source_glyph.code_point, source_glyph.flavor
+                if key in source_pending:
+                    flavors = source_pending[key]
+                else:
+                    flavors = []
+                    source_pending[key] = flavors
+                flavors.append(flavor)
+
+            flavor_pending = []
+            default_source = None
+            for (source_code_point, source_flavor), flavors in source_pending.items():
+                source_str = f'0x{source_code_point:04X}'
+                if source_flavor is not None:
+                    source_str = f'{source_str} {source_flavor}'
+
+                source_c = chr(source_code_point)
+                if not source_c.isprintable():
+                    source_c = f'0x{source_code_point:04X}'
+
+                if None in flavors:
+                    default_source = source_str, source_c
+                    continue
+                if flavors_order is None:
+                    flavors.sort()
+                else:
+                    flavors.sort(key=lambda x: flavors_order.index(x))
+                flavor_pending.append((flavors[0], ','.join(flavors), (source_str, source_c)))
+            if flavors_order is None:
+                flavor_pending.sort()
+            else:
+                flavor_pending.sort(key=lambda x: flavors_order.index(x[0]))
+
+            if default_source is not None:
+                default_source_str, default_source_c = default_source
+                buffer.write(f'  # {default_source_c}\n')
+                buffer.write(f'  ~: {default_source_str}\n')
+            for _, flavors_str, (source_str, source_c) in flavor_pending:
+                buffer.write(f'  # {source_c}\n')
+                buffer.write(f'  {flavors_str}: {source_str}\n')
 
     if isinstance(file_path, str):
         file_path = Path(file_path)
@@ -161,14 +182,30 @@ def apply_mapping(
     for code_point, source_group in mapping.items():
         if len(source_group) == 0:
             continue
-        flavor_group = context_patch.get(code_point, None)
-        for flavor, source_glyph in source_group.items():
+
+        if '*' in source_group:
+            if len(source_group) > 1:
+                raise RuntimeError(f'0x{code_point:04X} wildcard flavor cannot be mixed with explicit flavors')
+
+            source_glyph = source_group['*']
+            if source_glyph.flavor is not None:
+                raise RuntimeError(f'0x{code_point:04X} wildcard flavor source must be a code point')
+
             if source_glyph.code_point not in context:
                 continue
-            if flavor_group is None:
-                flavor_group = GlyphFlavorGroup()
-                context_patch[code_point] = flavor_group
-            flavor_group[flavor] = context[source_glyph.code_point].get_file(source_glyph.flavor)
+            flavor_group = GlyphFlavorGroup()
+            context_patch[code_point] = flavor_group
+            for flavor, glyph_file in context[source_glyph.code_point].items():
+                flavor_group[flavor] = glyph_file
+        else:
+            flavor_group = None
+            for flavor, source_glyph in source_group.items():
+                if source_glyph.code_point not in context:
+                    continue
+                if flavor_group is None:
+                    flavor_group = GlyphFlavorGroup()
+                    context_patch[code_point] = flavor_group
+                flavor_group[flavor] = context[source_glyph.code_point].get_file(source_glyph.flavor)
 
     for code_point, flavor_group in context_patch.items():
         if code_point in context:
