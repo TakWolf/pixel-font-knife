@@ -4,9 +4,18 @@ from os import PathLike
 from pathlib import Path
 from typing import Any
 
+import unicodedata2
 import yaml
 
 from pixel_font_knife.glyph_file_util import GlyphFlavorGroup
+
+
+def _display_code_point(code_point: int) -> str:
+    c = chr(code_point)
+    category = unicodedata2.category(c)
+    if category.startswith(('L', 'M', 'N', 'P', 'S')):
+        return c
+    return unicodedata2.name(c, f'0x{code_point:04X}')
 
 
 class SourceGlyph:
@@ -104,11 +113,7 @@ def save_mapping(
 
     for code_point, source_group in sorted(mapping.items()):
         buffer.write('\n')
-        c = chr(code_point)
-        if c.isprintable():
-            buffer.write(f'# {c}\n')
-        else:
-            buffer.write(f'# 0x{code_point:04X}\n')
+        buffer.write(f'# {_display_code_point(code_point)}\n')
         buffer.write(f'0x{code_point:04X}:\n')
 
         if '*' in source_group:
@@ -119,13 +124,8 @@ def save_mapping(
             if source_glyph.flavor is not None:
                 raise RuntimeError(f'0x{code_point:04X} wildcard flavor source must be a code point')
 
-            source_c = chr(source_glyph.code_point)
-            if not source_c.isprintable():
-                source_c = f'0x{source_glyph.code_point:04X}'
-            source_str = f'0x{source_glyph.code_point:04X}'
-
-            buffer.write(f'  # {source_c}\n')
-            buffer.write(f'  "*": {source_str}\n')
+            buffer.write(f'  # {_display_code_point(source_glyph.code_point)}\n')
+            buffer.write(f'  "*": 0x{source_glyph.code_point:04X}\n')
         else:
             source_pending = {}
             for flavor, source_glyph in source_group.items():
@@ -143,10 +143,7 @@ def save_mapping(
                 source_str = f'0x{source_code_point:04X}'
                 if source_flavor is not None:
                     source_str = f'{source_str} {source_flavor}'
-
-                source_c = chr(source_code_point)
-                if not source_c.isprintable():
-                    source_c = f'0x{source_code_point:04X}'
+                source_c = _display_code_point(source_code_point)
 
                 if None in flavors:
                     default_source = source_str, source_c
