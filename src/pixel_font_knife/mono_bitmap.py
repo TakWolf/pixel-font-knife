@@ -113,6 +113,39 @@ class MonoBitmap(UserList[list[int]]):
     def is_inside(self, x: int, y: int) -> bool:
         return self.is_x_inside(x) and self.is_y_inside(y)
 
+    def calculate_paddings(self) -> Paddings:
+        if self.height != len(self):
+            raise ValueError('inconsistent bitmap height')
+
+        first_row = self.height
+        last_row = -1
+        first_col = self.width
+        last_col = -1
+
+        for y, bitmap_row in enumerate(self):
+            if self.width != len(bitmap_row):
+                raise ValueError('inconsistent row widths')
+            for x, pixel in enumerate(bitmap_row):
+                if pixel != 0:
+                    if y < first_row:
+                        first_row = y
+                    if y > last_row:
+                        last_row = y
+                    if x < first_col:
+                        first_col = x
+                    if x > last_col:
+                        last_col = x
+
+        if first_row == self.height:
+            return Paddings(self.width, 0, self.height, 0)
+
+        return Paddings(
+            first_col,
+            self.width - 1 - last_col,
+            first_row,
+            self.height - 1 - last_row,
+        )
+
     def calculate_left_padding(self) -> int:
         padding = 0
         for i in range(self.width):

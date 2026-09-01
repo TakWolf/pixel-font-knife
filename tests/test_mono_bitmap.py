@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from pixel_font_knife.mono_bitmap import MonoBitmap
+from pixel_font_knife.mono_bitmap import Paddings, MonoBitmap
 
 
 def test_init():
@@ -72,10 +72,23 @@ def test_calculate_padding():
         [0, 0, 0, 1, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
     ])
+    assert bitmap.calculate_paddings() == Paddings(1, 2, 3, 1)
     assert bitmap.calculate_left_padding() == 1
     assert bitmap.calculate_right_padding() == 2
     assert bitmap.calculate_top_padding() == 3
     assert bitmap.calculate_bottom_padding() == 1
+
+
+def test_calculate_paddings_inconsistent_dimensions():
+    bitmap = MonoBitmap.create(7, 10)
+    bitmap.data = [[0] * 7 for _ in range(5)]
+    with pytest.raises(ValueError, match='inconsistent bitmap height'):
+        bitmap.calculate_paddings()
+
+    bitmap = MonoBitmap.create(7, 5)
+    bitmap[2] = [0] * 5
+    with pytest.raises(ValueError, match='inconsistent row widths'):
+        bitmap.calculate_paddings()
 
 
 def test_resize():
