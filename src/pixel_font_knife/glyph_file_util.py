@@ -9,7 +9,7 @@ from typing import Any
 import unidata_blocks
 
 from pixel_font_knife import fs_util
-from pixel_font_knife.mono_bitmap import MonoBitmap
+from pixel_font_knife.mono_bitmap import Paddings, MonoBitmap
 
 
 class GlyphFile:
@@ -39,6 +39,8 @@ class GlyphFile:
     code_point: int
     flavors: list[str]
     _bitmap: MonoBitmap | None
+    _optimized_bitmap: MonoBitmap | None
+    _optimized_paddings: Paddings | None
 
     def __init__(
             self,
@@ -50,12 +52,20 @@ class GlyphFile:
         self.code_point = code_point
         self.flavors = flavors
         self._bitmap = None
+        self._optimized_bitmap = None
+        self._optimized_paddings = None
 
     @property
     def bitmap(self) -> MonoBitmap:
         if self._bitmap is None:
             self._bitmap = MonoBitmap.load_png(self.file_path)
         return self._bitmap
+
+    @bitmap.setter
+    def bitmap(self, bitmap: MonoBitmap):
+        self._bitmap = bitmap
+        self._optimized_bitmap = None
+        self._optimized_paddings = None
 
     @property
     def width(self) -> int:
@@ -64,6 +74,18 @@ class GlyphFile:
     @property
     def height(self) -> int:
         return self.bitmap.height
+
+    @property
+    def optimized_bitmap(self) -> MonoBitmap:
+        if self._optimized_bitmap is None:
+            self._optimized_bitmap, self._optimized_paddings = self.bitmap.optimize()
+        return self._optimized_bitmap
+
+    @property
+    def optimized_paddings(self) -> Paddings:
+        if self._optimized_paddings is None:
+            self._optimized_bitmap, self._optimized_paddings = self.bitmap.optimize()
+        return self._optimized_paddings
 
     @property
     def glyph_name(self) -> str:
