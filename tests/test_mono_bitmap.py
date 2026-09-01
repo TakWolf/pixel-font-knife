@@ -8,6 +8,12 @@ from pixel_font_knife.mono_bitmap import Paddings, MonoBitmap
 
 
 def test_init():
+    bitmap = MonoBitmap([])
+    assert bitmap.width == 0
+    assert bitmap.height == 0
+    assert bitmap == MonoBitmap()
+    assert bitmap[:] == MonoBitmap()
+
     bitmap = MonoBitmap([
         [0, 1, 2, 3],
         [1, 0, 0, 1],
@@ -311,6 +317,14 @@ def test_eq():
         [1, 0],
     ])
     assert bitmap_1 == bitmap_2
+
+
+def test_dump_save_empty(tmp_path: Path):
+    for bitmap in [MonoBitmap(), MonoBitmap([[], []]), MonoBitmap.create(2, 0)]:
+        with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):
+            bitmap.dump_png(BytesIO())
+        with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):
+            bitmap.save_png(tmp_path.joinpath('empty.png'))
 
 
 def test_load_dump_save(glyphs_dir: Path, tmp_path: Path):

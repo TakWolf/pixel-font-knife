@@ -80,7 +80,7 @@ class MonoBitmap(UserList[list[int]]):
 
     def __init__(self, bitmap: list[list[int]] | None = None):
         super().__init__()
-        if bitmap is None:
+        if bitmap is None or len(bitmap) == 0:
             self.width = 0
             self.height = 0
         else:
@@ -298,6 +298,9 @@ class MonoBitmap(UserList[list[int]]):
         return text.getvalue()
 
     def _build_png(self, color: tuple[int, int, int]) -> png.Image:
+        if self.width == 0 or self.height == 0:
+            raise ValueError('cannot encode empty bitmap as PNG')
+
         red, green, blue = color
         rows = []
         for bitmap_row in self:
