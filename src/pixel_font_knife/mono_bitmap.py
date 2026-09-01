@@ -8,6 +8,50 @@ from typing import Any, BinaryIO
 from pixel_font_knife.internal import png
 
 
+class Paddings:
+    left: int
+    right: int
+    top: int
+    bottom: int
+
+    def __init__(
+            self,
+            left: int,
+            right: int,
+            top: int,
+            bottom: int,
+    ):
+        self.left = left
+        self.right = right
+        self.top = top
+        self.bottom = bottom
+
+    def __copy__(self) -> Paddings:
+        return self.copy()
+
+    def __deepcopy__(self, memo: dict[int, Any]) -> Paddings:
+        return self.deepcopy()
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Paddings):
+            return NotImplemented
+        return (self.left == other.left and
+                self.right == other.right and
+                self.top == other.top and
+                self.bottom == other.bottom)
+
+    def copy(self) -> Paddings:
+        return Paddings(
+            self.left,
+            self.right,
+            self.top,
+            self.bottom,
+        )
+
+    def deepcopy(self) -> Paddings:
+        return self.copy()
+
+
 class MonoBitmap(UserList[list[int]]):
     @staticmethod
     def create(width: int, height: int, filled: bool = False) -> MonoBitmap:
