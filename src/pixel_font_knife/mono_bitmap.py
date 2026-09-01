@@ -178,6 +178,17 @@ class MonoBitmap(UserList[list[int]]):
             padding += 1
         return padding
 
+    def optimize(self) -> tuple[MonoBitmap, Paddings]:
+        paddings = self.calculate_paddings()
+        bitmap = MonoBitmap()
+        bitmap.width = self.width - paddings.left - paddings.right
+        bitmap.height = self.height - paddings.top - paddings.bottom
+        end_x = self.width - paddings.right
+        end_y = self.height - paddings.bottom
+        for bitmap_row in self.data[paddings.top:end_y]:
+            bitmap.append(bitmap_row[paddings.left:end_x])
+        return bitmap, paddings
+
     def resize(self, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> MonoBitmap:
         bitmap = MonoBitmap()
         bitmap.width = self.width + left + right

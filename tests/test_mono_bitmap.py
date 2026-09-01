@@ -91,6 +91,56 @@ def test_calculate_paddings_inconsistent_dimensions():
         bitmap.calculate_paddings()
 
 
+def test_optimize():
+    bitmap = MonoBitmap([
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 1, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 1, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+    ])
+    optimized_bitmap, paddings = bitmap.optimize()
+    assert optimized_bitmap == MonoBitmap([
+        [0, 1, 0, 1],
+        [1, 1, 0, 0],
+        [0, 1, 1, 1],
+        [0, 1, 0, 1],
+        [0, 0, 1, 0],
+    ])
+    assert paddings == Paddings(1, 2, 3, 1)
+    assert optimized_bitmap is not bitmap
+    for optimized_row in optimized_bitmap:
+        assert all(optimized_row is not bitmap_row for bitmap_row in bitmap)
+
+
+def test_optimize_empty():
+    bitmap = MonoBitmap.create(7, 10)
+    optimized_bitmap, paddings = bitmap.optimize()
+    assert optimized_bitmap == MonoBitmap.create(0, 0)
+    assert paddings == Paddings(7, 0, 10, 0)
+
+    bitmap = MonoBitmap()
+    optimized_bitmap, paddings = bitmap.optimize()
+    assert optimized_bitmap == MonoBitmap.create(0, 0)
+    assert paddings == Paddings(0, 0, 0, 0)
+
+
+def test_optimize_inconsistent_dimensions():
+    bitmap = MonoBitmap.create(7, 10)
+    bitmap.data = [[0] * 7 for _ in range(5)]
+    with pytest.raises(ValueError, match='inconsistent bitmap height'):
+        bitmap.optimize()
+
+    bitmap = MonoBitmap.create(7, 5)
+    bitmap[2] = [0] * 5
+    with pytest.raises(ValueError, match='inconsistent row widths'):
+        bitmap.optimize()
+
+
 def test_resize():
     bitmap = MonoBitmap([
         [1, 0, 1, 0],
