@@ -20,7 +20,7 @@ class Paddings:
             right: int,
             top: int,
             bottom: int,
-    ):
+    ) -> None:
         self.left = left
         self.right = right
         self.top = top
@@ -78,7 +78,7 @@ class MonoBitmap(UserList[list[int]]):
     width: int
     height: int
 
-    def __init__(self, bitmap: list[list[int]] | None = None):
+    def __init__(self, bitmap: list[list[int]] | None = None) -> None:
         super().__init__()
         if bitmap is None or len(bitmap) == 0:
             self.width = 0
@@ -313,10 +313,10 @@ class MonoBitmap(UserList[list[int]]):
             rows.append(row)
         return png.from_array(rows, 'RGBA')
 
-    def dump_png(self, stream: BinaryIO, color: tuple[int, int, int] = (0, 0, 0)):
+    def dump_png(self, stream: BinaryIO, color: tuple[int, int, int] = (0, 0, 0)) -> None:
         self._build_png(color).write(stream)
 
-    def save_png(self, file_path: str | PathLike[str], color: tuple[int, int, int] = (0, 0, 0)):
+    def save_png(self, file_path: str | PathLike[str], color: tuple[int, int, int] = (0, 0, 0)) -> None:
         self._build_png(color).save(file_path)
 
     def copy(self) -> MonoBitmap:

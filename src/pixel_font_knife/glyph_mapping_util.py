@@ -22,7 +22,7 @@ class SourceGlyph:
     code_point: int
     flavor: str | None
 
-    def __init__(self, code_point: int, flavor: str | None):
+    def __init__(self, code_point: int, flavor: str | None) -> None:
         self.code_point = code_point
         self.flavor = flavor
 
@@ -33,7 +33,7 @@ class SourceFlavorGroup(UserDict[str | None, SourceGlyph]):
             flavor = flavor.lower()
         return super().__getitem__(flavor)
 
-    def __setitem__(self, flavor: Any, source_glyph: Any):
+    def __setitem__(self, flavor: Any, source_glyph: Any) -> None:
         if source_glyph is None:
             self.pop(flavor, None)
             return
@@ -48,7 +48,7 @@ class SourceFlavorGroup(UserDict[str | None, SourceGlyph]):
 
         super().__setitem__(flavor, source_glyph)
 
-    def __delitem__(self, flavor: Any):
+    def __delitem__(self, flavor: Any) -> None:
         if isinstance(flavor, str):
             flavor = flavor.lower()
         super().__delitem__(flavor)
@@ -108,7 +108,7 @@ def save_mapping(
         mapping: dict[int, SourceFlavorGroup],
         file_path: str | PathLike[str],
         flavors_order: list[str] | None = None,
-):
+) -> None:
     buffer = StringIO()
 
     for code_point, source_group in sorted(mapping.items()):
@@ -174,7 +174,7 @@ def save_mapping(
 def apply_mapping(
         context: dict[int, GlyphFlavorGroup],
         mapping: dict[int, SourceFlavorGroup],
-):
+) -> None:
     context_patch = {}
     for code_point, source_group in mapping.items():
         if len(source_group) == 0:

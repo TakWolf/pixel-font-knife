@@ -5,7 +5,7 @@ import pytest
 from pixel_font_knife import glyph_mapping_util, glyph_file_util
 
 
-def test_load(assets_dir: Path, glyphs_dir: Path, tmp_path: Path):
+def test_load(assets_dir: Path, glyphs_dir: Path, tmp_path: Path) -> None:
     load_path = assets_dir.joinpath('mapping-example.yaml')
     save_path = tmp_path.joinpath('mapping-example.yaml')
 
@@ -59,7 +59,7 @@ def test_load(assets_dir: Path, glyphs_dir: Path, tmp_path: Path):
         (0x10FFFF, '0x10FFFF'),
     ],
 )
-def test_save_code_point_display(code_point: int, display: str, tmp_path: Path):
+def test_save_code_point_display(code_point: int, display: str, tmp_path: Path) -> None:
     source_group = glyph_mapping_util.SourceFlavorGroup()
     source_group['*'] = glyph_mapping_util.SourceGlyph(code_point, None)
     mapping = {code_point: source_group}

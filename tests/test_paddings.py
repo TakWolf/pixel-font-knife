@@ -3,7 +3,7 @@ from copy import copy, deepcopy
 from pixel_font_knife.mono_bitmap import Paddings
 
 
-def test_copy():
+def test_copy() -> None:
     paddings_1 = Paddings(
         left=1,
         right=2,
@@ -19,7 +19,7 @@ def test_copy():
     assert paddings_1 is not paddings_3
 
 
-def test_eq():
+def test_eq() -> None:
     paddings_1 = Paddings(
         left=1,
         right=2,

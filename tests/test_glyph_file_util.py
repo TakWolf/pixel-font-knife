@@ -7,34 +7,34 @@ from pixel_font_knife.glyph_file_util import GlyphFile, GlyphFlavorGroup
 from pixel_font_knife.mono_bitmap import MonoBitmap
 
 
-def test_glyph_file_1():
+def test_glyph_file_1() -> None:
     glyph_file = GlyphFile.load(Path('notdef.png'))
     assert glyph_file.code_point == -1
     assert len(glyph_file.flavors) == 0
     assert glyph_file.glyph_name == '.notdef'
 
 
-def test_glyph_file_2():
+def test_glyph_file_2() -> None:
     with pytest.raises(ValueError) as info:
         GlyphFile.load(Path('notdef a,b.png'))
     assert info.value.args[0] == "'notdef' must be no flavor: 'notdef a,b.png'"
 
 
-def test_glyph_file_3():
+def test_glyph_file_3() -> None:
     glyph_file = GlyphFile.load(Path('4E00.png'))
     assert glyph_file.code_point == 0x4E00
     assert len(glyph_file.flavors) == 0
     assert glyph_file.glyph_name == 'u4E00'
 
 
-def test_glyph_file_4():
+def test_glyph_file_4() -> None:
     glyph_file = GlyphFile.load(Path('4E00 A,b,C,b,a.png'))
     assert glyph_file.code_point == 0x4E00
     assert glyph_file.flavors == ['a', 'b', 'c']
     assert glyph_file.glyph_name == 'u4E00-A'
 
 
-def test_glyph_file_5(glyphs_dir: Path):
+def test_glyph_file_5(glyphs_dir: Path) -> None:
     file_path = glyphs_dir.joinpath('black', '6A1E.png')
     glyph_file = GlyphFile.load(file_path)
     assert glyph_file.bitmap == MonoBitmap.load_png(file_path)
@@ -42,13 +42,13 @@ def test_glyph_file_5(glyphs_dir: Path):
     assert glyph_file.height == 12
 
 
-def test_glyph_file_6():
+def test_glyph_file_6() -> None:
     with pytest.raises(ValueError) as info:
         GlyphFile.load(Path('4E00.txt'))
     assert info.value.args[0] == "not '.png' file: '4E00.txt'"
 
 
-def test_flavor_group():
+def test_flavor_group() -> None:
     flavor_group = GlyphFlavorGroup()
 
     glyph_file_default = GlyphFile.load(Path('6000.png'))
@@ -64,7 +64,7 @@ def test_flavor_group():
     assert flavor_group.get_file('B') == flavor_group.get_file('b') == glyph_file_ab
 
 
-def test_context(glyphs_dir: Path):
+def test_context(glyphs_dir: Path) -> None:
     context = glyph_file_util.load_context(glyphs_dir.joinpath('context'))
 
     assert len(context) == 3

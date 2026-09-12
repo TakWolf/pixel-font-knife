@@ -47,7 +47,7 @@ class GlyphFile:
             file_path: Path,
             code_point: int,
             flavors: list[str],
-    ):
+    ) -> None:
         self.file_path = file_path
         self.code_point = code_point
         self.flavors = flavors
@@ -62,7 +62,7 @@ class GlyphFile:
         return self._bitmap
 
     @bitmap.setter
-    def bitmap(self, bitmap: MonoBitmap):
+    def bitmap(self, bitmap: MonoBitmap) -> None:
         self._bitmap = bitmap
         self._optimized_bitmap = None
         self._optimized_paddings = None
@@ -97,7 +97,7 @@ class GlyphFile:
             name = f'{name}-{self.flavors[0].upper()}'
         return name
 
-    def save(self):
+    def save(self) -> None:
         self.bitmap.save_png(self.file_path)
 
 
@@ -107,7 +107,7 @@ class GlyphFlavorGroup(UserDict[str | None, GlyphFile]):
             flavor = flavor.lower()
         return super().__getitem__(flavor)
 
-    def __setitem__(self, flavor: Any, glyph_file: Any):
+    def __setitem__(self, flavor: Any, glyph_file: Any) -> None:
         if glyph_file is None:
             self.pop(flavor, None)
             return
@@ -122,7 +122,7 @@ class GlyphFlavorGroup(UserDict[str | None, GlyphFile]):
 
         super().__setitem__(flavor, glyph_file)
 
-    def __delitem__(self, flavor: Any):
+    def __delitem__(self, flavor: Any) -> None:
         if isinstance(flavor, str):
             flavor = flavor.lower()
         super().__delitem__(flavor)
@@ -175,7 +175,7 @@ def normalize_context(
         context: dict[int, GlyphFlavorGroup],
         root_dir: str | PathLike[str],
         flavors_order: list[str] | None = None,
-):
+) -> None:
     if isinstance(root_dir, str):
         root_dir = Path(root_dir)
 

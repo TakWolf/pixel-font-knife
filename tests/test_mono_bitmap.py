@@ -7,7 +7,7 @@ import pytest
 from pixel_font_knife.mono_bitmap import Paddings, MonoBitmap
 
 
-def test_init():
+def test_init() -> None:
     bitmap = MonoBitmap([])
     assert bitmap.width == 0
     assert bitmap.height == 0
@@ -32,7 +32,7 @@ def test_init():
         ])
 
 
-def test_create():
+def test_create() -> None:
     bitmap = MonoBitmap.create(3, 4)
     assert bitmap.width == 3
     assert bitmap.height == 4
@@ -53,7 +53,7 @@ def test_create():
     ])
 
 
-def test_inside():
+def test_inside() -> None:
     bitmap = MonoBitmap.create(50, 50)
     assert bitmap.is_x_inside(10)
     assert not bitmap.is_x_inside(-1)
@@ -66,7 +66,7 @@ def test_inside():
     assert not bitmap.is_inside(15, 90)
 
 
-def test_calculate_padding():
+def test_calculate_padding() -> None:
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
@@ -85,7 +85,7 @@ def test_calculate_padding():
     assert bitmap.calculate_bottom_padding() == 1
 
 
-def test_calculate_paddings_inconsistent_dimensions():
+def test_calculate_paddings_inconsistent_dimensions() -> None:
     bitmap = MonoBitmap.create(7, 10)
     bitmap.data = [[0] * 7 for _ in range(5)]
     with pytest.raises(ValueError, match='inconsistent bitmap height'):
@@ -97,7 +97,7 @@ def test_calculate_paddings_inconsistent_dimensions():
         bitmap.calculate_paddings()
 
 
-def test_optimize():
+def test_optimize() -> None:
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
@@ -123,7 +123,7 @@ def test_optimize():
         assert all(optimized_row is not bitmap_row for bitmap_row in bitmap)
 
 
-def test_optimize_empty():
+def test_optimize_empty() -> None:
     bitmap = MonoBitmap.create(7, 10)
     optimized_bitmap, paddings = bitmap.optimize()
     assert optimized_bitmap == MonoBitmap.create(0, 0)
@@ -135,7 +135,7 @@ def test_optimize_empty():
     assert paddings == Paddings(0, 0, 0, 0)
 
 
-def test_optimize_inconsistent_dimensions():
+def test_optimize_inconsistent_dimensions() -> None:
     bitmap = MonoBitmap.create(7, 10)
     bitmap.data = [[0] * 7 for _ in range(5)]
     with pytest.raises(ValueError, match='inconsistent bitmap height'):
@@ -147,7 +147,7 @@ def test_optimize_inconsistent_dimensions():
         bitmap.optimize()
 
 
-def test_resize():
+def test_resize() -> None:
     bitmap = MonoBitmap([
         [1, 0, 1, 0],
         [1, 0, 0, 0],
@@ -171,7 +171,7 @@ def test_resize():
     ])
 
 
-def test_scale(glyphs_dir: Path):
+def test_scale(glyphs_dir: Path) -> None:
     for file_path in glyphs_dir.joinpath('black').iterdir():
         if file_path.suffix != '.png':
             continue
@@ -185,7 +185,7 @@ def test_scale(glyphs_dir: Path):
         assert x3_bitmap.scale(0.5, 0.5) == x1_5_bitmap
 
 
-def test_plus_minus():
+def test_plus_minus() -> None:
     bitmap = MonoBitmap([
         [1, 1, 1, 1],
         [1, 0, 0, 1],
@@ -212,7 +212,7 @@ def test_plus_minus():
     ])
 
 
-def test_is_overlapped():
+def test_is_overlapped() -> None:
     bitmap_1 = MonoBitmap([
         [1, 1, 1, 0],
         [1, 1, 1, 0],
@@ -231,7 +231,7 @@ def test_is_overlapped():
     assert bitmap_1.is_overlapped(bitmap_2, x=1, y=1)
 
 
-def test_pixel_expand():
+def test_pixel_expand() -> None:
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
@@ -258,7 +258,7 @@ def test_pixel_expand():
     ])
 
 
-def test_crop():
+def test_crop() -> None:
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
@@ -279,7 +279,7 @@ def test_crop():
     ])
 
 
-def test_draw():
+def test_draw() -> None:
     bitmap = MonoBitmap([
         [1, 1, 0, 0],
         [0, 0, 1, 1],
@@ -289,7 +289,7 @@ def test_draw():
     assert bitmap.draw(end='*') == text
 
 
-def test_copy():
+def test_copy() -> None:
     bitmap_1 = MonoBitmap([
         [0, 1],
         [1, 0],
@@ -307,7 +307,7 @@ def test_copy():
         assert bitmap_row_1 is not bitmap_row_3
 
 
-def test_eq():
+def test_eq() -> None:
     bitmap_1 = MonoBitmap([
         [0, 1],
         [1, 0],
@@ -319,7 +319,7 @@ def test_eq():
     assert bitmap_1 == bitmap_2
 
 
-def test_dump_save_empty(tmp_path: Path):
+def test_dump_save_empty(tmp_path: Path) -> None:
     for bitmap in [MonoBitmap(), MonoBitmap([[], []]), MonoBitmap.create(2, 0)]:
         with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):
             bitmap.dump_png(BytesIO())
@@ -327,7 +327,7 @@ def test_dump_save_empty(tmp_path: Path):
             bitmap.save_png(tmp_path.joinpath('empty.png'))
 
 
-def test_load_dump_save(glyphs_dir: Path, tmp_path: Path):
+def test_load_dump_save(glyphs_dir: Path, tmp_path: Path) -> None:
     black_load_dir = glyphs_dir.joinpath('black')
     black_save_dir = tmp_path.joinpath('black')
     black_save_dir.mkdir()
@@ -361,7 +361,7 @@ def test_load_dump_save(glyphs_dir: Path, tmp_path: Path):
         assert red_load_path.read_bytes() == red_save_path.read_bytes() == red_stream.getvalue()
 
 
-def test_move_right_and_overlap_bolding(glyphs_dir: Path):
+def test_move_right_and_overlap_bolding(glyphs_dir: Path) -> None:
     for file_path in glyphs_dir.joinpath('black').iterdir():
         if file_path.suffix != '.png':
             continue
@@ -374,7 +374,7 @@ def test_move_right_and_overlap_bolding(glyphs_dir: Path):
         assert result_bitmap == bold_bitmap
 
 
-def test_move_left_and_overlap_bolding(glyphs_dir: Path):
+def test_move_left_and_overlap_bolding(glyphs_dir: Path) -> None:
     for file_path in glyphs_dir.joinpath('black').iterdir():
         if file_path.suffix != '.png':
             continue
@@ -387,7 +387,7 @@ def test_move_left_and_overlap_bolding(glyphs_dir: Path):
         assert result_bitmap == bold_bitmap
 
 
-def test_inflation_bolding(glyphs_dir: Path):
+def test_inflation_bolding(glyphs_dir: Path) -> None:
     for file_path in glyphs_dir.joinpath('black').iterdir():
         if file_path.suffix != '.png':
             continue

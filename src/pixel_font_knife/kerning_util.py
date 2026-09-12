@@ -39,7 +39,7 @@ class KerningConfig:
             self,
             groups: dict[str, list[str]],
             templates: dict[tuple[str, str], int],
-    ):
+    ) -> None:
         self.groups = groups
         self.templates = templates
 
