@@ -1,6 +1,7 @@
 from copy import copy, deepcopy
 from io import BytesIO
 from pathlib import Path
+import sys
 
 import pytest
 
@@ -327,6 +328,7 @@ def test_dump_save_empty(tmp_path: Path) -> None:
             bitmap.save_png(tmp_path.joinpath('empty.png'))
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='PNG compression output differs on Windows')
 def test_load_dump_save(glyphs_dir: Path, tmp_path: Path) -> None:
     black_load_dir = glyphs_dir.joinpath('black')
     black_save_dir = tmp_path.joinpath('black')
