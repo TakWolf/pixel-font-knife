@@ -254,27 +254,23 @@ class MonoBitmap(UserList[list[int]]):
             text.write('\n')
         return text.getvalue()
 
-    def _build_png(self, color: tuple[int, int, int]) -> png.Image:
+    def _build_png(self) -> png.Image:
         if self.width == 0 or self.height == 0:
             raise ValueError('cannot encode empty bitmap as PNG')
 
-        red, green, blue = color
         rows = []
         for bitmap_row in self:
             row = []
             for pixel in bitmap_row:
-                row.append(red)
-                row.append(green)
-                row.append(blue)
-                row.append(255 if pixel != 0 else 0)
+                row.extend((0, 0, 0, 255 if pixel != 0 else 0))
             rows.append(row)
         return png.from_array(rows, 'RGBA')
 
-    def dump_png(self, stream: BinaryIO, color: tuple[int, int, int] = (0, 0, 0)) -> None:
-        self._build_png(color).write(stream)
+    def dump_png(self, stream: BinaryIO) -> None:
+        self._build_png().write(stream)
 
-    def save_png(self, file_path: str | PathLike[str], color: tuple[int, int, int] = (0, 0, 0)) -> None:
-        self._build_png(color).save(file_path)
+    def save_png(self, file_path: str | PathLike[str]) -> None:
+        self._build_png().save(file_path)
 
     def copy(self) -> MonoBitmap:
         bitmap = MonoBitmap()

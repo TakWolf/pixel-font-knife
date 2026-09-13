@@ -331,37 +331,23 @@ def test_dump_save_empty(tmp_path: Path) -> None:
 
 @pytest.mark.skipif(sys.platform == 'win32', reason='PNG compression output differs on Windows')
 def test_load_dump_save(glyphs_dir: Path, tmp_path: Path) -> None:
-    black_load_dir = glyphs_dir.joinpath('black')
-    black_save_dir = tmp_path.joinpath('black')
-    black_save_dir.mkdir()
+    load_dir = glyphs_dir.joinpath('black')
+    save_dir = tmp_path.joinpath('black')
+    save_dir.mkdir()
 
-    red_load_dir = glyphs_dir.joinpath('red')
-    red_save_dir = tmp_path.joinpath('red')
-    red_save_dir.mkdir()
-
-    for black_load_path in black_load_dir.iterdir():
-        if black_load_path.suffix != '.png':
+    for load_path in load_dir.iterdir():
+        if load_path.suffix != '.png':
             continue
-        red_load_path = red_load_dir.joinpath(black_load_path.name)
 
-        assert black_load_path.name == red_load_path.name
-        black_bitmap = MonoBitmap.load_png(black_load_path)
-        red_bitmap = MonoBitmap.load_png(red_load_path)
-        assert black_bitmap == red_bitmap
-        assert black_bitmap.width == red_bitmap.width == 12
-        assert black_bitmap.height == red_bitmap.height == 12
+        bitmap = MonoBitmap.load_png(load_path)
+        assert bitmap.width == 12
+        assert bitmap.height == 12
 
-        black_save_path = black_save_dir.joinpath(black_load_path.name)
-        black_bitmap.save_png(black_save_path)
-        black_stream = BytesIO()
-        black_bitmap.dump_png(black_stream)
-        assert black_load_path.read_bytes() == black_save_path.read_bytes() == black_stream.getvalue()
-
-        red_save_path = red_save_dir.joinpath(red_load_path.name)
-        red_bitmap.save_png(red_save_path, color=(255, 0, 0))
-        red_stream = BytesIO()
-        red_bitmap.dump_png(red_stream, color=(255, 0, 0))
-        assert red_load_path.read_bytes() == red_save_path.read_bytes() == red_stream.getvalue()
+        save_path = save_dir.joinpath(load_path.name)
+        bitmap.save_png(save_path)
+        stream = BytesIO()
+        bitmap.dump_png(stream)
+        assert load_path.read_bytes() == save_path.read_bytes() == stream.getvalue()
 
 
 def test_move_right_and_overlap_bolding(glyphs_dir: Path) -> None:
