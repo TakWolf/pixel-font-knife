@@ -9,7 +9,7 @@ from typing import Any
 import unidata_blocks
 
 from pixel_font_knife import fs_util
-from pixel_font_knife.mono_bitmap import Paddings, MonoBitmap
+from pixel_font_knife.bitmap.mono_bitmap import Paddings, MonoBitmap
 
 
 class GlyphFile:

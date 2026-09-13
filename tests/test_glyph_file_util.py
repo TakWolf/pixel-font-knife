@@ -3,8 +3,8 @@ from pathlib import Path
 import pytest
 
 from pixel_font_knife import glyph_file_util
+from pixel_font_knife.bitmap.mono_bitmap import MonoBitmap
 from pixel_font_knife.glyph_file_util import GlyphFile, GlyphFlavorGroup
-from pixel_font_knife.mono_bitmap import MonoBitmap
 
 
 def test_glyph_file_1() -> None:

@@ -1,11 +1,11 @@
+import sys
 from copy import copy, deepcopy
 from io import BytesIO
 from pathlib import Path
-import sys
 
 import pytest
 
-from pixel_font_knife.mono_bitmap import Paddings, MonoBitmap
+from pixel_font_knife.bitmap.mono_bitmap import Paddings, MonoBitmap
 
 
 def test_init() -> None:

@@ -1,6 +1,6 @@
 from copy import copy, deepcopy
 
-from pixel_font_knife.mono_bitmap import Paddings
+from pixel_font_knife.bitmap.mono_bitmap import Paddings
 
 
 def test_copy() -> None:
