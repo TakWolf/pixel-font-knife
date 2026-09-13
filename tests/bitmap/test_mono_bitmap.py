@@ -68,7 +68,7 @@ def test_inside() -> None:
     assert not bitmap.is_inside(15, 90)
 
 
-def test_calculate_padding() -> None:
+def test_measure_padding() -> None:
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
@@ -80,23 +80,23 @@ def test_calculate_padding() -> None:
         [0, 0, 0, 1, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
     ])
-    assert bitmap.calculate_padding() == Padding(1, 2, 3, 1)
-    assert bitmap.calculate_left_padding() == 1
-    assert bitmap.calculate_right_padding() == 2
-    assert bitmap.calculate_top_padding() == 3
-    assert bitmap.calculate_bottom_padding() == 1
+    assert bitmap.measure_padding() == Padding(1, 2, 3, 1)
+    assert bitmap.measure_left_padding() == 1
+    assert bitmap.measure_right_padding() == 2
+    assert bitmap.measure_top_padding() == 3
+    assert bitmap.measure_bottom_padding() == 1
 
 
-def test_calculate_padding_inconsistent_dimensions() -> None:
+def test_measure_padding_inconsistent_dimensions() -> None:
     bitmap = MonoBitmap.create(7, 10)
     bitmap.data = [[0] * 7 for _ in range(5)]
     with pytest.raises(ValueError, match='inconsistent bitmap height'):
-        bitmap.calculate_padding()
+        bitmap.measure_padding()
 
     bitmap = MonoBitmap.create(7, 5)
     bitmap[2] = [0] * 5
     with pytest.raises(ValueError, match='inconsistent row widths'):
-        bitmap.calculate_padding()
+        bitmap.measure_padding()
 
 
 def test_optimize() -> None:

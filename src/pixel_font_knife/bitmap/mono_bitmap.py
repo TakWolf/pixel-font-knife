@@ -70,7 +70,7 @@ class MonoBitmap(UserList[list[int]]):
     def is_inside(self, x: int, y: int) -> bool:
         return self.is_x_inside(x) and self.is_y_inside(y)
 
-    def calculate_padding(self) -> Padding:
+    def measure_padding(self) -> Padding:
         if self.height != len(self):
             raise ValueError('inconsistent bitmap height')
 
@@ -103,7 +103,7 @@ class MonoBitmap(UserList[list[int]]):
             self.height - 1 - last_row,
         )
 
-    def calculate_left_padding(self) -> int:
+    def measure_left_padding(self) -> int:
         padding = 0
         for i in range(self.width):
             if any(bitmap_row[i] != 0 for bitmap_row in self):
@@ -111,7 +111,7 @@ class MonoBitmap(UserList[list[int]]):
             padding += 1
         return padding
 
-    def calculate_right_padding(self) -> int:
+    def measure_right_padding(self) -> int:
         padding = 0
         for i in range(self.width):
             if any(bitmap_row[-1 - i] != 0 for bitmap_row in self):
@@ -119,7 +119,7 @@ class MonoBitmap(UserList[list[int]]):
             padding += 1
         return padding
 
-    def calculate_top_padding(self) -> int:
+    def measure_top_padding(self) -> int:
         padding = 0
         for bitmap_row in self:
             if any(pixel != 0 for pixel in bitmap_row):
@@ -127,7 +127,7 @@ class MonoBitmap(UserList[list[int]]):
             padding += 1
         return padding
 
-    def calculate_bottom_padding(self) -> int:
+    def measure_bottom_padding(self) -> int:
         padding = 0
         for bitmap_row in reversed(self):
             if any(pixel != 0 for pixel in bitmap_row):
@@ -136,7 +136,7 @@ class MonoBitmap(UserList[list[int]]):
         return padding
 
     def optimize(self) -> tuple[MonoBitmap, Padding]:
-        padding = self.calculate_padding()
+        padding = self.measure_padding()
         bitmap = MonoBitmap()
         bitmap.width = self.width - padding.left - padding.right
         bitmap.height = self.height - padding.top - padding.bottom
