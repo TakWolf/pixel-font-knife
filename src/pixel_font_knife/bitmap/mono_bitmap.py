@@ -5,51 +5,8 @@ from io import StringIO
 from os import PathLike
 from typing import Any, BinaryIO
 
+from pixel_font_knife.bitmap.padding import Padding
 from pixel_font_knife.internal import png
-
-
-class Paddings:
-    left: int
-    right: int
-    top: int
-    bottom: int
-
-    def __init__(
-            self,
-            left: int,
-            right: int,
-            top: int,
-            bottom: int,
-    ) -> None:
-        self.left = left
-        self.right = right
-        self.top = top
-        self.bottom = bottom
-
-    def __copy__(self) -> Paddings:
-        return self.copy()
-
-    def __deepcopy__(self, memo: dict[int, Any]) -> Paddings:
-        return self.deepcopy()
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Paddings):
-            return NotImplemented
-        return (self.left == other.left and
-                self.right == other.right and
-                self.top == other.top and
-                self.bottom == other.bottom)
-
-    def copy(self) -> Paddings:
-        return Paddings(
-            self.left,
-            self.right,
-            self.top,
-            self.bottom,
-        )
-
-    def deepcopy(self) -> Paddings:
-        return self.copy()
 
 
 class MonoBitmap(UserList[list[int]]):
@@ -113,7 +70,7 @@ class MonoBitmap(UserList[list[int]]):
     def is_inside(self, x: int, y: int) -> bool:
         return self.is_x_inside(x) and self.is_y_inside(y)
 
-    def calculate_paddings(self) -> Paddings:
+    def calculate_padding(self) -> Padding:
         if self.height != len(self):
             raise ValueError('inconsistent bitmap height')
 
@@ -137,9 +94,9 @@ class MonoBitmap(UserList[list[int]]):
                         last_col = x
 
         if first_row == self.height:
-            return Paddings(self.width, 0, self.height, 0)
+            return Padding(self.width, 0, self.height, 0)
 
-        return Paddings(
+        return Padding(
             first_col,
             self.width - 1 - last_col,
             first_row,
@@ -178,16 +135,16 @@ class MonoBitmap(UserList[list[int]]):
             padding += 1
         return padding
 
-    def optimize(self) -> tuple[MonoBitmap, Paddings]:
-        paddings = self.calculate_paddings()
+    def optimize(self) -> tuple[MonoBitmap, Padding]:
+        padding = self.calculate_padding()
         bitmap = MonoBitmap()
-        bitmap.width = self.width - paddings.left - paddings.right
-        bitmap.height = self.height - paddings.top - paddings.bottom
-        end_x = self.width - paddings.right
-        end_y = self.height - paddings.bottom
-        for bitmap_row in self.data[paddings.top:end_y]:
-            bitmap.append(bitmap_row[paddings.left:end_x])
-        return bitmap, paddings
+        bitmap.width = self.width - padding.left - padding.right
+        bitmap.height = self.height - padding.top - padding.bottom
+        end_x = self.width - padding.right
+        end_y = self.height - padding.bottom
+        for bitmap_row in self.data[padding.top:end_y]:
+            bitmap.append(bitmap_row[padding.left:end_x])
+        return bitmap, padding
 
     def resize(self, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> MonoBitmap:
         bitmap = MonoBitmap()
