@@ -173,14 +173,14 @@ def test_resize() -> None:
     ])
 
 
-def test_scale(glyphs_dir: Path) -> None:
-    for file_path in glyphs_dir.joinpath('black').iterdir():
+def test_scale(bitmaps_dir: Path) -> None:
+    for file_path in bitmaps_dir.joinpath('x1').iterdir():
         if file_path.suffix != '.png':
             continue
 
         x1_bitmap = MonoBitmap.load_png(file_path)
-        x3_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('x3', file_path.name))
-        x1_5_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('x1.5', file_path.name))
+        x3_bitmap = MonoBitmap.load_png(bitmaps_dir.joinpath('x3', file_path.name))
+        x1_5_bitmap = MonoBitmap.load_png(bitmaps_dir.joinpath('x1.5', file_path.name))
         assert x1_bitmap.scale(3, 3) == x3_bitmap
         assert x1_bitmap.scale(1.5, 1.5) == x1_5_bitmap
         assert x3_bitmap.scale(1 / 3, 1 / 3) == x1_bitmap
@@ -330,9 +330,9 @@ def test_dump_save_empty(tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(sys.platform == 'win32', reason='PNG compression output differs on Windows')
-def test_load_dump_save(glyphs_dir: Path, tmp_path: Path) -> None:
-    load_dir = glyphs_dir.joinpath('black')
-    save_dir = tmp_path.joinpath('black')
+def test_load_dump_save(bitmaps_dir: Path, tmp_path: Path) -> None:
+    load_dir = bitmaps_dir.joinpath('x1')
+    save_dir = tmp_path.joinpath('x1')
     save_dir.mkdir()
 
     for load_path in load_dir.iterdir():
@@ -350,8 +350,8 @@ def test_load_dump_save(glyphs_dir: Path, tmp_path: Path) -> None:
         assert load_path.read_bytes() == save_path.read_bytes() == stream.getvalue()
 
 
-def test_move_right_and_overlap_bolding(glyphs_dir: Path) -> None:
-    for file_path in glyphs_dir.joinpath('black').iterdir():
+def test_move_right_and_overlap_bolding(bitmaps_dir: Path) -> None:
+    for file_path in bitmaps_dir.joinpath('x1').iterdir():
         if file_path.suffix != '.png':
             continue
 
@@ -359,12 +359,12 @@ def test_move_right_and_overlap_bolding(glyphs_dir: Path) -> None:
         solid_bitmap = bitmap.resize(left=1).plus(bitmap)
         shadow_bitmap = solid_bitmap.minus(bitmap).resize(left=1)
         result_bitmap = solid_bitmap.minus(shadow_bitmap)
-        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('move-right-and-overlap-bolding', file_path.name))
+        bold_bitmap = MonoBitmap.load_png(bitmaps_dir.joinpath('move-right-and-overlap-bolding', file_path.name))
         assert result_bitmap == bold_bitmap
 
 
-def test_move_left_and_overlap_bolding(glyphs_dir: Path) -> None:
-    for file_path in glyphs_dir.joinpath('black').iterdir():
+def test_move_left_and_overlap_bolding(bitmaps_dir: Path) -> None:
+    for file_path in bitmaps_dir.joinpath('x1').iterdir():
         if file_path.suffix != '.png':
             continue
 
@@ -372,12 +372,12 @@ def test_move_left_and_overlap_bolding(glyphs_dir: Path) -> None:
         solid_bitmap = bitmap.resize(right=1).plus(bitmap, x=1)
         shadow_bitmap = solid_bitmap.minus(bitmap, x=1).resize(left=-1)
         result_bitmap = solid_bitmap.minus(shadow_bitmap)
-        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('move-left-and-overlap-bolding', file_path.name))
+        bold_bitmap = MonoBitmap.load_png(bitmaps_dir.joinpath('move-left-and-overlap-bolding', file_path.name))
         assert result_bitmap == bold_bitmap
 
 
-def test_inflation_bolding(glyphs_dir: Path) -> None:
-    for file_path in glyphs_dir.joinpath('black').iterdir():
+def test_inflation_bolding(bitmaps_dir: Path) -> None:
+    for file_path in bitmaps_dir.joinpath('x1').iterdir():
         if file_path.suffix != '.png':
             continue
 
@@ -385,5 +385,5 @@ def test_inflation_bolding(glyphs_dir: Path) -> None:
         result_bitmap = bitmap.scale(scale_x=4, scale_y=4).resize(left=1, right=1, top=1, bottom=1).pixel_expand(1)
         result_bitmap = result_bitmap.scale(scale_x=0.5, scale_y=0.5)
         result_bitmap = result_bitmap.resize(left=1, right=-1, top=-1, bottom=1)
-        bold_bitmap = MonoBitmap.load_png(glyphs_dir.joinpath('inflation-bolding', file_path.name))
+        bold_bitmap = MonoBitmap.load_png(bitmaps_dir.joinpath('inflation-bolding', file_path.name))
         assert result_bitmap == bold_bitmap

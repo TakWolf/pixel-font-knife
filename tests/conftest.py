@@ -14,5 +14,10 @@ def assets_dir(project_root_dir: Path) -> Path:
 
 
 @pytest.fixture(scope='session')
+def bitmaps_dir(assets_dir: Path) -> Path:
+    return assets_dir.joinpath('bitmaps')
+
+
+@pytest.fixture(scope='session')
 def glyphs_dir(assets_dir: Path) -> Path:
     return assets_dir.joinpath('glyphs')

@@ -34,8 +34,8 @@ def test_glyph_file_4() -> None:
     assert glyph_file.glyph_name == 'u4E00-A'
 
 
-def test_glyph_file_5(glyphs_dir: Path) -> None:
-    file_path = glyphs_dir.joinpath('black', '6A1E.png')
+def test_glyph_file_5(bitmaps_dir: Path) -> None:
+    file_path = bitmaps_dir.joinpath('x1', '6A1E.png')
     glyph_file = GlyphFile.load(file_path)
     assert glyph_file.bitmap == MonoBitmap.load_png(file_path)
     assert glyph_file.width == 12
