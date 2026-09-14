@@ -41,13 +41,13 @@ class GlyphCanvas:
     @property
     def trimmed_bitmap(self) -> MonoBitmap:
         if self._trimmed_bitmap is None:
-            self._trimmed_bitmap, self._trimmed_padding = self.bitmap.optimize()
+            self._trimmed_bitmap, self._trimmed_padding = self.bitmap.trim()
         return self._trimmed_bitmap
 
     @property
     def trimmed_padding(self) -> Padding:
         if self._trimmed_padding is None:
-            self._trimmed_bitmap, self._trimmed_padding = self.bitmap.optimize()
+            self._trimmed_bitmap, self._trimmed_padding = self.bitmap.trim()
         return self._trimmed_padding
 
     @property

@@ -139,7 +139,7 @@ class MonoBitmap(UserList[list[int]]):
             padding += 1
         return padding
 
-    def optimize(self) -> tuple[MonoBitmap, Padding]:
+    def trim(self) -> tuple[MonoBitmap, Padding]:
         padding = self.measure_padding()
         bitmap = MonoBitmap()
         bitmap.width = self.width - padding.left - padding.right

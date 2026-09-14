@@ -79,13 +79,13 @@ class GlyphFile:
     @property
     def optimized_bitmap(self) -> MonoBitmap:
         if self._optimized_bitmap is None:
-            self._optimized_bitmap, self._optimized_padding = self.bitmap.optimize()
+            self._optimized_bitmap, self._optimized_padding = self.bitmap.trim()
         return self._optimized_bitmap
 
     @property
     def optimized_padding(self) -> Padding:
         if self._optimized_padding is None:
-            self._optimized_bitmap, self._optimized_padding = self.bitmap.optimize()
+            self._optimized_bitmap, self._optimized_padding = self.bitmap.trim()
         return self._optimized_padding
 
     @property

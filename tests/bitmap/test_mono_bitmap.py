@@ -99,7 +99,7 @@ def test_measure_padding_inconsistent_dimensions() -> None:
         bitmap.measure_padding()
 
 
-def test_optimize() -> None:
+def test_trim() -> None:
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
@@ -111,8 +111,8 @@ def test_optimize() -> None:
         [0, 0, 0, 1, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0],
     ])
-    optimized_bitmap, padding = bitmap.optimize()
-    assert optimized_bitmap == MonoBitmap([
+    trimmed_bitmap, padding = bitmap.trim()
+    assert trimmed_bitmap == MonoBitmap([
         [0, 1, 0, 1],
         [1, 1, 0, 0],
         [0, 1, 1, 1],
@@ -120,33 +120,33 @@ def test_optimize() -> None:
         [0, 0, 1, 0],
     ])
     assert padding == Padding(1, 2, 3, 1)
-    assert optimized_bitmap is not bitmap
-    for optimized_row in optimized_bitmap:
-        assert all(optimized_row is not bitmap_row for bitmap_row in bitmap)
+    assert trimmed_bitmap is not bitmap
+    for trimmed_row in trimmed_bitmap:
+        assert all(trimmed_row is not bitmap_row for bitmap_row in bitmap)
 
 
-def test_optimize_empty() -> None:
+def test_trim_empty() -> None:
     bitmap = MonoBitmap.create(7, 10)
-    optimized_bitmap, padding = bitmap.optimize()
-    assert optimized_bitmap == MonoBitmap.create(0, 0)
+    trimmed_bitmap, padding = bitmap.trim()
+    assert trimmed_bitmap == MonoBitmap.create(0, 0)
     assert padding == Padding(7, 0, 10, 0)
 
     bitmap = MonoBitmap()
-    optimized_bitmap, padding = bitmap.optimize()
-    assert optimized_bitmap == MonoBitmap.create(0, 0)
+    trimmed_bitmap, padding = bitmap.trim()
+    assert trimmed_bitmap == MonoBitmap.create(0, 0)
     assert padding == Padding(0, 0, 0, 0)
 
 
-def test_optimize_inconsistent_dimensions() -> None:
+def test_trim_inconsistent_dimensions() -> None:
     bitmap = MonoBitmap.create(7, 10)
     bitmap.data = [[0] * 7 for _ in range(5)]
     with pytest.raises(ValueError, match='inconsistent bitmap height'):
-        bitmap.optimize()
+        bitmap.trim()
 
     bitmap = MonoBitmap.create(7, 5)
     bitmap[2] = [0] * 5
     with pytest.raises(ValueError, match='inconsistent row widths'):
-        bitmap.optimize()
+        bitmap.trim()
 
 
 def test_resize() -> None:
