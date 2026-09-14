@@ -61,6 +61,10 @@ class MonoBitmap(UserList[list[int]]):
                 self.height == other.height and
                 super().__eq__(other))
 
+    @property
+    def dimensions(self) -> tuple[int, int]:
+        return self.width, self.height
+
     def is_x_inside(self, x: int) -> bool:
         return 0 <= x < self.width
 
