@@ -21,6 +21,9 @@ _SetOperation = Literal[
 class MonoBitmap(UserList[list[int]]):
     @staticmethod
     def blank(width: int, height: int) -> MonoBitmap:
+        if width < 0 or height < 0:
+            raise ValueError(f'bitmap dimensions must be non-negative: ({width}, {height})')
+
         bitmap = MonoBitmap()
         bitmap.width = width
         bitmap.height = height
@@ -30,6 +33,9 @@ class MonoBitmap(UserList[list[int]]):
 
     @staticmethod
     def solid(width: int, height: int) -> MonoBitmap:
+        if width < 0 or height < 0:
+            raise ValueError(f'bitmap dimensions must be non-negative: ({width}, {height})')
+
         bitmap = MonoBitmap()
         bitmap.width = width
         bitmap.height = height
@@ -209,6 +215,11 @@ class MonoBitmap(UserList[list[int]]):
         return bitmap, padding
 
     def crop(self, x: int, y: int, width: int, height: int) -> MonoBitmap:
+        if width < 0 or height < 0:
+            raise ValueError(f'bitmap dimensions must be non-negative: ({width}, {height})')
+        if x < 0 or y < 0 or x + width > self.width or y + height > self.height:
+            raise ValueError(f'crop rectangle must be inside bitmap bounds: ({x}, {y}, {width}, {height})')
+
         bitmap = MonoBitmap()
         bitmap.width = width
         bitmap.height = height
@@ -218,7 +229,7 @@ class MonoBitmap(UserList[list[int]]):
 
     def scale_to(self, width: int, height: int) -> MonoBitmap:
         if width < 0 or height < 0:
-            raise ValueError(f'scaled bitmap dimensions must be non-negative: ({width}, {height})')
+            raise ValueError(f'bitmap dimensions must be non-negative: ({width}, {height})')
         if width == 0 or height == 0:
             return MonoBitmap.blank(width, height)
         if self.width == 0 or self.height == 0:
@@ -246,8 +257,13 @@ class MonoBitmap(UserList[list[int]]):
         if not isfinite(scale_y) or scale_y <= 0:
             raise ValueError(f'scale_y must be positive and finite: {scale_y}')
 
-        width = floor(self.width * scale_x + 0.5)
-        height = floor(self.height * scale_y + 0.5)
+        scaled_width = self.width * scale_x
+        scaled_height = self.height * scale_y
+        if not isfinite(scaled_width) or not isfinite(scaled_height):
+            raise ValueError('scaled bitmap dimensions must be finite')
+
+        width = floor(scaled_width + 0.5)
+        height = floor(scaled_height + 0.5)
         return self.scale_to(width, height)
 
     @staticmethod

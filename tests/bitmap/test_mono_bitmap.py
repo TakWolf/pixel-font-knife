@@ -1,4 +1,6 @@
+import re
 import sys
+from collections.abc import Callable
 from copy import copy, deepcopy
 from io import BytesIO
 from pathlib import Path
@@ -62,6 +64,19 @@ def test_solid() -> None:
     ])
 
 
+@pytest.mark.parametrize('factory', [MonoBitmap.blank, MonoBitmap.solid])
+@pytest.mark.parametrize(('width', 'height'), [(-1, 0), (0, -1), (-1, -1)])
+def test_factory_invalid_dimensions(factory: Callable[[int, int], MonoBitmap], width: int, height: int) -> None:
+    with pytest.raises(ValueError, match=re.escape('bitmap dimensions must be non-negative')):
+        factory(width, height)
+
+
+@pytest.mark.parametrize('factory', [MonoBitmap.blank, MonoBitmap.solid])
+def test_factory_zero_dimensions(factory: Callable[[int, int], MonoBitmap]) -> None:
+    assert factory(0, 2).dimensions == (0, 2)
+    assert factory(2, 0).dimensions == (2, 0)
+
+
 def test_measure_padding() -> None:
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0],
@@ -84,12 +99,12 @@ def test_measure_padding() -> None:
 def test_measure_padding_inconsistent_dimensions() -> None:
     bitmap = MonoBitmap.blank(7, 10)
     bitmap.data = [[0] * 7 for _ in range(5)]
-    with pytest.raises(ValueError, match='inconsistent bitmap height'):
+    with pytest.raises(ValueError, match=re.escape('inconsistent bitmap height')):
         bitmap.measure_padding()
 
     bitmap = MonoBitmap.blank(7, 5)
     bitmap[2] = [0] * 5
-    with pytest.raises(ValueError, match='inconsistent row widths'):
+    with pytest.raises(ValueError, match=re.escape('inconsistent row widths')):
         bitmap.measure_padding()
 
 
@@ -123,6 +138,11 @@ def test_overlaps() -> None:
     assert not bitmap_1.overlaps(bitmap_2, x=3, y=3)
     assert not bitmap_1.overlaps(bitmap_2, x=2, y=2)
     assert bitmap_1.overlaps(bitmap_2, x=1, y=1)
+    assert bitmap_1.overlaps(bitmap_2, x=-1, y=-1)
+    assert not bitmap_1.overlaps(bitmap_2, x=bitmap_1.width)
+    assert not bitmap_1.overlaps(bitmap_2, y=bitmap_1.height)
+    assert not bitmap_1.overlaps(bitmap_2, x=-bitmap_2.width)
+    assert not bitmap_1.overlaps(bitmap_2, y=-bitmap_2.height)
 
 
 def test_resize() -> None:
@@ -147,6 +167,22 @@ def test_resize() -> None:
         [0, 0],
         [1, 1],
     ])
+    assert bitmap.resize(left=-4).dimensions == (0, 4)
+    assert bitmap.resize(top=-4).dimensions == (4, 0)
+
+
+@pytest.mark.parametrize(
+    'resize',
+    [
+        {'left': -5},
+        {'right': -3, 'left': -2},
+        {'top': -5},
+        {'bottom': -3, 'top': -2},
+    ],
+)
+def test_resize_invalid_dimensions(resize: dict[str, int]) -> None:
+    with pytest.raises(ValueError, match=re.escape('bitmap dimensions must be non-negative')):
+        MonoBitmap.blank(4, 4).resize(**resize)
 
 
 def test_trim() -> None:
@@ -190,12 +226,12 @@ def test_trim_empty() -> None:
 def test_trim_inconsistent_dimensions() -> None:
     bitmap = MonoBitmap.blank(7, 10)
     bitmap.data = [[0] * 7 for _ in range(5)]
-    with pytest.raises(ValueError, match='inconsistent bitmap height'):
+    with pytest.raises(ValueError, match=re.escape('inconsistent bitmap height')):
         bitmap.trim()
 
     bitmap = MonoBitmap.blank(7, 5)
     bitmap[2] = [0] * 5
-    with pytest.raises(ValueError, match='inconsistent row widths'):
+    with pytest.raises(ValueError, match=re.escape('inconsistent row widths')):
         bitmap.trim()
 
 
@@ -218,6 +254,24 @@ def test_crop() -> None:
         [0, 1, 1, 1, 1, 1],
         [0, 0, 0, 1, 0, 0],
     ])
+    assert bitmap.crop(x=10, y=2, width=0, height=4).dimensions == (0, 4)
+    assert bitmap.crop(x=2, y=10, width=4, height=0).dimensions == (4, 0)
+
+
+@pytest.mark.parametrize(
+    ('x', 'y', 'width', 'height'),
+    [
+        (-1, 0, 1, 1),
+        (0, -1, 1, 1),
+        (0, 0, -1, 1),
+        (0, 0, 1, -1),
+        (9, 0, 2, 1),
+        (0, 9, 1, 2),
+    ],
+)
+def test_crop_invalid_rectangle(x: int, y: int, width: int, height: int) -> None:
+    with pytest.raises(ValueError):
+        MonoBitmap.blank(10, 10).crop(x, y, width, height)
 
 
 def test_scale_to() -> None:
@@ -264,15 +318,17 @@ def test_scale_invalid_arguments() -> None:
         with pytest.raises(ValueError):
             bitmap.scale(scale_y=scale)
 
-    with pytest.raises(ValueError, match='scaled bitmap dimensions must be non-negative'):
+    with pytest.raises(ValueError, match=re.escape('bitmap dimensions must be non-negative')):
         bitmap.scale_to(-1, 1)
-    with pytest.raises(ValueError, match='scaled bitmap dimensions must be non-negative'):
+    with pytest.raises(ValueError, match=re.escape('bitmap dimensions must be non-negative')):
         bitmap.scale_to(1, -1)
+    with pytest.raises(ValueError, match=re.escape('scaled bitmap dimensions must be finite')):
+        MonoBitmap.solid(2, 1).scale(sys.float_info.max)
 
     assert bitmap.scale_to(0, 1).dimensions == (0, 1)
     assert bitmap.scale_to(1, 0).dimensions == (1, 0)
 
-    with pytest.raises(ValueError, match='cannot scale a zero-sized bitmap'):
+    with pytest.raises(ValueError, match=re.escape('cannot scale a zero-sized bitmap')):
         MonoBitmap.blank(0, 0).scale_to(1, 1)
 
 
@@ -302,8 +358,23 @@ def test_set_operations() -> None:
         [1, 0, 0],
         [1, 1, 1],
     ])
-
     assert bitmap.intersection(other, x=3) == MonoBitmap.blank(3, 2)
+    assert bitmap.union(other, x=-1, y=-1) == MonoBitmap([
+        [1, 1, 0],
+        [1, 0, 0],
+    ])
+    assert bitmap.intersection(other, x=-1, y=-1) == MonoBitmap([
+        [1, 0, 0],
+        [0, 0, 0],
+    ])
+    assert bitmap.difference(other, x=-1, y=-1) == MonoBitmap([
+        [0, 1, 0],
+        [1, 0, 0],
+    ])
+    assert bitmap.symmetric_difference(other, x=-1, y=-1) == MonoBitmap([
+        [0, 1, 0],
+        [1, 0, 0],
+    ])
 
 
 def test_dilate() -> None:
@@ -394,9 +465,9 @@ def test_dilate_invalid_arguments() -> None:
     assert bitmap.dilate(0) == bitmap
     assert bitmap.dilate(0) is not bitmap
 
-    with pytest.raises(ValueError, match='dilation radius must be non-negative'):
+    with pytest.raises(ValueError, match=re.escape('dilation radius must be non-negative')):
         bitmap.dilate(-1)
-    with pytest.raises(ValueError, match='unsupported dilation shape'):
+    with pytest.raises(ValueError, match=re.escape('unsupported dilation shape')):
         bitmap.dilate(1, 'invalid')
 
 
@@ -434,9 +505,9 @@ def test_load_dump_save(bitmaps_dir: Path, tmp_path: Path) -> None:
 
 def test_dump_save_empty(tmp_path: Path) -> None:
     for bitmap in [MonoBitmap(), MonoBitmap([[], []]), MonoBitmap.blank(2, 0)]:
-        with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):
+        with pytest.raises(ValueError, match=re.escape('cannot encode empty bitmap as PNG')):
             bitmap.dump_png(BytesIO())
-        with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):
+        with pytest.raises(ValueError, match=re.escape('cannot encode empty bitmap as PNG')):
             bitmap.save_png(tmp_path.joinpath('empty.png'))
 
 
