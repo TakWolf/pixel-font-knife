@@ -4,7 +4,7 @@ from collections import UserList
 from io import StringIO
 from math import floor, isfinite
 from os import PathLike
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, Literal
 
 from pixel_font_knife.bitmap.padding import Padding
 from pixel_font_knife.internal import png
@@ -270,22 +270,33 @@ class MonoBitmap(UserList[list[int]]):
                     bitmap[ty][tx] = 0
         return bitmap
 
-    def dilate(self, size: int) -> MonoBitmap:
-        if size <= 0:
-            raise ValueError(f'stroke size must be positive: {size}')
+    def dilate(
+            self,
+            radius: int,
+            shape: Literal['orthogonal', 'diagonal', 'surrounding'] = 'surrounding',
+    ) -> MonoBitmap:
+        if radius < 0:
+            raise ValueError(f'dilation radius must be non-negative: {radius}')
+        if shape not in ('orthogonal', 'diagonal', 'surrounding'):
+            raise ValueError(f'unsupported dilation shape: {shape!r}')
+        if radius == 0:
+            return self.copy()
 
         bitmap = self.copy()
         for y, source_row in enumerate(self):
             for x, pixel in enumerate(source_row):
                 if pixel == 0:
                     continue
-                for ty in range(y - size, y + size + 1):
-                    if not bitmap.is_y_inside(ty):
-                        continue
-                    for tx in range(x - size, x + size + 1):
-                        if not bitmap.is_x_inside(tx):
+                for offset_y in range(-radius, radius + 1):
+                    for offset_x in range(-radius, radius + 1):
+                        if shape == 'orthogonal' and offset_x != 0 and offset_y != 0:
                             continue
-                        bitmap[ty][tx] = 1
+                        if shape == 'diagonal' and abs(offset_x) != abs(offset_y):
+                            continue
+                        target_x = x + offset_x
+                        target_y = y + offset_y
+                        if bitmap.is_inside(target_x, target_y):
+                            bitmap[target_y][target_x] = 1
         return bitmap
 
     def to_text(self, off: str = '  ', on: str = '██', line_suffix: str | None = None) -> str:

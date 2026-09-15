@@ -330,6 +330,73 @@ def test_dilate() -> None:
     ])
 
 
+def test_dilate_shapes() -> None:
+    bitmap = MonoBitmap([
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+    ])
+    assert bitmap.dilate(1, 'orthogonal') == MonoBitmap([
+        [0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0],
+    ])
+    assert bitmap.dilate(1, 'diagonal') == MonoBitmap([
+        [0, 0, 0, 0, 0],
+        [0, 1, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0],
+        [0, 0, 0, 0, 0],
+    ])
+    assert bitmap.dilate(1, 'surrounding') == MonoBitmap([
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 1, 1, 1, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0],
+    ])
+    assert bitmap.dilate(1) == bitmap.dilate(1, 'surrounding')
+
+
+def test_dilate_radius() -> None:
+    bitmap = MonoBitmap([
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+    ])
+    assert bitmap.dilate(2, 'orthogonal') == MonoBitmap([
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+    ])
+    assert bitmap.dilate(2, 'diagonal') == MonoBitmap([
+        [1, 0, 0, 0, 1],
+        [0, 1, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 1, 0],
+        [1, 0, 0, 0, 1],
+    ])
+
+
+def test_dilate_invalid_arguments() -> None:
+    bitmap = MonoBitmap([[1]])
+    assert bitmap.dilate(0) == bitmap
+    assert bitmap.dilate(0) is not bitmap
+
+    with pytest.raises(ValueError, match='dilation radius must be non-negative'):
+        bitmap.dilate(-1)
+    with pytest.raises(ValueError, match='unsupported dilation shape'):
+        bitmap.dilate(1, 'invalid')
+
+
 def test_to_text() -> None:
     bitmap = MonoBitmap([
         [1, 1, 0, 0],
