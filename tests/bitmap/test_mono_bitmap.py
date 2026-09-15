@@ -233,7 +233,7 @@ def test_is_overlapped() -> None:
     assert bitmap_1.is_overlapped(bitmap_2, x=1, y=1)
 
 
-def test_pixel_expand() -> None:
+def test_dilate() -> None:
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
@@ -246,7 +246,7 @@ def test_pixel_expand() -> None:
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ])
-    assert bitmap.pixel_expand(1) == MonoBitmap([
+    assert bitmap.dilate(1) == MonoBitmap([
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
         [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
@@ -382,7 +382,7 @@ def test_inflation_bolding(bitmaps_dir: Path) -> None:
             continue
 
         bitmap = MonoBitmap.load_png(file_path)
-        result_bitmap = bitmap.scale(scale_x=4, scale_y=4).resize(left=1, right=1, top=1, bottom=1).pixel_expand(1)
+        result_bitmap = bitmap.scale(scale_x=4, scale_y=4).resize(left=1, right=1, top=1, bottom=1).dilate(1)
         result_bitmap = result_bitmap.scale(scale_x=0.5, scale_y=0.5)
         result_bitmap = result_bitmap.resize(left=1, right=-1, top=-1, bottom=1)
         bold_bitmap = MonoBitmap.load_png(bitmaps_dir.joinpath('inflation-bolding', file_path.name))

@@ -217,7 +217,7 @@ class MonoBitmap(UserList[list[int]]):
                     return True
         return False
 
-    def pixel_expand(self, size: int) -> MonoBitmap:
+    def dilate(self, size: int) -> MonoBitmap:
         if size <= 0:
             raise ValueError(f'stroke size must be positive: {size}')
 

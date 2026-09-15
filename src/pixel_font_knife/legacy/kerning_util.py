@@ -62,7 +62,7 @@ def calculate_kerning_values(
             if left_code_point not in context:
                 continue
             left_file = context[left_code_point].get_file(flavor)
-            left_bitmap_mask = left_file.bitmap.pixel_expand(1)
+            left_bitmap_mask = left_file.bitmap.dilate(1)
 
             for right_c in right_group:
                 right_code_point = ord(right_c)
