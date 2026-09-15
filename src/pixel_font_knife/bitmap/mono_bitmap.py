@@ -286,10 +286,10 @@ class MonoBitmap(UserList[list[int]]):
 
     def copy(self) -> MonoBitmap:
         bitmap = MonoBitmap()
-        for bitmap_row in self:
-            bitmap.append(bitmap_row.copy())
         bitmap.width = self.width
         bitmap.height = self.height
+        for bitmap_row in self:
+            bitmap.append(bitmap_row.copy())
         return bitmap
 
     def deepcopy(self) -> MonoBitmap:
