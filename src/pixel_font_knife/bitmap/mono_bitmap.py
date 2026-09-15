@@ -191,13 +191,12 @@ class MonoBitmap(UserList[list[int]]):
 
     def trim(self) -> tuple[MonoBitmap, Padding]:
         padding = self.measure_padding()
-        bitmap = MonoBitmap()
-        bitmap.width = self.width - padding.left - padding.right
-        bitmap.height = self.height - padding.top - padding.bottom
-        end_x = self.width - padding.right
-        end_y = self.height - padding.bottom
-        for bitmap_row in self.data[padding.top:end_y]:
-            bitmap.append(bitmap_row[padding.left:end_x])
+        bitmap = self.crop(
+            padding.left,
+            padding.top,
+            self.width - padding.left - padding.right,
+            self.height - padding.top - padding.bottom,
+        )
         return bitmap, padding
 
     def scale(self, scale_x: float = 1, scale_y: float = 1) -> MonoBitmap:
