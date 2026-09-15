@@ -34,8 +34,8 @@ def test_init() -> None:
         ])
 
 
-def test_create() -> None:
-    bitmap = MonoBitmap.create(3, 4)
+def test_blank() -> None:
+    bitmap = MonoBitmap.blank(3, 4)
     assert bitmap.width == 3
     assert bitmap.height == 4
     assert bitmap == MonoBitmap([
@@ -45,18 +45,21 @@ def test_create() -> None:
         [0, 0, 0],
     ])
 
-    bitmap = MonoBitmap.create(2, 3, filled=True)
-    assert bitmap.width == 2
-    assert bitmap.height == 3
+
+def test_solid() -> None:
+    bitmap = MonoBitmap.solid(3, 4)
+    assert bitmap.width == 3
+    assert bitmap.height == 4
     assert bitmap == MonoBitmap([
-        [1, 1],
-        [1, 1],
-        [1, 1],
+        [1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1],
     ])
 
 
 def test_inside() -> None:
-    bitmap = MonoBitmap.create(50, 50)
+    bitmap = MonoBitmap.blank(50, 50)
     assert bitmap.is_x_inside(10)
     assert not bitmap.is_x_inside(-1)
     assert not bitmap.is_x_inside(60)
@@ -88,12 +91,12 @@ def test_measure_padding() -> None:
 
 
 def test_measure_padding_inconsistent_dimensions() -> None:
-    bitmap = MonoBitmap.create(7, 10)
+    bitmap = MonoBitmap.blank(7, 10)
     bitmap.data = [[0] * 7 for _ in range(5)]
     with pytest.raises(ValueError, match='inconsistent bitmap height'):
         bitmap.measure_padding()
 
-    bitmap = MonoBitmap.create(7, 5)
+    bitmap = MonoBitmap.blank(7, 5)
     bitmap[2] = [0] * 5
     with pytest.raises(ValueError, match='inconsistent row widths'):
         bitmap.measure_padding()
@@ -126,24 +129,24 @@ def test_trim() -> None:
 
 
 def test_trim_empty() -> None:
-    bitmap = MonoBitmap.create(7, 10)
+    bitmap = MonoBitmap.blank(7, 10)
     trimmed_bitmap, padding = bitmap.trim()
-    assert trimmed_bitmap == MonoBitmap.create(0, 0)
+    assert trimmed_bitmap == MonoBitmap.blank(0, 0)
     assert padding == Padding(7, 0, 10, 0)
 
     bitmap = MonoBitmap()
     trimmed_bitmap, padding = bitmap.trim()
-    assert trimmed_bitmap == MonoBitmap.create(0, 0)
+    assert trimmed_bitmap == MonoBitmap.blank(0, 0)
     assert padding == Padding(0, 0, 0, 0)
 
 
 def test_trim_inconsistent_dimensions() -> None:
-    bitmap = MonoBitmap.create(7, 10)
+    bitmap = MonoBitmap.blank(7, 10)
     bitmap.data = [[0] * 7 for _ in range(5)]
     with pytest.raises(ValueError, match='inconsistent bitmap height'):
         bitmap.trim()
 
-    bitmap = MonoBitmap.create(7, 5)
+    bitmap = MonoBitmap.blank(7, 5)
     bitmap[2] = [0] * 5
     with pytest.raises(ValueError, match='inconsistent row widths'):
         bitmap.trim()
@@ -322,7 +325,7 @@ def test_eq() -> None:
 
 
 def test_dump_save_empty(tmp_path: Path) -> None:
-    for bitmap in [MonoBitmap(), MonoBitmap([[], []]), MonoBitmap.create(2, 0)]:
+    for bitmap in [MonoBitmap(), MonoBitmap([[], []]), MonoBitmap.blank(2, 0)]:
         with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):
             bitmap.dump_png(BytesIO())
         with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):

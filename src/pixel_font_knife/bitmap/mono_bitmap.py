@@ -11,12 +11,21 @@ from pixel_font_knife.internal import png
 
 class MonoBitmap(UserList[list[int]]):
     @staticmethod
-    def create(width: int, height: int, filled: bool = False) -> MonoBitmap:
+    def blank(width: int, height: int) -> MonoBitmap:
         bitmap = MonoBitmap()
         bitmap.width = width
         bitmap.height = height
         for _ in range(height):
-            bitmap.append([1 if filled else 0] * width)
+            bitmap.append([0] * width)
+        return bitmap
+
+    @staticmethod
+    def solid(width: int, height: int) -> MonoBitmap:
+        bitmap = MonoBitmap()
+        bitmap.width = width
+        bitmap.height = height
+        for _ in range(height):
+            bitmap.append([1] * width)
         return bitmap
 
     @staticmethod
