@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from pixel_font_knife import glyph_file_util, kerning_util
-from pixel_font_knife.kerning_util import KerningConfig
+from pixel_font_knife.legacy import glyph_file_util, kerning_util
+from pixel_font_knife.legacy.kerning_util import KerningConfig
 
 
 def test_calculate_kerning_values(assets_dir: Path, glyphs_dir: Path) -> None:

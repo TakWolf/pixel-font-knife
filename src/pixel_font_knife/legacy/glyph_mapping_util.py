@@ -7,7 +7,7 @@ from typing import Any
 import unicodedata2
 import yaml
 
-from pixel_font_knife.glyph_file_util import GlyphFlavorGroup
+from pixel_font_knife.legacy.glyph_file_util import GlyphFlavorGroup
 
 
 def _display_code_point(code_point: int) -> str:

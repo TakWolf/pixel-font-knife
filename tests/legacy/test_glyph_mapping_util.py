@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from pixel_font_knife import glyph_mapping_util, glyph_file_util
+from pixel_font_knife.legacy import glyph_mapping_util, glyph_file_util
 
 
 def test_load(assets_dir: Path, glyphs_dir: Path, tmp_path: Path) -> None:
