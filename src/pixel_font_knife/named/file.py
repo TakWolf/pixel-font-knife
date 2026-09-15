@@ -4,6 +4,7 @@ from os import PathLike
 from pathlib import Path
 
 from pixel_font_knife.glyph.file import GlyphFile
+from pixel_font_knife.glyph.flavor import normalize_flavor
 
 
 class NamedGlyphFile(GlyphFile):
@@ -16,7 +17,8 @@ class NamedGlyphFile(GlyphFile):
         glyph_name = parts[0]
         flavors = []
         if len(parts) > 1:
-            for flavor in parts[1].lower().split(','):
+            for flavor in parts[1].split(','):
+                flavor = normalize_flavor(flavor)
                 if flavor not in flavors:
                     flavors.append(flavor)
         return NamedGlyphFile(file_path, glyph_name, flavors)

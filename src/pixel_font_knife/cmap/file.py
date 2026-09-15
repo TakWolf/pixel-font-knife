@@ -3,10 +3,28 @@ from __future__ import annotations
 from os import PathLike
 from pathlib import Path
 
+import unidata_blocks
+
 from pixel_font_knife.glyph.file import GlyphFile
+from pixel_font_knife.glyph.flavor import normalize_flavor
 
 
 class CmapGlyphFile(GlyphFile):
+    @staticmethod
+    def get_normalized_dir(
+            code_point: int,
+            root_dir: str | PathLike[str],
+    ) -> Path:
+        if not isinstance(root_dir, Path):
+            root_dir = Path(root_dir)
+
+        block = unidata_blocks.get_block_by_code_point(code_point)
+        file_dir = root_dir.joinpath(f'{block.code_start:04X}-{block.code_end:04X} {block.name}')
+        if block.name == 'CJK Unified Ideographs':
+            code_name = f'{code_point:04X}'
+            file_dir = file_dir.joinpath(f'{code_name[0:-2]}-')
+        return file_dir
+
     @staticmethod
     def load(file_path: str | PathLike[str]) -> CmapGlyphFile:
         if not isinstance(file_path, Path):
@@ -16,7 +34,8 @@ class CmapGlyphFile(GlyphFile):
         code_point = int(parts[0], 16)
         flavors = []
         if len(parts) > 1:
-            for flavor in parts[1].lower().split(','):
+            for flavor in parts[1].split(','):
+                flavor = normalize_flavor(flavor)
                 if flavor not in flavors:
                     flavors.append(flavor)
         return CmapGlyphFile(file_path, code_point, flavors)
@@ -40,3 +59,28 @@ class CmapGlyphFile(GlyphFile):
         if len(self.flavors) > 0:
             name = f'{name}.{self.flavors[0].lower()}'
         return name
+
+    def normalize(
+            self,
+            root_dir: str | PathLike[str],
+            flavor_order: list[str] | None = None,
+    ) -> None:
+        file_dir = CmapGlyphFile.get_normalized_dir(self.code_point, root_dir)
+
+        if len(self.flavors) > 0:
+            if flavor_order is None:
+                flavors = self.flavors
+            else:
+                flavors = sorted(self.flavors, key=lambda x: flavor_order.index(x))
+            file_name = f'{self.code_point:04X} {",".join(flavors)}.png'
+        else:
+            file_name = f'{self.code_point:04X}.png'
+
+        file_path = file_dir.joinpath(file_name)
+        if self.file_path != file_path:
+            if file_path.exists():
+                raise RuntimeError(f"duplicate glyph files:\n'{self.file_path}'\n'{file_path}'")
+
+            file_dir.mkdir(parents=True, exist_ok=True)
+            self.file_path.rename(file_path)
+            self.file_path = file_path
