@@ -13,6 +13,7 @@ def test_init() -> None:
     bitmap = MonoBitmap([])
     assert bitmap.width == 0
     assert bitmap.height == 0
+    assert bitmap.dimensions == (0, 0)
     assert bitmap == MonoBitmap()
     assert bitmap[:] == MonoBitmap()
 
@@ -22,6 +23,7 @@ def test_init() -> None:
     ])
     assert bitmap.width == 4
     assert bitmap.height == 2
+    assert bitmap.dimensions == (4, 2)
     assert bitmap == MonoBitmap([
         [0, 1, 1, 1],
         [1, 0, 0, 1],
@@ -38,6 +40,7 @@ def test_blank() -> None:
     bitmap = MonoBitmap.blank(3, 4)
     assert bitmap.width == 3
     assert bitmap.height == 4
+    assert bitmap.dimensions == (3, 4)
     assert bitmap == MonoBitmap([
         [0, 0, 0],
         [0, 0, 0],
@@ -50,6 +53,7 @@ def test_solid() -> None:
     bitmap = MonoBitmap.solid(3, 4)
     assert bitmap.width == 3
     assert bitmap.height == 4
+    assert bitmap.dimensions == (3, 4)
     assert bitmap == MonoBitmap([
         [1, 1, 1],
         [1, 1, 1],
@@ -345,6 +349,7 @@ def test_load_dump_save(bitmaps_dir: Path, tmp_path: Path) -> None:
         bitmap = MonoBitmap.load_png(load_path)
         assert bitmap.width == 12
         assert bitmap.height == 12
+        assert bitmap.dimensions == (12, 12)
 
         save_path = save_dir.joinpath(load_path.name)
         bitmap.save_png(save_path)
