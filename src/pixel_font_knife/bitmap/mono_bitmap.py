@@ -148,16 +148,22 @@ class MonoBitmap(UserList[list[int]]):
         return self.is_x_inside(x) and self.is_y_inside(y)
 
     def overlaps(self, other: MonoBitmap, x: int = 0, y: int = 0) -> bool:
-        for oy, other_row in enumerate(other):
-            ty = oy + y
-            if not self.is_y_inside(ty):
-                continue
-            for ox, pixel in enumerate(other_row):
-                tx = ox + x
-                if not self.is_x_inside(tx):
-                    continue
-                if pixel != 0 and self[ty][tx] != 0:
+        left = max(x, 0)
+        right = min(x + other.width, self.width)
+        top = max(y, 0)
+        bottom = min(y + other.height, self.height)
+
+        if left >= right or top >= bottom:
+            return False
+
+        for target_y in range(top, bottom):
+            self_row = self[target_y]
+            other_row = other[target_y - y]
+
+            for target_x in range(left, right):
+                if self_row[target_x] != 0 and other_row[target_x - x] != 0:
                     return True
+
         return False
 
     def trim(self) -> tuple[MonoBitmap, Padding]:
