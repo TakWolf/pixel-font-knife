@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from pixel_font_knife.bitmap.mono_bitmap import MonoBitmap
@@ -71,7 +73,7 @@ def test_horizontal_offset() -> None:
 def test_horizontal_offset_with_vertical_bias() -> None:
     canvas = GlyphCanvas(MonoBitmap.solid(10, 15))
 
-    with pytest.raises(ValueError, match='canvas height and em size must have the same parity unless vertical_bias is specified'):
+    with pytest.raises(ValueError, match=re.escape('canvas height and em size must have the same parity unless vertical_bias is specified')):
         canvas.horizontal_offset(12, 10)
 
     assert canvas.horizontal_offset(12, 10, 'top') == (0, -3)
@@ -98,14 +100,14 @@ def test_vertical_offset_with_horizontal_bias() -> None:
     assert canvas.vertical_offset(12, 'left') == (-4, 0)
     assert canvas.vertical_offset(12, 'right') == (-3, 0)
 
-    with pytest.raises(ValueError, match='canvas width must be even unless horizontal_bias is specified'):
+    with pytest.raises(ValueError, match=re.escape('canvas width must be even unless horizontal_bias is specified')):
         canvas.vertical_offset(12, None)
 
 
 def test_vertical_offset_with_vertical_bias() -> None:
     canvas = GlyphCanvas(MonoBitmap.solid(10, 15))
 
-    with pytest.raises(ValueError, match='canvas height and em size must have the same parity unless vertical_bias is specified'):
+    with pytest.raises(ValueError, match=re.escape('canvas height and em size must have the same parity unless vertical_bias is specified')):
         canvas.vertical_offset(12)
 
     assert canvas.vertical_offset(12, vertical_bias='top') == (-5, -2)

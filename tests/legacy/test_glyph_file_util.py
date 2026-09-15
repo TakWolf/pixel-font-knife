@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import pytest
@@ -15,9 +16,8 @@ def test_glyph_file_1() -> None:
 
 
 def test_glyph_file_2() -> None:
-    with pytest.raises(ValueError) as info:
+    with pytest.raises(ValueError, match=re.escape("'notdef' must be no flavor: 'notdef a,b.png'")):
         GlyphFile.load(Path('notdef a,b.png'))
-    assert info.value.args[0] == "'notdef' must be no flavor: 'notdef a,b.png'"
 
 
 def test_glyph_file_3() -> None:
@@ -43,9 +43,8 @@ def test_glyph_file_5(bitmaps_dir: Path) -> None:
 
 
 def test_glyph_file_6() -> None:
-    with pytest.raises(ValueError) as info:
+    with pytest.raises(ValueError, match=re.escape("not '.png' file: '4E00.txt'")):
         GlyphFile.load(Path('4E00.txt'))
-    assert info.value.args[0] == "not '.png' file: '4E00.txt'"
 
 
 def test_flavor_group() -> None:
