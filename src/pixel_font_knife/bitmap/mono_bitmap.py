@@ -30,16 +30,19 @@ class MonoBitmap(UserList[list[int]]):
 
     @staticmethod
     def load_png(file_path: str | PathLike[str]) -> MonoBitmap:
-        width, height, rows, _ = png.Reader(filename=file_path).read()
-        bitmap = MonoBitmap()
-        bitmap.width = width
-        bitmap.height = height
-        for row in rows:
-            bitmap_row = []
-            for i in range(0, width * 4, 4):
-                bitmap_row.append(1 if row[i + 3] > 127 else 0)
-            bitmap.append(bitmap_row)
-        return bitmap
+        with open(file_path, 'rb') as file:
+            width, height, rows, info = png.Reader(file=file).asRGBA()
+            alpha_threshold = 1 << (info['bitdepth'] - 1)
+
+            bitmap = MonoBitmap()
+            bitmap.width = width
+            bitmap.height = height
+            for row in rows:
+                bitmap.append([
+                    1 if row[x * 4 + 3] >= alpha_threshold else 0
+                    for x in range(width)
+                ])
+            return bitmap
 
     width: int
     height: int
