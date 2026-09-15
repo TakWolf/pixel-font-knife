@@ -200,6 +200,14 @@ class MonoBitmap(UserList[list[int]]):
         )
         return bitmap, padding
 
+    def crop(self, x: int, y: int, width: int, height: int) -> MonoBitmap:
+        bitmap = MonoBitmap()
+        bitmap.width = width
+        bitmap.height = height
+        for bitmap_row in self.data[y:y + height]:
+            bitmap.append(bitmap_row[x:x + width])
+        return bitmap
+
     def scale_to(self, width: int, height: int) -> MonoBitmap:
         if width < 0 or height < 0:
             raise ValueError(f'scaled bitmap dimensions must be non-negative: ({width}, {height})')
@@ -278,19 +286,6 @@ class MonoBitmap(UserList[list[int]]):
                         if not bitmap.is_x_inside(tx):
                             continue
                         bitmap[ty][tx] = 1
-        return bitmap
-
-    def crop(self, x: int, y: int, width: int, height: int) -> MonoBitmap:
-        bitmap = MonoBitmap()
-        bitmap.width = width
-        bitmap.height = height
-        for ny in range(height):
-            sy = ny + y
-            bitmap_row = []
-            for nx in range(width):
-                sx = nx + x
-                bitmap_row.append(self[sy][sx])
-            bitmap.append(bitmap_row)
         return bitmap
 
     def to_text(self, off: str = '  ', on: str = '██', line_suffix: str | None = None) -> str:
