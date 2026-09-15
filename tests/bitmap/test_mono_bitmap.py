@@ -276,31 +276,34 @@ def test_scale_invalid_arguments() -> None:
         MonoBitmap.blank(0, 0).scale_to(1, 1)
 
 
-def test_plus_minus() -> None:
+def test_set_operations() -> None:
     bitmap = MonoBitmap([
-        [1, 1, 1, 1],
-        [1, 0, 0, 1],
-        [1, 0, 0, 1],
-        [1, 1, 1, 1],
+        [1, 1, 0],
+        [1, 0, 0],
     ])
-    assert bitmap.plus(MonoBitmap([
-        [1, 1, 1],
-        [1, 1, 1],
-    ]), x=-1, y=1) == MonoBitmap([
-        [1, 1, 1, 1],
-        [1, 1, 0, 1],
-        [1, 1, 0, 1],
-        [1, 1, 1, 1],
+    other = MonoBitmap([
+        [1, 0],
+        [1, 1],
     ])
-    assert bitmap.minus(MonoBitmap([
+
+    assert bitmap.union(other, x=1) == MonoBitmap([
+        [1, 1, 0],
         [1, 1, 1],
-        [1, 1, 1],
-    ]), x=-1, y=1) == MonoBitmap([
-        [1, 1, 1, 1],
-        [0, 0, 0, 1],
-        [0, 0, 0, 1],
-        [1, 1, 1, 1],
     ])
+    assert bitmap.intersection(other, x=1) == MonoBitmap([
+        [0, 1, 0],
+        [0, 0, 0],
+    ])
+    assert bitmap.difference(other, x=1) == MonoBitmap([
+        [1, 0, 0],
+        [1, 0, 0],
+    ])
+    assert bitmap.symmetric_difference(other, x=1) == MonoBitmap([
+        [1, 0, 0],
+        [1, 1, 1],
+    ])
+
+    assert bitmap.intersection(other, x=3) == MonoBitmap.blank(3, 2)
 
 
 def test_dilate() -> None:
@@ -473,9 +476,9 @@ def test_move_right_and_overlap_bolding(bitmaps_dir: Path) -> None:
             continue
 
         bitmap = MonoBitmap.load_png(file_path)
-        solid_bitmap = bitmap.resize(left=1).plus(bitmap)
-        shadow_bitmap = solid_bitmap.minus(bitmap).resize(left=1)
-        result_bitmap = solid_bitmap.minus(shadow_bitmap)
+        solid_bitmap = bitmap.resize(left=1).union(bitmap)
+        shadow_bitmap = solid_bitmap.difference(bitmap).resize(left=1)
+        result_bitmap = solid_bitmap.difference(shadow_bitmap)
         bold_bitmap = MonoBitmap.load_png(bitmaps_dir.joinpath('move-right-and-overlap-bolding', file_path.name))
         assert result_bitmap == bold_bitmap
 
@@ -486,9 +489,9 @@ def test_move_left_and_overlap_bolding(bitmaps_dir: Path) -> None:
             continue
 
         bitmap = MonoBitmap.load_png(file_path)
-        solid_bitmap = bitmap.resize(right=1).plus(bitmap, x=1)
-        shadow_bitmap = solid_bitmap.minus(bitmap, x=1).resize(left=-1)
-        result_bitmap = solid_bitmap.minus(shadow_bitmap)
+        solid_bitmap = bitmap.resize(right=1).union(bitmap, x=1)
+        shadow_bitmap = solid_bitmap.difference(bitmap, x=1).resize(left=-1)
+        result_bitmap = solid_bitmap.difference(shadow_bitmap)
         bold_bitmap = MonoBitmap.load_png(bitmaps_dir.joinpath('move-left-and-overlap-bolding', file_path.name))
         assert result_bitmap == bold_bitmap
 

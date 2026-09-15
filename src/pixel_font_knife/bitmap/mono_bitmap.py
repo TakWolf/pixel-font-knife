@@ -10,6 +10,14 @@ from pixel_font_knife.bitmap.padding import Padding
 from pixel_font_knife.internal import png
 
 
+_SetOperation = Literal[
+    'union',
+    'intersection',
+    'difference',
+    'symmetric_difference',
+]
+
+
 class MonoBitmap(UserList[list[int]]):
     @staticmethod
     def blank(width: int, height: int) -> MonoBitmap:
@@ -242,33 +250,57 @@ class MonoBitmap(UserList[list[int]]):
         height = floor(self.height * scale_y + 0.5)
         return self.scale_to(width, height)
 
-    def plus(self, other: MonoBitmap, x: int = 0, y: int = 0) -> MonoBitmap:
+    @staticmethod
+    def _set_pixel(left: int, right: int, operation: _SetOperation) -> int:
+        if operation == 'union':
+            return left | right
+        if operation == 'intersection':
+            return left & right
+        if operation == 'difference':
+            return left & (1 - right)
+        if operation == 'symmetric_difference':
+            return left ^ right
+        raise ValueError(f'unsupported set operation: {operation!r}')
+
+    def _set_operation(
+            self,
+            other: MonoBitmap,
+            operation: _SetOperation,
+            x: int,
+            y: int,
+    ) -> MonoBitmap:
         bitmap = self.copy()
-        for oy, other_row in enumerate(other):
-            ty = oy + y
-            if not bitmap.is_y_inside(ty):
-                continue
-            for ox, pixel in enumerate(other_row):
-                tx = ox + x
-                if not bitmap.is_x_inside(tx):
-                    continue
-                if pixel != 0:
-                    bitmap[ty][tx] = 1
+        left = max(x, 0)
+        right = min(x + other.width, self.width)
+        top = max(y, 0)
+        bottom = min(y + other.height, self.height)
+
+        if operation == 'intersection':
+            bitmap = MonoBitmap.blank(self.width, self.height)
+
+        for target_y in range(top, bottom):
+            bitmap_row = bitmap[target_y]
+            self_row = self[target_y]
+            other_row = other[target_y - y]
+            for target_x in range(left, right):
+                bitmap_row[target_x] = self._set_pixel(
+                    self_row[target_x],
+                    other_row[target_x - x],
+                    operation,
+                )
         return bitmap
 
-    def minus(self, other: MonoBitmap, x: int = 0, y: int = 0) -> MonoBitmap:
-        bitmap = self.copy()
-        for oy, other_row in enumerate(other):
-            ty = oy + y
-            if not bitmap.is_y_inside(ty):
-                continue
-            for ox, pixel in enumerate(other_row):
-                tx = ox + x
-                if not bitmap.is_x_inside(tx):
-                    continue
-                if pixel != 0:
-                    bitmap[ty][tx] = 0
-        return bitmap
+    def union(self, other: MonoBitmap, x: int = 0, y: int = 0) -> MonoBitmap:
+        return self._set_operation(other, 'union', x, y)
+
+    def intersection(self, other: MonoBitmap, x: int = 0, y: int = 0) -> MonoBitmap:
+        return self._set_operation(other, 'intersection', x, y)
+
+    def difference(self, other: MonoBitmap, x: int = 0, y: int = 0) -> MonoBitmap:
+        return self._set_operation(other, 'difference', x, y)
+
+    def symmetric_difference(self, other: MonoBitmap, x: int = 0, y: int = 0) -> MonoBitmap:
+        return self._set_operation(other, 'symmetric_difference', x, y)
 
     def dilate(
             self,
