@@ -72,7 +72,7 @@ def calculate_kerning_values(
 
                 actual_offset = offset
                 while actual_offset < 0:
-                    if not left_bitmap_mask.is_overlapped(right_file.bitmap, x=left_bitmap_mask.width + actual_offset):
+                    if not left_bitmap_mask.overlaps(right_file.bitmap, x=left_bitmap_mask.width + actual_offset):
                         break
                     actual_offset += 1
 

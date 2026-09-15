@@ -204,7 +204,7 @@ class MonoBitmap(UserList[list[int]]):
                     bitmap[ty][tx] = 0
         return bitmap
 
-    def is_overlapped(self, other: MonoBitmap, x: int = 0, y: int = 0) -> bool:
+    def overlaps(self, other: MonoBitmap, x: int = 0, y: int = 0) -> bool:
         for oy, other_row in enumerate(other):
             ty = oy + y
             if not self.is_y_inside(ty):

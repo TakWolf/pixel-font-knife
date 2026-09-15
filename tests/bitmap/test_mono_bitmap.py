@@ -214,7 +214,7 @@ def test_plus_minus() -> None:
     ])
 
 
-def test_is_overlapped() -> None:
+def test_overlaps() -> None:
     bitmap_1 = MonoBitmap([
         [1, 1, 1, 0],
         [1, 1, 1, 0],
@@ -227,10 +227,10 @@ def test_is_overlapped() -> None:
         [0, 1, 1, 1],
         [0, 1, 1, 1],
     ])
-    assert bitmap_1.is_overlapped(bitmap_2)
-    assert not bitmap_1.is_overlapped(bitmap_2, x=3, y=3)
-    assert not bitmap_1.is_overlapped(bitmap_2, x=2, y=2)
-    assert bitmap_1.is_overlapped(bitmap_2, x=1, y=1)
+    assert bitmap_1.overlaps(bitmap_2)
+    assert not bitmap_1.overlaps(bitmap_2, x=3, y=3)
+    assert not bitmap_1.overlaps(bitmap_2, x=2, y=2)
+    assert bitmap_1.overlaps(bitmap_2, x=1, y=1)
 
 
 def test_dilate() -> None:
