@@ -257,13 +257,13 @@ class MonoBitmap(UserList[list[int]]):
             bitmap.append(bitmap_row)
         return bitmap
 
-    def draw(self, white: str = '  ', black: str = '██', end: str | None = None) -> str:
+    def to_text(self, off: str = '  ', on: str = '██', line_suffix: str | None = None) -> str:
         text = StringIO()
         for bitmap_row in self:
             for pixel in bitmap_row:
-                text.write(white if pixel == 0 else black)
-            if end is not None:
-                text.write(end)
+                text.write(off if pixel == 0 else on)
+            if line_suffix is not None:
+                text.write(line_suffix)
             text.write('\n')
         return text.getvalue()
 

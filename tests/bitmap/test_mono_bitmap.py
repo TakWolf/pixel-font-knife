@@ -284,14 +284,14 @@ def test_crop() -> None:
     ])
 
 
-def test_draw() -> None:
+def test_to_text() -> None:
     bitmap = MonoBitmap([
         [1, 1, 0, 0],
         [0, 0, 1, 1],
     ])
     text = ('████    *\n'
             '    ████*\n')
-    assert bitmap.draw(end='*') == text
+    assert bitmap.to_text(line_suffix='*') == text
 
 
 def test_copy() -> None:
