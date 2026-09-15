@@ -298,6 +298,36 @@ def test_to_text() -> None:
     assert bitmap.to_text(line_suffix='*') == text
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason='PNG compression output differs on Windows')
+def test_load_dump_save(bitmaps_dir: Path, tmp_path: Path) -> None:
+    load_dir = bitmaps_dir.joinpath('x1')
+    save_dir = tmp_path.joinpath('x1')
+    save_dir.mkdir()
+
+    for load_path in load_dir.iterdir():
+        if load_path.suffix != '.png':
+            continue
+
+        bitmap = MonoBitmap.load_png(load_path)
+        assert bitmap.width == 12
+        assert bitmap.height == 12
+        assert bitmap.dimensions == (12, 12)
+
+        save_path = save_dir.joinpath(load_path.name)
+        bitmap.save_png(save_path)
+        stream = BytesIO()
+        bitmap.dump_png(stream)
+        assert load_path.read_bytes() == save_path.read_bytes() == stream.getvalue()
+
+
+def test_dump_save_empty(tmp_path: Path) -> None:
+    for bitmap in [MonoBitmap(), MonoBitmap([[], []]), MonoBitmap.blank(2, 0)]:
+        with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):
+            bitmap.dump_png(BytesIO())
+        with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):
+            bitmap.save_png(tmp_path.joinpath('empty.png'))
+
+
 def test_copy() -> None:
     bitmap_1 = MonoBitmap([
         [0, 1],
@@ -326,36 +356,6 @@ def test_eq() -> None:
         [1, 0],
     ])
     assert bitmap_1 == bitmap_2
-
-
-def test_dump_save_empty(tmp_path: Path) -> None:
-    for bitmap in [MonoBitmap(), MonoBitmap([[], []]), MonoBitmap.blank(2, 0)]:
-        with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):
-            bitmap.dump_png(BytesIO())
-        with pytest.raises(ValueError, match='cannot encode empty bitmap as PNG'):
-            bitmap.save_png(tmp_path.joinpath('empty.png'))
-
-
-@pytest.mark.skipif(sys.platform == 'win32', reason='PNG compression output differs on Windows')
-def test_load_dump_save(bitmaps_dir: Path, tmp_path: Path) -> None:
-    load_dir = bitmaps_dir.joinpath('x1')
-    save_dir = tmp_path.joinpath('x1')
-    save_dir.mkdir()
-
-    for load_path in load_dir.iterdir():
-        if load_path.suffix != '.png':
-            continue
-
-        bitmap = MonoBitmap.load_png(load_path)
-        assert bitmap.width == 12
-        assert bitmap.height == 12
-        assert bitmap.dimensions == (12, 12)
-
-        save_path = save_dir.joinpath(load_path.name)
-        bitmap.save_png(save_path)
-        stream = BytesIO()
-        bitmap.dump_png(stream)
-        assert load_path.read_bytes() == save_path.read_bytes() == stream.getvalue()
 
 
 def test_move_right_and_overlap_bolding(bitmaps_dir: Path) -> None:
