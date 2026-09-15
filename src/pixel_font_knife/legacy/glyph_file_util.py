@@ -10,7 +10,7 @@ import unidata_blocks
 
 from pixel_font_knife.bitmap.mono_bitmap import MonoBitmap
 from pixel_font_knife.bitmap.padding import Padding
-from pixel_font_knife.legacy import fs_util
+from pixel_font_knife.utils import fs_util
 
 
 class GlyphFile:
