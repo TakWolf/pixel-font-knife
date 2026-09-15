@@ -97,14 +97,10 @@ class MonoBitmap(UserList[list[int]]):
                 raise ValueError('inconsistent row widths')
             for x, pixel in enumerate(bitmap_row):
                 if pixel != 0:
-                    if y < first_row:
-                        first_row = y
-                    if y > last_row:
-                        last_row = y
-                    if x < first_col:
-                        first_col = x
-                    if x > last_col:
-                        last_col = x
+                    first_row = min(first_row, y)
+                    last_row = max(last_row, y)
+                    first_col = min(first_col, x)
+                    last_col = max(last_col, x)
 
         if first_row == self.height:
             return Padding(self.width, 0, self.height, 0)
@@ -118,16 +114,16 @@ class MonoBitmap(UserList[list[int]]):
 
     def measure_left_padding(self) -> int:
         padding = 0
-        for i in range(self.width):
-            if any(bitmap_row[i] != 0 for bitmap_row in self):
+        for x in range(self.width):
+            if any(bitmap_row[x] != 0 for bitmap_row in self):
                 break
             padding += 1
         return padding
 
     def measure_right_padding(self) -> int:
         padding = 0
-        for i in range(self.width):
-            if any(bitmap_row[-1 - i] != 0 for bitmap_row in self):
+        for x in range(self.width):
+            if any(bitmap_row[-1 - x] != 0 for bitmap_row in self):
                 break
             padding += 1
         return padding
