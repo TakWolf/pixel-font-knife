@@ -125,6 +125,30 @@ def test_overlaps() -> None:
     assert bitmap_1.overlaps(bitmap_2, x=1, y=1)
 
 
+def test_resize() -> None:
+    bitmap = MonoBitmap([
+        [1, 0, 1, 0],
+        [1, 0, 0, 0],
+        [1, 1, 1, 0],
+        [0, 0, 1, 0],
+    ])
+    assert bitmap.resize(left=2, right=1, top=3, bottom=2) == MonoBitmap([
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+    ])
+    assert bitmap.resize(left=-1, right=-1, top=-1, bottom=-1) == MonoBitmap([
+        [0, 0],
+        [1, 1],
+    ])
+
+
 def test_trim() -> None:
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0],
@@ -173,30 +197,6 @@ def test_trim_inconsistent_dimensions() -> None:
     bitmap[2] = [0] * 5
     with pytest.raises(ValueError, match='inconsistent row widths'):
         bitmap.trim()
-
-
-def test_resize() -> None:
-    bitmap = MonoBitmap([
-        [1, 0, 1, 0],
-        [1, 0, 0, 0],
-        [1, 1, 1, 0],
-        [0, 0, 1, 0],
-    ])
-    assert bitmap.resize(left=2, right=1, top=3, bottom=2) == MonoBitmap([
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 1, 0, 0],
-        [0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 1, 1, 1, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0],
-    ])
-    assert bitmap.resize(left=-1, right=-1, top=-1, bottom=-1) == MonoBitmap([
-        [0, 0],
-        [1, 1],
-    ])
 
 
 def test_scale(bitmaps_dir: Path) -> None:

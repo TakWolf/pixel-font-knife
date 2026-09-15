@@ -166,6 +166,29 @@ class MonoBitmap(UserList[list[int]]):
 
         return False
 
+    def resize(self, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> MonoBitmap:
+        width = self.width + left + right
+        height = self.height + top + bottom
+
+        bitmap = MonoBitmap.blank(width, height)
+
+        source_left = max(-left, 0)
+        source_right = min(self.width, width - left)
+        source_top = max(-top, 0)
+        source_bottom = min(self.height, height - top)
+
+        if source_left >= source_right or source_top >= source_bottom:
+            return bitmap
+
+        target_left = source_left + left
+        target_right = source_right + left
+
+        for source_y in range(source_top, source_bottom):
+            target_y = source_y + top
+            bitmap[target_y][target_left:target_right] = self[source_y][source_left:source_right]
+
+        return bitmap
+
     def trim(self) -> tuple[MonoBitmap, Padding]:
         padding = self.measure_padding()
         bitmap = MonoBitmap()
@@ -176,19 +199,6 @@ class MonoBitmap(UserList[list[int]]):
         for bitmap_row in self.data[padding.top:end_y]:
             bitmap.append(bitmap_row[padding.left:end_x])
         return bitmap, padding
-
-    def resize(self, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> MonoBitmap:
-        bitmap = MonoBitmap()
-        bitmap.width = self.width + left + right
-        bitmap.height = self.height + top + bottom
-        for y in range(bitmap.height):
-            sy = y - top
-            bitmap_row = []
-            for x in range(bitmap.width):
-                sx = x - left
-                bitmap_row.append(self[sy][sx] if self.is_inside(sx, sy) else 0)
-            bitmap.append(bitmap_row)
-        return bitmap
 
     def scale(self, scale_x: float = 1, scale_y: float = 1) -> MonoBitmap:
         bitmap = MonoBitmap()
