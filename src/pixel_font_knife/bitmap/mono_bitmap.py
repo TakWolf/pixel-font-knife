@@ -77,15 +77,6 @@ class MonoBitmap(UserList[list[int]]):
     def dimensions(self) -> tuple[int, int]:
         return self.width, self.height
 
-    def is_x_inside(self, x: int) -> bool:
-        return 0 <= x < self.width
-
-    def is_y_inside(self, y: int) -> bool:
-        return 0 <= y < self.height
-
-    def is_inside(self, x: int, y: int) -> bool:
-        return self.is_x_inside(x) and self.is_y_inside(y)
-
     def measure_padding(self) -> Padding:
         if self.height != len(self):
             raise ValueError('inconsistent bitmap height')
@@ -146,6 +137,28 @@ class MonoBitmap(UserList[list[int]]):
                 break
             padding += 1
         return padding
+
+    def is_x_inside(self, x: int) -> bool:
+        return 0 <= x < self.width
+
+    def is_y_inside(self, y: int) -> bool:
+        return 0 <= y < self.height
+
+    def is_inside(self, x: int, y: int) -> bool:
+        return self.is_x_inside(x) and self.is_y_inside(y)
+
+    def overlaps(self, other: MonoBitmap, x: int = 0, y: int = 0) -> bool:
+        for oy, other_row in enumerate(other):
+            ty = oy + y
+            if not self.is_y_inside(ty):
+                continue
+            for ox, pixel in enumerate(other_row):
+                tx = ox + x
+                if not self.is_x_inside(tx):
+                    continue
+                if pixel != 0 and self[ty][tx] != 0:
+                    return True
+        return False
 
     def trim(self) -> tuple[MonoBitmap, Padding]:
         padding = self.measure_padding()
@@ -211,19 +224,6 @@ class MonoBitmap(UserList[list[int]]):
                 if pixel != 0:
                     bitmap[ty][tx] = 0
         return bitmap
-
-    def overlaps(self, other: MonoBitmap, x: int = 0, y: int = 0) -> bool:
-        for oy, other_row in enumerate(other):
-            ty = oy + y
-            if not self.is_y_inside(ty):
-                continue
-            for ox, pixel in enumerate(other_row):
-                tx = ox + x
-                if not self.is_x_inside(tx):
-                    continue
-                if pixel != 0 and self[ty][tx] != 0:
-                    return True
-        return False
 
     def dilate(self, size: int) -> MonoBitmap:
         if size <= 0:

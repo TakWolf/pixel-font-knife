@@ -62,19 +62,6 @@ def test_solid() -> None:
     ])
 
 
-def test_inside() -> None:
-    bitmap = MonoBitmap.blank(50, 50)
-    assert bitmap.is_x_inside(10)
-    assert not bitmap.is_x_inside(-1)
-    assert not bitmap.is_x_inside(60)
-    assert bitmap.is_y_inside(25)
-    assert not bitmap.is_y_inside(-5)
-    assert not bitmap.is_y_inside(90)
-    assert bitmap.is_inside(20, 40)
-    assert not bitmap.is_inside(-6, 10)
-    assert not bitmap.is_inside(15, 90)
-
-
 def test_measure_padding() -> None:
     bitmap = MonoBitmap([
         [0, 0, 0, 0, 0, 0, 0],
@@ -104,6 +91,38 @@ def test_measure_padding_inconsistent_dimensions() -> None:
     bitmap[2] = [0] * 5
     with pytest.raises(ValueError, match='inconsistent row widths'):
         bitmap.measure_padding()
+
+
+def test_inside() -> None:
+    bitmap = MonoBitmap.blank(50, 50)
+    assert bitmap.is_x_inside(10)
+    assert not bitmap.is_x_inside(-1)
+    assert not bitmap.is_x_inside(60)
+    assert bitmap.is_y_inside(25)
+    assert not bitmap.is_y_inside(-5)
+    assert not bitmap.is_y_inside(90)
+    assert bitmap.is_inside(20, 40)
+    assert not bitmap.is_inside(-6, 10)
+    assert not bitmap.is_inside(15, 90)
+
+
+def test_overlaps() -> None:
+    bitmap_1 = MonoBitmap([
+        [1, 1, 1, 0],
+        [1, 1, 1, 0],
+        [1, 1, 1, 0],
+        [0, 0, 0, 0],
+    ])
+    bitmap_2 = MonoBitmap([
+        [0, 0, 0, 0],
+        [0, 1, 1, 1],
+        [0, 1, 1, 1],
+        [0, 1, 1, 1],
+    ])
+    assert bitmap_1.overlaps(bitmap_2)
+    assert not bitmap_1.overlaps(bitmap_2, x=3, y=3)
+    assert not bitmap_1.overlaps(bitmap_2, x=2, y=2)
+    assert bitmap_1.overlaps(bitmap_2, x=1, y=1)
 
 
 def test_trim() -> None:
@@ -219,25 +238,6 @@ def test_plus_minus() -> None:
         [0, 0, 0, 1],
         [1, 1, 1, 1],
     ])
-
-
-def test_overlaps() -> None:
-    bitmap_1 = MonoBitmap([
-        [1, 1, 1, 0],
-        [1, 1, 1, 0],
-        [1, 1, 1, 0],
-        [0, 0, 0, 0],
-    ])
-    bitmap_2 = MonoBitmap([
-        [0, 0, 0, 0],
-        [0, 1, 1, 1],
-        [0, 1, 1, 1],
-        [0, 1, 1, 1],
-    ])
-    assert bitmap_1.overlaps(bitmap_2)
-    assert not bitmap_1.overlaps(bitmap_2, x=3, y=3)
-    assert not bitmap_1.overlaps(bitmap_2, x=2, y=2)
-    assert bitmap_1.overlaps(bitmap_2, x=1, y=1)
 
 
 def test_dilate() -> None:
