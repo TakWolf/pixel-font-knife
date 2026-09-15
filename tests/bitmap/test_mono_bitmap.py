@@ -199,6 +199,21 @@ def test_trim_inconsistent_dimensions() -> None:
         bitmap.trim()
 
 
+def test_scale_to() -> None:
+    bitmap = MonoBitmap([
+        [1, 0, 1],
+        [0, 1, 0],
+    ])
+    assert bitmap.scale_to(5, 3) == MonoBitmap([
+        [1, 1, 0, 0, 1],
+        [1, 1, 0, 0, 1],
+        [0, 0, 1, 1, 0],
+    ])
+    assert bitmap.scale_to(2, 1) == MonoBitmap([
+        [1, 0],
+    ])
+
+
 def test_scale(bitmaps_dir: Path) -> None:
     for file_path in bitmaps_dir.joinpath('x1').iterdir():
         if file_path.suffix != '.png':
@@ -211,6 +226,33 @@ def test_scale(bitmaps_dir: Path) -> None:
         assert x1_bitmap.scale(1.5, 1.5) == x1_5_bitmap
         assert x3_bitmap.scale(1 / 3, 1 / 3) == x1_bitmap
         assert x3_bitmap.scale(0.5, 0.5) == x1_5_bitmap
+
+
+def test_scale_rounds_dimensions() -> None:
+    bitmap = MonoBitmap.solid(3, 3)
+    assert bitmap.scale(0.5, 0.5).dimensions == (2, 2)
+    assert bitmap.scale(1.5, 1.5).dimensions == (5, 5)
+
+
+def test_scale_invalid_arguments() -> None:
+    bitmap = MonoBitmap([[1]])
+
+    for scale in (0, -1, float('inf'), float('-inf'), float('nan')):
+        with pytest.raises(ValueError):
+            bitmap.scale(scale_x=scale)
+        with pytest.raises(ValueError):
+            bitmap.scale(scale_y=scale)
+
+    with pytest.raises(ValueError, match='scaled bitmap dimensions must be non-negative'):
+        bitmap.scale_to(-1, 1)
+    with pytest.raises(ValueError, match='scaled bitmap dimensions must be non-negative'):
+        bitmap.scale_to(1, -1)
+
+    assert bitmap.scale_to(0, 1).dimensions == (0, 1)
+    assert bitmap.scale_to(1, 0).dimensions == (1, 0)
+
+    with pytest.raises(ValueError, match='cannot scale a zero-sized bitmap'):
+        MonoBitmap.blank(0, 0).scale_to(1, 1)
 
 
 def test_plus_minus() -> None:

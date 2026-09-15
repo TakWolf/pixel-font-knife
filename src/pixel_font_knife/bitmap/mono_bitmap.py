@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import UserList
 from io import StringIO
+from math import floor, isfinite
 from os import PathLike
 from typing import Any, BinaryIO
 
@@ -199,18 +200,39 @@ class MonoBitmap(UserList[list[int]]):
         )
         return bitmap, padding
 
-    def scale(self, scale_x: float = 1, scale_y: float = 1) -> MonoBitmap:
+    def scale_to(self, width: int, height: int) -> MonoBitmap:
+        if width < 0 or height < 0:
+            raise ValueError(f'scaled bitmap dimensions must be non-negative: ({width}, {height})')
+        if width == 0 or height == 0:
+            return MonoBitmap.blank(width, height)
+        if self.width == 0 or self.height == 0:
+            raise ValueError('cannot scale a zero-sized bitmap to non-zero dimensions')
+
+        source_x = [
+            min(floor(target_x * self.width / width), self.width - 1)
+            for target_x in range(width)
+        ]
+        source_y = [
+            min(floor(target_y * self.height / height), self.height - 1)
+            for target_y in range(height)
+        ]
+
         bitmap = MonoBitmap()
-        bitmap.width = int(self.width * scale_x)
-        bitmap.height = int(self.height * scale_y)
-        for y in range(bitmap.height):
-            sy = int(y / scale_y)
-            bitmap_row = []
-            for x in range(bitmap.width):
-                sx = int(x / scale_x)
-                bitmap_row.append(self[sy][sx])
-            bitmap.append(bitmap_row)
+        bitmap.width = width
+        bitmap.height = height
+        for y in source_y:
+            bitmap.append([self[y][x] for x in source_x])
         return bitmap
+
+    def scale(self, scale_x: float = 1, scale_y: float = 1) -> MonoBitmap:
+        if not isfinite(scale_x) or scale_x <= 0:
+            raise ValueError(f'scale_x must be positive and finite: {scale_x}')
+        if not isfinite(scale_y) or scale_y <= 0:
+            raise ValueError(f'scale_y must be positive and finite: {scale_y}')
+
+        width = floor(self.width * scale_x + 0.5)
+        height = floor(self.height * scale_y + 0.5)
+        return self.scale_to(width, height)
 
     def plus(self, other: MonoBitmap, x: int = 0, y: int = 0) -> MonoBitmap:
         bitmap = self.copy()
