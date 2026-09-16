@@ -9,7 +9,6 @@ from typing import Any, BinaryIO, Literal
 from pixel_font_knife.bitmap.padding import Padding
 from pixel_font_knife.internal import png
 
-
 _SetOperation = Literal[
     'union',
     'intersection',

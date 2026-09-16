@@ -5,8 +5,8 @@ from pathlib import Path
 
 import unidata_blocks
 
+from pixel_font_knife.glyph.common import normalize_flavor
 from pixel_font_knife.glyph.file import GlyphFile
-from pixel_font_knife.glyph.flavor import normalize_flavor
 
 
 class CmapGlyphFile(GlyphFile):

@@ -2,7 +2,7 @@ from collections import UserDict
 from typing import Any
 
 from pixel_font_knife.cmap.file import CmapGlyphFile
-from pixel_font_knife.glyph.flavor import normalize_flavor
+from pixel_font_knife.glyph.common import normalize_flavor
 
 
 class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
