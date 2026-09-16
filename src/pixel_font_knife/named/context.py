@@ -164,7 +164,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
                         case 'replace':
                             target_variants[flavor] = glyph_file
                         case _:
-                            raise RuntimeError(f'duplicate named flavor: {name_key!r} {flavor!r}')
+                            raise RuntimeError(f'duplicate flavor: {name_key!r} {flavor!r}')
         return result
 
     def with_default_flavor(self, flavor_order: Sequence[str] | None = None) -> NamedContext:

@@ -133,7 +133,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                     case 'replace':
                         result[code_point] = glyph_variants.copy()
                     case _:
-                        raise RuntimeError(f'duplicate cmap code point: 0x{code_point:04X}')
+                        raise RuntimeError(f'duplicate code point: 0x{code_point:04X}')
         return result
 
     def merge_by_flavor(
@@ -163,7 +163,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                         case 'replace':
                             target_variants[flavor] = glyph_file
                         case _:
-                            raise RuntimeError(f'duplicate cmap flavor: 0x{code_point:04X} {flavor!r}')
+                            raise RuntimeError(f'duplicate flavor: 0x{code_point:04X} {flavor!r}')
         return result
 
     def with_default_flavor(self, flavor_order: Sequence[str] | None = None) -> CmapContext:
