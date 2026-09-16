@@ -8,6 +8,16 @@ from pixel_font_knife.glyph.common import normalize_flavor
 
 
 class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
+    """同一个上下文码点下按 flavor 选择字形文件的使用映射。
+
+    键是请求时使用的 flavor，``None`` 表示默认变体；键与 ``CmapGlyphFile.flavors`` 的本地存储信息
+    相互独立，不要求一致。多个 flavor 可以引用同一个 ``CmapGlyphFile`` 对象，映射修改不会改变
+    字形文件属性。
+
+    ``select()`` 优先返回指定 flavor，缺失时回退到默认变体。``copy()`` 只复制映射容器，始终共享
+    原有的 ``CmapGlyphFile`` 对象及其画布缓存。
+    """
+
     def __getitem__(self, flavor: Any) -> CmapGlyphFile:
         flavor = normalize_flavor(flavor)
         return super().__getitem__(flavor)
