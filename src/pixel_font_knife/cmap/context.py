@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from pixel_font_knife.cmap.file import CmapGlyphFile
+from pixel_font_knife.cmap.mapping.mapping import CmapMapping
 from pixel_font_knife.cmap.variants import CmapGlyphVariants
 from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy
 from pixel_font_knife.utils import fs_util
@@ -30,6 +31,11 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
     ``CmapGlyphFile`` 对象及其画布缓存。按码点合并时以整组变体为单位处理冲突；按 flavor 合并时
     只处理同一码点下发生冲突的 flavor。对合并结果中字形文件属性的修改，会被所有共享该对象的
     上下文观察到。
+
+    mapping 中的引用约定直接指向当前上下文中的实体字形，不应引用其他 mapping 创建的引用。
+    ``apply_mapping_by_code_point()`` 和 ``apply_mapping_by_flavor()`` 始终从当前上下文解析所有引用，
+    因此 mapping 参数顺序及其内部条目顺序不会改变合法配置的结果。库不验证引用目标是否属于实体字形；
+    调用方必须遵守该约定，违反约定产生的缺失映射或冲突由调用方负责处理。
 
     ``get_glyph_sequence()`` 按 flavor 顺序和码点顺序生成字形序列，并按 glyph name 保留首次出现的
     字形，以满足字体构建的字形排序约定。``get_character_mapping()`` 则以当前上下文的码点键生成
@@ -148,6 +154,119 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             for code_point, source_variants in context.items():
                 if code_point not in result:
                     result[code_point] = source_variants.copy()
+                    continue
+
+                target_variants = result[code_point]
+
+                for flavor, glyph_file in source_variants.items():
+                    if flavor not in target_variants:
+                        target_variants[flavor] = glyph_file
+                        continue
+
+                    match conflict:
+                        case 'keep':
+                            pass
+                        case 'replace':
+                            target_variants[flavor] = glyph_file
+                        case _:
+                            raise RuntimeError(f'duplicate flavor: 0x{code_point:04X} {flavor!r}')
+        return result
+
+    def apply_mapping_by_code_point(
+            self,
+            *mappings: CmapMapping,
+            conflict: MergeConflictStrategy = 'error',
+    ) -> CmapContext:
+        check_merge_conflict_strategy(conflict)
+
+        result = self.copy()
+        for mapping in mappings:
+            for code_point, entry in mapping.items():
+                if len(entry) == 0:
+                    continue
+
+                if '*' in entry:
+                    if len(entry) > 1:
+                        raise RuntimeError(f'0x{code_point:04X}: wildcard flavor cannot be mixed with explicit flavors')
+
+                    glyph_reference = entry['*']
+                    if glyph_reference.flavor is not None:
+                        raise RuntimeError(f'0x{code_point:04X}: wildcard flavor reference must be a code point')
+
+                    if glyph_reference.code_point not in self:
+                        continue
+
+                    glyph_variants = self[glyph_reference.code_point].copy()
+                else:
+                    glyph_variants = None
+
+                    for flavor, glyph_reference in entry.items():
+                        if glyph_reference.code_point not in self:
+                            continue
+
+                        if glyph_variants is None:
+                            glyph_variants = CmapGlyphVariants()
+
+                        glyph_variants[flavor] = self[glyph_reference.code_point].select(glyph_reference.flavor)
+
+                    if glyph_variants is None:
+                        continue
+
+                if code_point not in result:
+                    result[code_point] = glyph_variants
+                    continue
+
+                match conflict:
+                    case 'keep':
+                        pass
+                    case 'replace':
+                        result[code_point] = glyph_variants
+                    case _:
+                        raise RuntimeError(f'duplicate code point: 0x{code_point:04X}')
+        return result
+
+    def apply_mapping_by_flavor(
+            self,
+            *mappings: CmapMapping,
+            conflict: MergeConflictStrategy = 'error',
+    ) -> CmapContext:
+        check_merge_conflict_strategy(conflict)
+
+        result = self.copy()
+        for mapping in mappings:
+            for code_point, entry in mapping.items():
+                if len(entry) == 0:
+                    continue
+
+                if '*' in entry:
+                    if len(entry) > 1:
+                        raise RuntimeError(f'0x{code_point:04X}: wildcard flavor cannot be mixed with explicit flavors')
+
+                    glyph_reference = entry['*']
+                    if glyph_reference.flavor is not None:
+                        raise RuntimeError(f'0x{code_point:04X}: wildcard flavor reference must be a code point')
+
+                    if glyph_reference.code_point not in self:
+                        continue
+
+                    source_variants = self[glyph_reference.code_point].copy()
+                else:
+                    source_variants = None
+
+                    for flavor, glyph_reference in entry.items():
+                        if glyph_reference.code_point not in self:
+                            continue
+
+                        if source_variants is None:
+                            source_variants = CmapGlyphVariants()
+
+                        source_variants[flavor] = self[glyph_reference.code_point].select(glyph_reference.flavor)
+
+                    if source_variants is None:
+                        continue
+
+                if code_point not in result:
+                    result[code_point] = source_variants
                     continue
 
                 target_variants = result[code_point]
