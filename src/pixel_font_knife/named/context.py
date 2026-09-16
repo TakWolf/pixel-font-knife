@@ -80,6 +80,10 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
 
         check_glyph_name_key(name_key)
 
+        if glyph_variants is None:
+            self.pop(name_key, None)
+            return
+
         if not isinstance(glyph_variants, NamedGlyphVariants):
             raise ValueError(f'illegal value type: {type(glyph_variants).__name__!r}')
 

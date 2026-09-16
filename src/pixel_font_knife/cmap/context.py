@@ -82,6 +82,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
         if code_point < 0:
             raise KeyError(f'illegal code point: {code_point}')
 
+        if glyph_variants is None:
+            self.pop(code_point, None)
+            return
+
         if not isinstance(glyph_variants, CmapGlyphVariants):
             raise ValueError(f'illegal value type: {type(glyph_variants).__name__!r}')
 
