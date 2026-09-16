@@ -59,7 +59,6 @@ class CmapGlyphFile(GlyphFile):
     ):
         if code_point < 0:
             raise KeyError(f'illegal code point: {code_point}')
-
         if flavors is not None:
             check_flavors(flavors)
 
