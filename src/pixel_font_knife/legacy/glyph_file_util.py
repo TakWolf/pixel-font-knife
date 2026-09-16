@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 from collections import UserDict
+from collections.abc import Mapping
 from os import PathLike
 from pathlib import Path
 from typing import Any
@@ -216,7 +217,7 @@ def normalize_context(
 
 
 def get_glyph_sequence(
-        context: dict[int, GlyphFlavorGroup],
+        context: Mapping[int, GlyphFlavorGroup],
         flavors: list[str] | None = None,
 ) -> list[GlyphFile]:
     if -1 in context:
@@ -249,7 +250,7 @@ def get_glyph_sequence(
 
 
 def get_character_mapping(
-        context: dict[int, GlyphFlavorGroup],
+        context: Mapping[int, GlyphFlavorGroup],
         flavor: str | None = None,
 ) -> dict[int, str]:
     character_mapping = {}

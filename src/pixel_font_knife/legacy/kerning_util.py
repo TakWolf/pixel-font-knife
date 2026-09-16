@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from os import PathLike
 from pathlib import Path
 
@@ -46,7 +47,7 @@ class KerningConfig:
 
 def calculate_kerning_values(
         kerning_config: KerningConfig,
-        context: dict[int, GlyphFlavorGroup],
+        context: Mapping[int, GlyphFlavorGroup],
         flavor: str | None = None,
 ) -> dict[tuple[str, str], int]:
     kerning_values = {}

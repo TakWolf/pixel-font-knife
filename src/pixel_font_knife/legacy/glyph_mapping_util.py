@@ -1,4 +1,5 @@
 from collections import UserDict
+from collections.abc import Mapping
 from io import StringIO
 from os import PathLike
 from pathlib import Path
@@ -105,7 +106,7 @@ def load_mapping(file_path: str | PathLike[str]) -> dict[int, SourceFlavorGroup]
 
 
 def save_mapping(
-        mapping: dict[int, SourceFlavorGroup],
+        mapping: Mapping[int, SourceFlavorGroup],
         file_path: str | PathLike[str],
         flavors_order: list[str] | None = None,
 ) -> None:
@@ -173,7 +174,7 @@ def save_mapping(
 
 def apply_mapping(
         context: dict[int, GlyphFlavorGroup],
-        mapping: dict[int, SourceFlavorGroup],
+        mapping: Mapping[int, SourceFlavorGroup],
 ) -> None:
     context_patch = {}
     for code_point, source_group in mapping.items():
