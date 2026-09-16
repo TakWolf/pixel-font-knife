@@ -82,6 +82,8 @@ class CmapGlyphFile(GlyphFile):
         if not self.file_path.exists():
             raise RuntimeError(f"missing glyph file:\n'{self.file_path}'")
 
+        if self.code_point < 0:
+            raise KeyError(f'illegal code point: {self.code_point}')
         check_flavors(self.flavors)
 
         file_dir = CmapGlyphFile.get_normalized_dir(self.code_point, root_dir)
