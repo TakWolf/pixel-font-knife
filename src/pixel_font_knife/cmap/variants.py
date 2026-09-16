@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import UserDict
 from typing import Any
 
@@ -30,9 +32,15 @@ class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
         flavor = normalize_flavor(flavor)
         return super().__contains__(flavor)
 
+    def __copy__(self) -> CmapGlyphVariants:
+        return self.copy()
+
     def select(self, flavor: str | None = None) -> CmapGlyphFile:
         if flavor in self:
             return self[flavor]
         if None in self:
             return self[None]
         raise KeyError(f'no flavor file: {flavor!r}')
+
+    def copy(self) -> CmapGlyphVariants:
+        return CmapGlyphVariants(self)

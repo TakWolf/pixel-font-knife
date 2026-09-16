@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import shutil
 from collections import UserDict
+from collections.abc import Mapping
 from os import PathLike
 from pathlib import Path
 from typing import Any
 
 from pixel_font_knife.cmap.file import CmapGlyphFile
 from pixel_font_knife.cmap.variants import CmapGlyphVariants
+from pixel_font_knife.glyph.common import MergeConflictStrategy, validate_merge_conflict_strategy
 from pixel_font_knife.utils import fs_util
 
 
@@ -55,6 +57,9 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
 
         super().__setitem__(code_point, glyph_variants)
 
+    def __copy__(self) -> CmapContext:
+        return self.copy()
+
     def normalize(
             self,
             root_dir: str | PathLike[str],
@@ -70,6 +75,59 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
         for file_dir, _, _ in root_dir.walk(top_down=False):
             if fs_util.is_empty_dir(file_dir):
                 shutil.rmtree(file_dir)
+
+    def merge_by_code_point(
+            self,
+            *contexts: Mapping[int, CmapGlyphVariants],
+            conflict: MergeConflictStrategy = 'error',
+    ) -> CmapContext:
+        validate_merge_conflict_strategy(conflict)
+
+        result = self.copy()
+        for context in contexts:
+            for code_point, glyph_variants in context.items():
+                if code_point not in result:
+                    result[code_point] = glyph_variants.copy()
+                    continue
+
+                match conflict:
+                    case 'keep':
+                        pass
+                    case 'replace':
+                        result[code_point] = glyph_variants.copy()
+                    case _:
+                        raise RuntimeError(f'duplicate cmap code point: 0x{code_point:04X}')
+        return result
+
+    def merge_by_flavor(
+            self,
+            *contexts: Mapping[int, CmapGlyphVariants],
+            conflict: MergeConflictStrategy = 'error',
+    ) -> CmapContext:
+        validate_merge_conflict_strategy(conflict)
+
+        result = self.copy()
+        for context in contexts:
+            for code_point, source_variants in context.items():
+                if code_point not in result:
+                    result[code_point] = source_variants.copy()
+                    continue
+
+                target_variants = result[code_point]
+
+                for flavor, glyph_file in source_variants.items():
+                    if flavor not in target_variants:
+                        target_variants[flavor] = glyph_file
+                        continue
+
+                    match conflict:
+                        case 'keep':
+                            pass
+                        case 'replace':
+                            target_variants[flavor] = glyph_file
+                        case _:
+                            raise RuntimeError(f'duplicate cmap flavor: 0x{code_point:04X} {flavor!r}')
+        return result
 
     def get_glyph_sequence(self, flavor_order: list[str | None] | None = None) -> list[CmapGlyphFile]:
         if flavor_order is None:
@@ -94,3 +152,9 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             glyph_file = glyph_variants.select(flavor)
             character_mapping[code_point] = glyph_file.glyph_name
         return character_mapping
+
+    def copy(self) -> CmapContext:
+        result = CmapContext()
+        for code_point, glyph_variants in self.items():
+            result[code_point] = glyph_variants.copy()
+        return result
