@@ -31,7 +31,7 @@ def check_flavor(flavor: Any) -> None:
     if len(flavor) == 0:
         raise KeyError('flavor cannot be empty')
 
-    if any(character.isspace() for character in flavor) or '.' in flavor or ',' in flavor or '，' in flavor:
+    if any(character.isspace() for character in flavor) or '.' in flavor or ',' in flavor or '*' in flavor:
         raise KeyError(f'illegal flavor: {flavor!r}')
 
 

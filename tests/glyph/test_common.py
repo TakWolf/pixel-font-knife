@@ -18,7 +18,7 @@ def test_validate_flavor() -> None:
         'zh\u3000cn',
         'zh.cn',
         'zh,cn',
-        'zh，cn',
+        'zh_cn*',
     ],
 )
 def test_validate_flavor_with_illegal_character(flavor: str) -> None:
