@@ -1,0 +1,168 @@
+from __future__ import annotations
+
+from collections import UserDict
+from collections.abc import Collection, Sequence
+from io import StringIO
+from os import PathLike
+from pathlib import Path
+from typing import Any
+
+import unicodedata2
+import yaml
+
+from pixel_font_knife.cmap.mapping.entry import CmapMappingEntry
+from pixel_font_knife.cmap.mapping.reference import CmapGlyphReference
+
+
+def _display_code_point(code_point: int) -> str:
+    c = chr(code_point)
+    category = unicodedata2.category(c)
+    if category.startswith(('L', 'M', 'N', 'P', 'S')):
+        return c
+    return unicodedata2.name(c, f'0x{code_point:04X}')
+
+
+class CmapMapping(UserDict[int, CmapMappingEntry]):
+    @staticmethod
+    def load_yaml(
+            file_path: str | PathLike[str],
+            allowed_flavors: Collection[str] | None = None,
+    ) -> CmapMapping:
+        if allowed_flavors is not None:
+            allowed_flavors = set(allowed_flavors)
+
+        if not isinstance(file_path, Path):
+            file_path = Path(file_path)
+
+        mapping = CmapMapping()
+        raw_mapping = yaml.safe_load(file_path.read_bytes())
+        if raw_mapping is not None:
+            for code_point, raw_entry in raw_mapping.items():
+                if raw_entry is not None:
+                    entry = CmapMappingEntry()
+                    if '*' in raw_entry:
+                        if len(raw_entry) > 1:
+                            raise RuntimeError(f'0x{code_point:04X} wildcard flavor cannot be mixed with explicit flavors')
+
+                        value = raw_entry['*']
+                        if not isinstance(value, int):
+                            raise RuntimeError(f'0x{code_point:04X} wildcard flavor reference must be a code point')
+
+                        entry['*'] = CmapGlyphReference(value)
+                    else:
+                        for key, value in raw_entry.items():
+                            if key is None:
+                                flavors = []
+                            else:
+                                flavors = key.split(',')
+
+                            if isinstance(value, int):
+                                glyph_reference = CmapGlyphReference(value)
+                            else:
+                                reference_code_point_text, separator, reference_flavor = value.partition(' ')
+                                reference_code_point = int(reference_code_point_text, 0)
+
+                                if allowed_flavors is not None and separator and reference_flavor not in allowed_flavors:
+                                    raise RuntimeError(f'0x{code_point:04X} -> {key!r}: reference flavor {reference_flavor!r} not allowed')
+
+                                glyph_reference = CmapGlyphReference(reference_code_point, reference_flavor if separator else None)
+
+                            if len(flavors) > 0:
+                                for flavor in flavors:
+                                    if allowed_flavors is not None and flavor not in allowed_flavors:
+                                        raise RuntimeError(f'0x{code_point:04X}: flavor {flavor!r} not allowed')
+
+                                    if flavor in entry:
+                                        raise RuntimeError(f'0x{code_point:04X}: duplicate flavor {flavor!r}')
+
+                                    entry[flavor] = glyph_reference
+                            else:
+                                if None in entry:
+                                    raise RuntimeError(f'0x{code_point:04X}: duplicate default flavor')
+
+                                entry[None] = glyph_reference
+                    mapping[code_point] = entry
+        return mapping
+
+    def __setitem__(self, code_point: Any, entry: Any) -> None:
+        if not isinstance(code_point, int):
+            raise KeyError(f'illegal code point type: {type(code_point).__name__!r}')
+
+        if code_point < 0:
+            raise KeyError(f'illegal code point: {code_point}')
+
+        if entry is None:
+            self.pop(code_point, None)
+            return
+
+        if not isinstance(entry, CmapMappingEntry):
+            raise ValueError(f'illegal value type: {type(entry).__name__!r}')
+
+        super().__setitem__(code_point, entry)
+
+    def save_yaml(
+            self,
+            file_path: str | PathLike[str],
+            flavor_order: Sequence[str] | None = None,
+    ) -> None:
+        buffer = StringIO()
+
+        for code_point, entry in sorted(self.items()):
+            buffer.write('\n')
+            buffer.write(f'# {_display_code_point(code_point)}\n')
+            buffer.write(f'0x{code_point:04X}:\n')
+
+            if '*' in entry:
+                if len(entry) > 1:
+                    raise RuntimeError(f'0x{code_point:04X}: wildcard flavor cannot be mixed with explicit flavors')
+
+                glyph_reference = entry['*']
+                if glyph_reference.flavor is not None:
+                    raise RuntimeError(f'0x{code_point:04X}: wildcard flavor reference must be a code point')
+
+                buffer.write(f'  # {_display_code_point(glyph_reference.code_point)}\n')
+                buffer.write(f'  "*": 0x{glyph_reference.code_point:04X}\n')
+            else:
+                reference_pending = {}
+                for flavor, glyph_reference in entry.items():
+                    key = glyph_reference.code_point, glyph_reference.flavor
+                    if key in reference_pending:
+                        flavors = reference_pending[key]
+                    else:
+                        flavors = []
+                        reference_pending[key] = flavors
+                    flavors.append(flavor)
+
+                flavor_pending = []
+                default_reference = None
+                for (reference_code_point, reference_flavor), flavors in reference_pending.items():
+                    reference_str = f'0x{reference_code_point:04X}'
+                    if reference_flavor is not None:
+                        reference_str = f'{reference_str} {reference_flavor}'
+                    reference_c = _display_code_point(reference_code_point)
+
+                    if None in flavors:
+                        default_reference = reference_str, reference_c
+                        continue
+                    if flavor_order is None:
+                        flavors.sort()
+                    else:
+                        flavors.sort(key=lambda x: flavor_order.index(x))
+                    flavor_pending.append((flavors[0], ','.join(flavors), (reference_str, reference_c)))
+
+                if flavor_order is None:
+                    flavor_pending.sort()
+                else:
+                    flavor_pending.sort(key=lambda x: flavor_order.index(x[0]))
+
+                if default_reference is not None:
+                    default_reference_str, default_reference_c = default_reference
+                    buffer.write(f'  # {default_reference_c}\n')
+                    buffer.write(f'  ~: {default_reference_str}\n')
+                for _, flavors_str, (reference_str, reference_c) in flavor_pending:
+                    buffer.write(f'  # {reference_c}\n')
+                    buffer.write(f'  {flavors_str}: {reference_str}\n')
+
+        if not isinstance(file_path, Path):
+            file_path = Path(file_path)
+        file_path.write_text(buffer.getvalue(), 'utf-8')
