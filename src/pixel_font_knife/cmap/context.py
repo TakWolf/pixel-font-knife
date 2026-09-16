@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 from collections import UserDict
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from os import PathLike
 from pathlib import Path
 from typing import Any
@@ -37,7 +37,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
     """
 
     @staticmethod
-    def load(root_dir: str | PathLike[str]) -> CmapContext:
+    def load(
+            root_dir: str | PathLike[str],
+            allowed_flavors: Collection[str] | None = None,
+    ) -> CmapContext:
         if not isinstance(root_dir, Path):
             root_dir = Path(root_dir)
 
@@ -58,6 +61,8 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
 
                 if len(glyph_file.flavors) > 0:
                     for flavor in glyph_file.flavors:
+                        if allowed_flavors is not None and flavor not in allowed_flavors:
+                            raise RuntimeError(f"flavor {flavor!r} not allowed:\n'{file_path}'")
                         if flavor in glyph_variants:
                             raise RuntimeError(f"flavor {flavor!r} already exists:\n'{file_path}'\n'{glyph_variants[flavor].file_path}'")
                         glyph_variants[flavor] = glyph_file
