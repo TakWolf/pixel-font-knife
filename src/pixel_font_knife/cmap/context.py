@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 from collections import UserDict
-from collections.abc import Mapping
+from collections.abc import Sequence
 from os import PathLike
 from pathlib import Path
 from typing import Any
@@ -85,7 +85,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
     def normalize(
             self,
             root_dir: str | PathLike[str],
-            flavor_order: list[str] | None = None,
+            flavor_order: Sequence[str] | None = None,
     ) -> None:
         if not isinstance(root_dir, Path):
             root_dir = Path(root_dir)
@@ -151,7 +151,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                             raise RuntimeError(f'duplicate cmap flavor: 0x{code_point:04X} {flavor!r}')
         return result
 
-    def with_default_flavor(self, flavor_order: list[str] | None = None) -> CmapContext:
+    def with_default_flavor(self, flavor_order: Sequence[str] | None = None) -> CmapContext:
         result = self.copy()
         for code_point, glyph_variants in result.items():
             if None not in glyph_variants:
@@ -171,7 +171,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                         raise RuntimeError(f'cannot fallback default with flavors: {flavor_order!r}')
         return result
 
-    def get_glyph_sequence(self, flavor_order: list[str | None] | None = None) -> list[CmapGlyphFile]:
+    def get_glyph_sequence(self, flavor_order: Sequence[str | None] | None = None) -> list[CmapGlyphFile]:
         if flavor_order is None:
             flavor_order = [None]
 

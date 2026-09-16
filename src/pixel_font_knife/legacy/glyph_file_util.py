@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import shutil
 from collections import UserDict
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from os import PathLike
 from pathlib import Path
 from typing import Any
@@ -176,7 +176,7 @@ def load_context(root_dir: str | PathLike[str]) -> dict[int, GlyphFlavorGroup]:
 def normalize_context(
         context: dict[int, GlyphFlavorGroup],
         root_dir: str | PathLike[str],
-        flavors_order: list[str] | None = None,
+        flavors_order: Sequence[str] | None = None,
 ) -> None:
     if isinstance(root_dir, str):
         root_dir = Path(root_dir)
@@ -218,7 +218,7 @@ def normalize_context(
 
 def get_glyph_sequence(
         context: Mapping[int, GlyphFlavorGroup],
-        flavors: list[str] | None = None,
+        flavors: Sequence[str] | None = None,
 ) -> list[GlyphFile]:
     if -1 in context:
         flavor_group = context[-1]

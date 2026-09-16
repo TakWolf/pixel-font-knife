@@ -1,5 +1,5 @@
 from collections import UserDict
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from io import StringIO
 from os import PathLike
 from pathlib import Path
@@ -108,7 +108,7 @@ def load_mapping(file_path: str | PathLike[str]) -> dict[int, SourceFlavorGroup]
 def save_mapping(
         mapping: Mapping[int, SourceFlavorGroup],
         file_path: str | PathLike[str],
-        flavors_order: list[str] | None = None,
+        flavors_order: Sequence[str] | None = None,
 ) -> None:
     buffer = StringIO()
 

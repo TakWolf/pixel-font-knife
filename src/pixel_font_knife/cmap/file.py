@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from os import PathLike
 from pathlib import Path
 
@@ -74,7 +75,7 @@ class CmapGlyphFile(GlyphFile):
     def normalize(
             self,
             root_dir: str | PathLike[str],
-            flavor_order: list[str] | None = None,
+            flavor_order: Sequence[str] | None = None,
     ) -> None:
         if not self.file_path.exists():
             raise RuntimeError(f"missing glyph file:\n'{self.file_path}'")
