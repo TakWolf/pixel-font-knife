@@ -100,7 +100,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
 
     def merge_by_code_point(
             self,
-            *contexts: Mapping[int, CmapGlyphVariants],
+            *contexts: CmapContext,
             conflict: MergeConflictStrategy = 'error',
     ) -> CmapContext:
         validate_merge_conflict_strategy(conflict)
@@ -123,7 +123,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
 
     def merge_by_flavor(
             self,
-            *contexts: Mapping[int, CmapGlyphVariants],
+            *contexts: CmapContext,
             conflict: MergeConflictStrategy = 'error',
     ) -> CmapContext:
         validate_merge_conflict_strategy(conflict)
