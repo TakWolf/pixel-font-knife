@@ -18,8 +18,9 @@ class CmapGlyphFile(GlyphFile):
     将本地文件移动到由当前属性确定的规范路径。
 
     glyph name 由 code point 和第一个 flavor 生成；只使用第一个 flavor 是为了控制字体内 glyph name
-    的长度。无 flavor 时名称仅由 code point 生成。``load()`` 从文件名解析属性并规范化 flavor，
-    ``normalize()`` 只规范本地路径，不会更新任何上下文映射，也不会校验整个目录能否无冲突地重新加载。
+    的长度。无 flavor 时名称仅由 code point 生成。``load()`` 从文件名解析属性并验证 flavor，
+    不会修改 flavor 的大小写或其他字符。``normalize()`` 只规范本地路径，不会更新任何上下文映射，
+    也不会校验整个目录能否无冲突地重新加载。
     """
 
     @staticmethod
