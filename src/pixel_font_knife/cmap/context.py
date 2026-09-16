@@ -151,6 +151,26 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                             raise RuntimeError(f'duplicate cmap flavor: 0x{code_point:04X} {flavor!r}')
         return result
 
+    def with_default_flavor(self, flavor_order: list[str] | None = None) -> CmapContext:
+        result = self.copy()
+        for code_point, glyph_variants in result.items():
+            if None not in glyph_variants:
+                if len(glyph_variants) == 0:
+                    raise RuntimeError(f'empty glyph variants: 0x{code_point:04X}')
+
+                if flavor_order is None:
+                    for flavor in glyph_variants.keys():
+                        glyph_variants[None] = glyph_variants[flavor]
+                        break
+                else:
+                    for flavor in flavor_order:
+                        if flavor in glyph_variants:
+                            glyph_variants[None] = glyph_variants[flavor]
+                            break
+                    if None not in glyph_variants:
+                        raise RuntimeError(f'cannot fallback default with flavors: {flavor_order!r}')
+        return result
+
     def get_glyph_sequence(self, flavor_order: list[str | None] | None = None) -> list[CmapGlyphFile]:
         if flavor_order is None:
             flavor_order = [None]
