@@ -22,7 +22,7 @@ class KerningConfig:
             groups[group_name] = list(alphabet)
 
         templates = {}
-        for group_names, offset in data['templates'].items():
+        for group_names, offset in data['values'].items():
             group_names = group_names.split(',')
             left_group_name = group_names[0]
             right_group_name = group_names[1]

@@ -3,5 +3,5 @@ groups:
   latin_T: T
   latin_o: o
 
-templates:
+values:
   latin_T,latin_o: -1
