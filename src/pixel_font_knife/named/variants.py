@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import UserDict
 from typing import Any
 
-from pixel_font_knife.glyph.common import check_flavor
+from pixel_font_knife.glyph.common import check_glyph_name_key, check_flavor
 from pixel_font_knife.named.file import NamedGlyphFile
 
 
@@ -20,6 +20,13 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
     原有的 ``NamedGlyphFile`` 对象及其画布缓存。
     """
 
+    name_key: str
+
+    def __init__(self, name_key: str) -> None:
+        check_glyph_name_key(name_key)
+        super().__init__()
+        self.name_key = name_key
+
     def __setitem__(self, flavor: Any, glyph_file: Any) -> None:
         if flavor is not None:
             check_flavor(flavor)
@@ -31,14 +38,25 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
         if not isinstance(glyph_file, NamedGlyphFile):
             raise ValueError(f'illegal value type: {type(glyph_file).__name__!r}')
 
+        if glyph_file.name_key != self.name_key:
+            raise ValueError(f'name key mismatch: {self.name_key!r} != {glyph_file.name_key!r}')
+
         super().__setitem__(flavor, glyph_file)
 
     def __copy__(self) -> NamedGlyphVariants:
         return self.copy()
 
+    def check(self) -> None:
+        check_glyph_name_key(self.name_key)
+        for glyph_file in self.values():
+            if glyph_file.name_key != self.name_key:
+                raise ValueError(f'name key mismatch: {self.name_key!r} != {glyph_file.name_key!r}')
+
     def select(self, flavor: str | None = None) -> NamedGlyphFile:
         if flavor is not None:
             check_flavor(flavor)
+
+        self.check()
 
         if flavor in self:
             return self[flavor]
@@ -49,4 +67,8 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
         raise KeyError(f'no flavor file: {flavor!r}')
 
     def copy(self) -> NamedGlyphVariants:
-        return NamedGlyphVariants(self)
+        self.check()
+
+        result = NamedGlyphVariants(self.name_key)
+        result.update(self)
+        return result

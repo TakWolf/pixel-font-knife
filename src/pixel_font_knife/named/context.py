@@ -56,7 +56,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
                 glyph_file = NamedGlyphFile.load(file_path)
 
                 if glyph_file.name_key not in context:
-                    glyph_variants = NamedGlyphVariants()
+                    glyph_variants = NamedGlyphVariants(glyph_file.name_key)
                     context[glyph_file.name_key] = glyph_variants
                 else:
                     glyph_variants = context[glyph_file.name_key]
@@ -83,12 +83,24 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
         if not isinstance(glyph_variants, NamedGlyphVariants):
             raise ValueError(f'illegal value type: {type(glyph_variants).__name__!r}')
 
+        if glyph_variants.name_key != name_key:
+            raise ValueError(f'name key mismatch: {name_key!r} != {glyph_variants.name_key!r}')
+
+        glyph_variants.check()
+
         super().__setitem__(name_key, glyph_variants)
 
     def __copy__(self) -> NamedContext:
         return self.copy()
 
+    def check(self) -> None:
+        for name_key, glyph_variants in self.items():
+            if glyph_variants.name_key != name_key:
+                raise ValueError(f'name key mismatch: {name_key!r} != {glyph_variants.name_key!r}')
+            glyph_variants.check()
+
     def normalize(self, flavor_order: Sequence[str] | None = None) -> None:
+        self.check()
         for glyph_variants in self.values():
             for glyph_file in glyph_variants.values():
                 glyph_file.normalize(flavor_order)
@@ -102,6 +114,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
 
         result = self.copy()
         for context in contexts:
+            context.check()
             for name_key, glyph_variants in context.items():
                 if name_key not in result:
                     result[name_key] = glyph_variants.copy()
@@ -125,6 +138,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
 
         result = self.copy()
         for context in contexts:
+            context.check()
             for name_key, source_variants in context.items():
                 if name_key not in result:
                     result[name_key] = source_variants.copy()
