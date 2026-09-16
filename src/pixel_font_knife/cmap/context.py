@@ -9,7 +9,7 @@ from typing import Any
 
 from pixel_font_knife.cmap.file import CmapGlyphFile
 from pixel_font_knife.cmap.variants import CmapGlyphVariants
-from pixel_font_knife.glyph.common import MergeConflictStrategy, validate_merge_conflict_strategy
+from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy
 from pixel_font_knife.utils import fs_util
 
 
@@ -41,6 +41,9 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             root_dir: str | PathLike[str],
             allowed_flavors: Collection[str] | None = None,
     ) -> CmapContext:
+        if allowed_flavors is not None:
+            allowed_flavors = set(allowed_flavors)
+
         if not isinstance(root_dir, Path):
             root_dir = Path(root_dir)
 
@@ -108,7 +111,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             *contexts: CmapContext,
             conflict: MergeConflictStrategy = 'error',
     ) -> CmapContext:
-        validate_merge_conflict_strategy(conflict)
+        check_merge_conflict_strategy(conflict)
 
         result = self.copy()
         for context in contexts:
@@ -131,7 +134,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             *contexts: CmapContext,
             conflict: MergeConflictStrategy = 'error',
     ) -> CmapContext:
-        validate_merge_conflict_strategy(conflict)
+        check_merge_conflict_strategy(conflict)
 
         result = self.copy()
         for context in contexts:

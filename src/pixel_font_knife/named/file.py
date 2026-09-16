@@ -3,8 +3,16 @@ from __future__ import annotations
 from os import PathLike
 from pathlib import Path
 
-from pixel_font_knife.glyph.common import normalize_flavor
+from pixel_font_knife.glyph.common import check_flavors
 from pixel_font_knife.glyph.file import GlyphFile
+
+
+def _check_glyph_name(glyph_name: str) -> None:
+    if glyph_name == '':
+        raise KeyError('glyph name cannot be empty')
+
+    if any(character.isspace() for character in glyph_name):
+        raise KeyError(f'illegal glyph name: {glyph_name!r}')
 
 
 class NamedGlyphFile(GlyphFile):
@@ -13,14 +21,8 @@ class NamedGlyphFile(GlyphFile):
         if not isinstance(file_path, Path):
             file_path = Path(file_path)
 
-        parts = file_path.stem.split(maxsplit=1)
-        glyph_name = parts[0]
-        flavors = []
-        if len(parts) > 1:
-            for flavor in parts[1].split(','):
-                flavor = normalize_flavor(flavor)
-                if flavor not in flavors:
-                    flavors.append(flavor)
+        glyph_name, separator, flavors_text = file_path.stem.partition(' ')
+        flavors = flavors_text.split(',') if separator else []
         return NamedGlyphFile(file_path, glyph_name, flavors)
 
     @staticmethod
@@ -36,6 +38,10 @@ class NamedGlyphFile(GlyphFile):
             glyph_name: str,
             flavors: list[str] | None = None,
     ):
+        _check_glyph_name(glyph_name)
+        if flavors is not None:
+            check_flavors(flavors)
+
         super().__init__(file_path)
         self._glyph_name = glyph_name
         self.flavors = flavors if flavors is not None else []
@@ -46,4 +52,5 @@ class NamedGlyphFile(GlyphFile):
 
     @glyph_name.setter
     def glyph_name(self, value: str) -> None:
+        _check_glyph_name(value)
         self._glyph_name = value

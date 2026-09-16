@@ -6,7 +6,7 @@ from pathlib import Path
 
 import unidata_blocks
 
-from pixel_font_knife.glyph.common import normalize_flavor
+from pixel_font_knife.glyph.common import check_flavors
 from pixel_font_knife.glyph.file import GlyphFile
 
 
@@ -42,14 +42,9 @@ class CmapGlyphFile(GlyphFile):
         if not isinstance(file_path, Path):
             file_path = Path(file_path)
 
-        parts = file_path.stem.split(maxsplit=1)
-        code_point = int(parts[0], 16)
-        flavors = []
-        if len(parts) > 1:
-            for flavor in parts[1].split(','):
-                flavor = normalize_flavor(flavor)
-                if flavor not in flavors:
-                    flavors.append(flavor)
+        code_point_text, separator, flavors_text = file_path.stem.partition(' ')
+        code_point = int(code_point_text, 16)
+        flavors = flavors_text.split(',') if separator else []
         return CmapGlyphFile(file_path, code_point, flavors)
 
     code_point: int
@@ -61,6 +56,12 @@ class CmapGlyphFile(GlyphFile):
             code_point: int,
             flavors: list[str] | None = None,
     ):
+        if code_point < 0:
+            raise KeyError(f'illegal code point: {code_point}')
+
+        if flavors is not None:
+            check_flavors(flavors)
+
         super().__init__(file_path)
         self.code_point = code_point
         self.flavors = flavors if flavors is not None else []
@@ -69,7 +70,7 @@ class CmapGlyphFile(GlyphFile):
     def glyph_name(self) -> str:
         name = f'u{self.code_point:04X}'
         if len(self.flavors) > 0:
-            name = f'{name}.{self.flavors[0].lower()}'
+            name = f'{name}.{self.flavors[0]}'
         return name
 
     def normalize(
@@ -79,6 +80,8 @@ class CmapGlyphFile(GlyphFile):
     ) -> None:
         if not self.file_path.exists():
             raise RuntimeError(f"missing glyph file:\n'{self.file_path}'")
+
+        check_flavors(self.flavors)
 
         file_dir = CmapGlyphFile.get_normalized_dir(self.code_point, root_dir)
 

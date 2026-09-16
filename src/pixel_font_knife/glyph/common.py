@@ -1,4 +1,5 @@
-from typing import Literal
+from collections.abc import Iterable
+from typing import Literal, Any
 
 MergeConflictStrategy = Literal[
     'error',
@@ -7,18 +8,29 @@ MergeConflictStrategy = Literal[
 ]
 
 
-def validate_merge_conflict_strategy(conflict: MergeConflictStrategy) -> None:
+def check_merge_conflict_strategy(conflict: MergeConflictStrategy) -> None:
     if conflict not in ('error', 'keep', 'replace'):
         raise ValueError(f'illegal merge conflict strategy: {conflict!r}')
 
 
-def normalize_flavor(flavor: object) -> str | None:
-    if isinstance(flavor, str):
-        flavor = flavor.strip().lower()
-        if len(flavor) == 0:
-            raise KeyError('flavor cannot be empty')
-        return flavor
+def check_flavor(flavor: Any) -> None:
+    if flavor is None:
+        raise KeyError('flavor cannot be None')
 
-    if flavor is not None:
+    if not isinstance(flavor, str):
         raise KeyError(f'illegal flavor type: {type(flavor).__name__!r}')
-    return None
+
+    if len(flavor) == 0:
+        raise KeyError('flavor cannot be empty')
+
+    if any(character.isspace() for character in flavor) or '.' in flavor or ',' in flavor or '，' in flavor:
+        raise KeyError(f'illegal flavor: {flavor!r}')
+
+
+def check_flavors(flavors: Iterable[Any]) -> None:
+    validated_flavors = set()
+    for flavor in flavors:
+        check_flavor(flavor)
+        if flavor in validated_flavors:
+            raise KeyError(f'duplicate flavor: {flavor!r}')
+        validated_flavors.add(flavor)
