@@ -67,6 +67,87 @@ def test_mapping_cannot_resolve_another_reference(method_name: str) -> None:
     assert 0x41 not in result
 
 
+@pytest.mark.parametrize(
+    'method_name',
+    [
+        'apply_mapping_by_code_point',
+        'apply_mapping_by_flavor',
+    ],
+)
+@pytest.mark.parametrize('target_flavor', ['*', None, 'zh_cn'])
+def test_apply_mapping_allows_missing_code_point(method_name: str, target_flavor: str | None) -> None:
+    context = CmapContext()
+    entry = CmapMappingEntry({target_flavor: CmapGlyphReference(0x9999)})
+    mapping = CmapMapping({0x41: entry})
+
+    result = getattr(context, method_name)(mapping)
+
+    assert 0x41 not in result
+
+
+@pytest.mark.parametrize(
+    'method_name',
+    [
+        'apply_mapping_by_code_point',
+        'apply_mapping_by_flavor',
+    ],
+)
+@pytest.mark.parametrize('target_flavor', ['*', None, 'zh_cn'])
+def test_apply_mapping_rejects_missing_code_point(method_name: str, target_flavor: str | None) -> None:
+    context = CmapContext()
+    entry = CmapMappingEntry({target_flavor: CmapGlyphReference(0x9999)})
+    mapping = CmapMapping({0x41: entry})
+
+    with pytest.raises(RuntimeError, match=re.escape('0x0041: missing reference code point 0x9999')):
+        getattr(context, method_name)(mapping, allow_missing_code_point=False)
+
+
+@pytest.mark.parametrize(
+    'method_name',
+    [
+        'apply_mapping_by_code_point',
+        'apply_mapping_by_flavor',
+    ],
+)
+def test_apply_mapping_allows_partially_missing_code_point(method_name: str) -> None:
+    glyph_file = CmapGlyphFile('0042.png', 0x42)
+    context = CmapContext({
+        0x42: CmapGlyphVariants({None: glyph_file}),
+    })
+    entry = CmapMappingEntry({
+        None: CmapGlyphReference(0x42),
+        'zh_cn': CmapGlyphReference(0x9999),
+    })
+    mapping = CmapMapping({0x41: entry})
+
+    result = getattr(context, method_name)(mapping)
+
+    assert result[0x41][None] is glyph_file
+    assert 'zh_cn' not in result[0x41]
+
+
+@pytest.mark.parametrize(
+    'method_name',
+    [
+        'apply_mapping_by_code_point',
+        'apply_mapping_by_flavor',
+    ],
+)
+def test_apply_mapping_rejects_partially_missing_code_point(method_name: str) -> None:
+    glyph_file = CmapGlyphFile('0042.png', 0x42)
+    context = CmapContext({
+        0x42: CmapGlyphVariants({None: glyph_file}),
+    })
+    entry = CmapMappingEntry({
+        None: CmapGlyphReference(0x42),
+        'zh_cn': CmapGlyphReference(0x9999),
+    })
+    mapping = CmapMapping({0x41: entry})
+
+    with pytest.raises(RuntimeError, match=re.escape('0x0041: missing reference code point 0x9999')):
+        getattr(context, method_name)(mapping, allow_missing_code_point=False)
+
+
 def test_load_yaml_rejects_disallowed_target_flavor(tmp_path: Path) -> None:
     yaml_path = tmp_path.joinpath('mapping.yaml')
     yaml_path.write_text('0x0041:\n  zh_tw: 0x0042\n', 'utf-8')

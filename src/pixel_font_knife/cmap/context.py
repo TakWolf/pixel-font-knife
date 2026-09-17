@@ -172,6 +172,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
     def apply_mapping_by_code_point(
             self,
             *mappings: CmapMapping,
+            allow_missing_code_point: bool = True,
             conflict: MergeConflictStrategy = 'error',
     ) -> CmapContext:
         check_merge_conflict_strategy(conflict)
@@ -191,7 +192,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                         raise RuntimeError(f'0x{code_point:04X}: wildcard flavor reference must be a code point')
 
                     if glyph_reference.code_point not in self:
-                        continue
+                        if allow_missing_code_point:
+                            continue
+                        else:
+                            raise RuntimeError(f'0x{code_point:04X}: missing reference code point 0x{glyph_reference.code_point:04X}')
 
                     glyph_variants = self[glyph_reference.code_point].copy()
                 else:
@@ -199,7 +203,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
 
                     for flavor, glyph_reference in entry.items():
                         if glyph_reference.code_point not in self:
-                            continue
+                            if allow_missing_code_point:
+                                continue
+                            else:
+                                raise RuntimeError(f'0x{code_point:04X}: missing reference code point 0x{glyph_reference.code_point:04X}')
 
                         if glyph_variants is None:
                             glyph_variants = CmapGlyphVariants()
@@ -225,6 +232,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
     def apply_mapping_by_flavor(
             self,
             *mappings: CmapMapping,
+            allow_missing_code_point: bool = True,
             conflict: MergeConflictStrategy = 'error',
     ) -> CmapContext:
         check_merge_conflict_strategy(conflict)
@@ -244,7 +252,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                         raise RuntimeError(f'0x{code_point:04X}: wildcard flavor reference must be a code point')
 
                     if glyph_reference.code_point not in self:
-                        continue
+                        if allow_missing_code_point:
+                            continue
+                        else:
+                            raise RuntimeError(f'0x{code_point:04X}: missing reference code point 0x{glyph_reference.code_point:04X}')
 
                     source_variants = self[glyph_reference.code_point].copy()
                 else:
@@ -252,7 +263,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
 
                     for flavor, glyph_reference in entry.items():
                         if glyph_reference.code_point not in self:
-                            continue
+                            if allow_missing_code_point:
+                                continue
+                            else:
+                                raise RuntimeError(f'0x{code_point:04X}: missing reference code point 0x{glyph_reference.code_point:04X}')
 
                         if source_variants is None:
                             source_variants = CmapGlyphVariants()
