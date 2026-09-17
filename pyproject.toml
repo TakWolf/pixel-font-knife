@@ -1,7 +1,7 @@
 [project]
 name = "pixel-font-knife"
 version = "0.0.28"
-description = "A set of pixel font utilities"
+description = "Bitmap, glyph asset, cmap mapping, and kerning tools for pixel-font-build pipelines"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

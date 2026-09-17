@@ -3,9 +3,7 @@
 [![Python](https://img.shields.io/badge/python-3.12-brightgreen?style=flat-square)](https://www.python.org)
 [![PyPI](https://img.shields.io/pypi/v/pixel-font-knife?style=flat-square)](https://pypi.org/project/pixel-font-knife/)
 
-一组用于构建像素字体的实用工具包。
-
-该库被设计用于和 [Pixel Font Builder](https://github.com/TakWolf/pixel-font-builder) 配合使用，主要包含一些符合 [Ark Pixel Font](https://github.com/TakWolf/ark-pixel-font) 构建约定的通用工具。
+一个面向像素字体构建的工具库，提供单色位图处理、PNG 字形素材管理、多 flavor cmap/named 字形组织、引用映射和 kerning 数据生成，并可与 [Pixel Font Builder](https://github.com/TakWolf/pixel-font-builder) 配合使用。
 
 ## 安装
 
