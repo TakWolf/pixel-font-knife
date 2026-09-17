@@ -18,6 +18,13 @@ _SetOperation = Literal[
 
 
 class MonoBitmap(UserList[list[int]]):
+    """尺寸固定的 0/1 单色位图。
+
+    构造时会将非零像素归一化为 1，并要求所有行宽一致。对象允许修改现有像素或以等宽行替换现有行，
+    但不允许通过列表结构操作增删行；需要改变尺寸时应使用 ``resize()``、``crop()``、``scale()`` 或
+    ``scale_to()`` 创建新的位图。集合运算、碰撞检测和膨胀操作同样返回新对象，不修改输入位图。
+    """
+
     @staticmethod
     def blank(width: int, height: int) -> MonoBitmap:
         if width < 0 or height < 0:

@@ -4,6 +4,8 @@ from typing import Any
 
 
 class Padding:
+    """位图内容相对原始画布四条边的空白像素数量。"""
+
     left: int
     right: int
     top: int

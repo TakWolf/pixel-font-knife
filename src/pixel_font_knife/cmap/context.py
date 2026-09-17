@@ -23,9 +23,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
     或 flavor 引用，修改使用映射不会修改字形文件的本地信息。
 
     ``load()`` 根据本地文件名建立初始使用映射，并确保同一码点下的每个 flavor 只对应一个文件。
-    字形文件属性允许在素材设计阶段修改；修改后应立即调用 ``normalize()``，根据字形文件自身的
-    ``code_point`` 和 ``flavors`` 将文件移动到规范路径。该操作不会重建或改变当前使用映射，
-    也不保证规范化后的目录能够再次无冲突地加载。
+    字形文件属性允许在素材设计阶段修改；修改后应立即调用 ``normalize()``。``normalize()`` 只根据
+    每个字形文件自身的当前属性规范本地路径，不会更新 context key、variants key 或重新建立使用映射，
+    也不保证规范化后的目录能够再次无冲突地加载。该操作无事务：一旦某个文件规范化失败，之前已经移动
+    的文件不会自动回滚。完成移动后会清理 ``root_dir`` 下的空子目录，但始终保留 ``root_dir`` 本身。
 
     ``copy()`` 和合并操作只复制 ``CmapContext`` 与 ``CmapGlyphVariants`` 容器，始终共享原有的
     ``CmapGlyphFile`` 对象及其画布缓存。按码点合并时以整组变体为单位处理冲突；按 flavor 合并时
