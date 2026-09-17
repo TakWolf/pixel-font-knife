@@ -1,3 +1,6 @@
+import re
+from pathlib import Path
+
 import pytest
 
 from pixel_font_knife.cmap.context import CmapContext
@@ -62,3 +65,74 @@ def test_mapping_cannot_resolve_another_reference(method_name: str) -> None:
 
     assert result[0x42][None] is glyph_file
     assert 0x41 not in result
+
+
+def test_load_yaml_rejects_disallowed_target_flavor(tmp_path: Path) -> None:
+    yaml_path = tmp_path.joinpath('mapping.yaml')
+    yaml_path.write_text('0x0041:\n  zh_tw: 0x0042\n', 'utf-8')
+
+    with pytest.raises(RuntimeError, match=re.escape("0x0041: flavor 'zh_tw' not allowed")):
+        CmapMapping.load_yaml(yaml_path, {'zh_cn'})
+
+
+def test_load_yaml_rejects_disallowed_reference_flavor(tmp_path: Path) -> None:
+    yaml_path = tmp_path.joinpath('mapping.yaml')
+    yaml_path.write_text('0x0041:\n  zh_cn: 0x0042 zh_tw\n', 'utf-8')
+
+    with pytest.raises(RuntimeError, match=re.escape("0x0041 -> 'zh_cn': reference flavor 'zh_tw' not allowed")):
+        CmapMapping.load_yaml(yaml_path, {'zh_cn'})
+
+
+def test_load_and_save_yaml_preserves_mapping_semantics(assets_dir: Path, tmp_path: Path) -> None:
+    load_path = assets_dir.joinpath('mapping-example.yaml')
+    save_path = tmp_path.joinpath('mapping-example.yaml')
+
+    mapping = CmapMapping.load_yaml(load_path)
+    mapping.save_yaml(save_path)
+
+    assert load_path.read_text('utf-8') == save_path.read_text('utf-8')
+    assert set(mapping) == {0x0004, 0x0005}
+    assert set(mapping[0x0004]) == {'*'}
+    assert mapping[0x0004]['*'].code_point == 0x6AA4
+    assert mapping[0x0004]['*'].flavor is None
+    assert set(mapping[0x0005]) == {None, 'ko', 'zh_cn', 'zh_hk'}
+    assert mapping[0x0005][None].code_point == 0x6AA4
+    assert mapping[0x0005][None].flavor is None
+    assert mapping[0x0005]['ko'].code_point == 0x6AA4
+    assert mapping[0x0005]['ko'].flavor == 'ko'
+    assert mapping[0x0005]['zh_cn'] is mapping[0x0005]['zh_hk']
+    assert mapping[0x0005]['zh_cn'].code_point == 0x6AA4
+    assert mapping[0x0005]['zh_cn'].flavor == 'ja'
+
+
+@pytest.mark.parametrize(
+    ('code_point', 'display'),
+    [
+        (0x0000, '0x0000'),
+        (0x0020, 'SPACE'),
+        (0x0021, '!'),
+        (0x0301, '\u0301'),
+        (0x0378, '0x0378'),
+        (0x2028, 'LINE SEPARATOR'),
+        (0xD800, '0xD800'),
+        (0x1F600, '😀'),
+        (0x10FFFF, '0x10FFFF'),
+    ],
+)
+def test_save_code_point_display(code_point: int, display: str, tmp_path: Path) -> None:
+    entry = CmapMappingEntry()
+    entry['*'] = CmapGlyphReference(code_point, None)
+    mapping = CmapMapping({code_point: entry})
+
+    save_path = tmp_path.joinpath('mapping.yaml')
+    mapping.save_yaml(save_path)
+    assert save_path.read_text('utf-8') == (
+        f'\n# {display}\n'
+        f'0x{code_point:04X}:\n'
+        f'  # {display}\n'
+        f'  "*": 0x{code_point:04X}\n'
+    )
+
+    loaded_mapping = CmapMapping.load_yaml(save_path)
+    assert loaded_mapping[code_point]['*'].code_point == code_point
+    assert loaded_mapping[code_point]['*'].flavor is None
