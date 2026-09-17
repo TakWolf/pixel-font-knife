@@ -43,6 +43,9 @@ class CmapGlyphFile(GlyphFile):
         if not isinstance(file_path, Path):
             file_path = Path(file_path)
 
+        if file_path.suffix != '.png':
+            raise ValueError(f"illegal glyph file extension: '{file_path}'")
+
         code_point_text, separator, flavors_text = file_path.stem.partition(' ')
         code_point = int(code_point_text, 16)
         flavors = flavors_text.split(',') if separator else []

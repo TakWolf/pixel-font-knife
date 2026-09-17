@@ -30,12 +30,21 @@ class NamedGlyphFile(GlyphFile):
         if not isinstance(file_path, Path):
             file_path = Path(file_path)
 
+        if file_path.suffix != '.png':
+            raise ValueError(f"illegal glyph file extension: '{file_path}'")
+
         name_key, separator, flavors_text = file_path.stem.partition(' ')
         flavors = flavors_text.split(',') if separator else []
         return NamedGlyphFile(file_path, name_key, flavors)
 
     @staticmethod
     def load_notdef(file_path: str | PathLike[str]) -> NamedGlyphFile:
+        if not isinstance(file_path, Path):
+            file_path = Path(file_path)
+
+        if file_path.suffix != '.png':
+            raise ValueError(f"illegal glyph file extension: '{file_path}'")
+
         return NamedGlyphFile(file_path, '.notdef')
 
     name_key: str
