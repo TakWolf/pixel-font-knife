@@ -6,7 +6,7 @@ from pathlib import Path
 
 import unidata_blocks
 
-from pixel_font_knife.glyph.common import check_flavors
+from pixel_font_knife.glyph.common import check_code_point, check_flavors
 from pixel_font_knife.glyph.file import GlyphFile
 
 
@@ -57,8 +57,7 @@ class CmapGlyphFile(GlyphFile):
             code_point: int,
             flavors: list[str] | None = None,
     ):
-        if code_point < 0:
-            raise KeyError(f'illegal code point: {code_point}')
+        check_code_point(code_point)
         if flavors is not None:
             check_flavors(flavors)
 
@@ -81,8 +80,7 @@ class CmapGlyphFile(GlyphFile):
         if not self.file_path.exists():
             raise RuntimeError(f"missing glyph file:\n'{self.file_path}'")
 
-        if self.code_point < 0:
-            raise KeyError(f'illegal code point: {self.code_point}')
+        check_code_point(self.code_point)
         check_flavors(self.flavors)
 
         file_dir = CmapGlyphFile.get_normalized_dir(self.code_point, root_dir)

@@ -13,6 +13,14 @@ def check_merge_conflict_strategy(conflict: MergeConflictStrategy) -> None:
         raise ValueError(f'illegal merge conflict strategy: {conflict!r}')
 
 
+def check_code_point(code_point: Any) -> None:
+    if not isinstance(code_point, int):
+        raise KeyError(f'illegal code point type: {type(code_point).__name__!r}')
+
+    if code_point < 0:
+        raise KeyError(f'illegal code point: {code_point}')
+
+
 def check_glyph_name_key(glyph_name: str) -> None:
     if glyph_name == '':
         raise KeyError('glyph name cannot be empty')

@@ -12,6 +12,7 @@ import yaml
 
 from pixel_font_knife.cmap.mapping.entry import CmapMappingEntry
 from pixel_font_knife.cmap.mapping.reference import CmapGlyphReference
+from pixel_font_knife.glyph.common import check_code_point
 
 
 def _display_code_point(code_point: int) -> str:
@@ -95,11 +96,7 @@ class CmapMapping(UserDict[int, CmapMappingEntry]):
         return mapping
 
     def __setitem__(self, code_point: Any, entry: Any) -> None:
-        if not isinstance(code_point, int):
-            raise KeyError(f'illegal code point type: {type(code_point).__name__!r}')
-
-        if code_point < 0:
-            raise KeyError(f'illegal code point: {code_point}')
+        check_code_point(code_point)
 
         if entry is None:
             self.pop(code_point, None)
