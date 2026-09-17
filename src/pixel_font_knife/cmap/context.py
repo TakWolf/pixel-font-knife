@@ -113,7 +113,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                 glyph_file.normalize(root_dir, flavor_order)
 
         for file_dir, _, _ in root_dir.walk(top_down=False):
-            if fs_util.is_empty_dir(file_dir):
+            if file_dir != root_dir and fs_util.is_empty_dir(file_dir):
                 shutil.rmtree(file_dir)
 
     def merge_by_code_point(
