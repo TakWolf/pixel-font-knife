@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import Literal, Any
+from typing import Any, Literal
 
 MergeConflictStrategy = Literal[
     'error',
@@ -21,12 +21,15 @@ def check_code_point(code_point: Any) -> None:
         raise KeyError(f'illegal code point: {code_point}')
 
 
-def check_glyph_name_key(glyph_name: str) -> None:
-    if glyph_name == '':
-        raise KeyError('glyph name cannot be empty')
+def check_glyph_name_key(name_key: Any) -> None:
+    if not isinstance(name_key, str):
+        raise KeyError(f'illegal name key type: {type(name_key).__name__!r}')
 
-    if any(character.isspace() for character in glyph_name):
-        raise KeyError(f'illegal glyph name: {glyph_name!r}')
+    if name_key == '':
+        raise KeyError('name key cannot be empty')
+
+    if any(character.isspace() for character in name_key):
+        raise KeyError(f'illegal name key: {name_key!r}')
 
 
 def check_flavor(flavor: Any) -> None:

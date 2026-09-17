@@ -78,9 +78,6 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
         return context
 
     def __setitem__(self, name_key: Any, glyph_variants: Any) -> None:
-        if not isinstance(name_key, str):
-            raise KeyError(f'illegal name key type: {type(name_key).__name__!r}')
-
         check_glyph_name_key(name_key)
 
         if glyph_variants is None:
