@@ -10,7 +10,7 @@ from typing import Any
 from pixel_font_knife.cmap.file import CmapGlyphFile
 from pixel_font_knife.cmap.mapping.mapping import CmapMapping
 from pixel_font_knife.cmap.variants import CmapGlyphVariants
-from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy, check_code_point, normalize_allowed_flavors
+from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy, check_code_point, normalize_allowed_flavors, normalize_flavor_order
 from pixel_font_knife.utils import fs_util
 
 
@@ -102,8 +102,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
     def normalize(
             self,
             root_dir: str | PathLike[str],
-            flavor_order: Sequence[str] | None = None,
+            flavor_order: Sequence[str | None] | None = None,
     ) -> None:
+        flavor_order = normalize_flavor_order(flavor_order)
+
         if not isinstance(root_dir, Path):
             root_dir = Path(root_dir)
 
@@ -295,7 +297,9 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                             raise RuntimeError(f'duplicate flavor: 0x{code_point:04X} {flavor!r}')
         return result
 
-    def with_default_flavor(self, flavor_order: Sequence[str] | None = None) -> CmapContext:
+    def with_default_flavor(self, flavor_order: Sequence[str | None] | None = None) -> CmapContext:
+        flavor_order = normalize_flavor_order(flavor_order)
+
         result = self.copy()
         for code_point, glyph_variants in result.items():
             if None not in glyph_variants:
@@ -316,6 +320,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
         return result
 
     def get_glyph_sequence(self, flavor_order: Sequence[str | None] | None = None) -> list[CmapGlyphFile]:
+        flavor_order = normalize_flavor_order(flavor_order)
         if flavor_order is None:
             flavor_order = [None]
 

@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from os import PathLike
 from pathlib import Path
 
-from pixel_font_knife.glyph.common import check_glyph_name_key, check_flavors
+from pixel_font_knife.glyph.common import check_glyph_name_key, check_flavors, normalize_flavor_order
 from pixel_font_knife.glyph.file import GlyphFile
 
 
@@ -71,12 +71,14 @@ class NamedGlyphFile(GlyphFile):
             name = f'{name}.{self.flavors[0]}'
         return name
 
-    def normalize(self, flavor_order: Sequence[str] | None = None) -> None:
+    def normalize(self, flavor_order: Sequence[str | None] | None = None) -> None:
         if not self.file_path.exists():
             raise RuntimeError(f"missing glyph file:\n'{self.file_path}'")
 
         check_glyph_name_key(self.name_key)
         check_flavors(self.flavors)
+
+        flavor_order = normalize_flavor_order(flavor_order)
 
         if len(self.flavors) > 0:
             if flavor_order is None:

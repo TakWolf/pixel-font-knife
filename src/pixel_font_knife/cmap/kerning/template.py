@@ -7,6 +7,7 @@ from pathlib import Path
 import yaml
 
 from pixel_font_knife.cmap.context import CmapContext
+from pixel_font_knife.glyph.common import normalize_flavor_order
 
 
 class CmapKerningTemplate:
@@ -59,6 +60,7 @@ class CmapKerningTemplate:
             context: CmapContext,
             flavor_order: Sequence[str | None] | None = None,
     ) -> dict[tuple[str, str], int]:
+        flavor_order = normalize_flavor_order(flavor_order)
         if flavor_order is None:
             flavor_order = [None]
 

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import unidata_blocks
 
-from pixel_font_knife.glyph.common import check_code_point, check_flavors
+from pixel_font_knife.glyph.common import check_code_point, check_flavors, normalize_flavor_order
 from pixel_font_knife.glyph.file import GlyphFile
 
 
@@ -78,13 +78,15 @@ class CmapGlyphFile(GlyphFile):
     def normalize(
             self,
             root_dir: str | PathLike[str],
-            flavor_order: Sequence[str] | None = None,
+            flavor_order: Sequence[str | None] | None = None,
     ) -> None:
         if not self.file_path.exists():
             raise RuntimeError(f"missing glyph file:\n'{self.file_path}'")
 
         check_code_point(self.code_point)
         check_flavors(self.flavors)
+
+        flavor_order = normalize_flavor_order(flavor_order)
 
         file_dir = CmapGlyphFile.get_normalized_dir(self.code_point, root_dir)
 

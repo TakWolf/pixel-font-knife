@@ -12,7 +12,7 @@ import yaml
 
 from pixel_font_knife.cmap.mapping.entry import CmapMappingEntry
 from pixel_font_knife.cmap.mapping.reference import CmapGlyphReference
-from pixel_font_knife.glyph.common import check_code_point, normalize_allowed_flavors
+from pixel_font_knife.glyph.common import check_code_point, normalize_allowed_flavors, normalize_flavor_order
 
 
 def _display_code_point(code_point: int) -> str:
@@ -109,8 +109,10 @@ class CmapMapping(UserDict[int, CmapMappingEntry]):
     def save_yaml(
             self,
             file_path: str | PathLike[str],
-            flavor_order: Sequence[str] | None = None,
+            flavor_order: Sequence[str | None] | None = None,
     ) -> None:
+        flavor_order = normalize_flavor_order(flavor_order)
+
         buffer = StringIO()
 
         for code_point, entry in sorted(self.items()):

@@ -6,7 +6,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Any
 
-from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy, check_glyph_name_key, normalize_allowed_flavors
+from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy, check_glyph_name_key, normalize_allowed_flavors, normalize_flavor_order
 from pixel_font_knife.named.file import NamedGlyphFile
 from pixel_font_knife.named.variants import NamedGlyphVariants
 
@@ -102,8 +102,11 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
                 raise ValueError(f'name key mismatch: {name_key!r} != {glyph_variants.name_key!r}')
             glyph_variants.check()
 
-    def normalize(self, flavor_order: Sequence[str] | None = None) -> None:
+    def normalize(self, flavor_order: Sequence[str | None] | None = None) -> None:
         self.check()
+
+        flavor_order = normalize_flavor_order(flavor_order)
+
         for glyph_variants in self.values():
             for glyph_file in glyph_variants.values():
                 glyph_file.normalize(flavor_order)
@@ -163,7 +166,9 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
                             raise RuntimeError(f'duplicate flavor: {name_key!r} {flavor!r}')
         return result
 
-    def with_default_flavor(self, flavor_order: Sequence[str] | None = None) -> NamedContext:
+    def with_default_flavor(self, flavor_order: Sequence[str | None] | None = None) -> NamedContext:
+        flavor_order = normalize_flavor_order(flavor_order)
+
         result = self.copy()
         for name_key, glyph_variants in result.items():
             if None not in glyph_variants:
@@ -184,6 +189,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
         return result
 
     def get_glyph_sequence(self, flavor_order: Sequence[str | None] | None = None) -> list[NamedGlyphFile]:
+        flavor_order = normalize_flavor_order(flavor_order)
         if flavor_order is None:
             flavor_order = [None]
 
