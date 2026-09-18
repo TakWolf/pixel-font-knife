@@ -6,7 +6,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Any
 
-from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy, check_glyph_name_key
+from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy, check_glyph_name_key, normalize_allowed_flavors
 from pixel_font_knife.named.file import NamedGlyphFile
 from pixel_font_knife.named.variants import NamedGlyphVariants
 
@@ -40,8 +40,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
             root_dir: str | PathLike[str],
             allowed_flavors: Collection[str] | None = None,
     ) -> NamedContext:
-        if allowed_flavors is not None:
-            allowed_flavors = set(allowed_flavors)
+        allowed_flavors = normalize_allowed_flavors(allowed_flavors)
 
         if not isinstance(root_dir, Path):
             root_dir = Path(root_dir)

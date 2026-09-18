@@ -12,7 +12,7 @@ import yaml
 
 from pixel_font_knife.cmap.mapping.entry import CmapMappingEntry
 from pixel_font_knife.cmap.mapping.reference import CmapGlyphReference
-from pixel_font_knife.glyph.common import check_code_point
+from pixel_font_knife.glyph.common import check_code_point, normalize_allowed_flavors
 
 
 def _display_code_point(code_point: int) -> str:
@@ -39,8 +39,7 @@ class CmapMapping(UserDict[int, CmapMappingEntry]):
             file_path: str | PathLike[str],
             allowed_flavors: Collection[str] | None = None,
     ) -> CmapMapping:
-        if allowed_flavors is not None:
-            allowed_flavors = set(allowed_flavors)
+        allowed_flavors = normalize_allowed_flavors(allowed_flavors)
 
         if not isinstance(file_path, Path):
             file_path = Path(file_path)

@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Iterable, Collection
 from typing import Any, Literal
 
 MergeConflictStrategy = Literal[
@@ -53,3 +53,12 @@ def check_flavors(flavors: Iterable[Any]) -> None:
         if flavor in validated_flavors:
             raise KeyError(f'duplicate flavor: {flavor!r}')
         validated_flavors.add(flavor)
+
+
+def normalize_allowed_flavors(allowed_flavors: Collection[str] | None) -> set[str] | None:
+    if allowed_flavors is not None:
+        if isinstance(allowed_flavors, str):
+            allowed_flavors = {allowed_flavors}
+        else:
+            allowed_flavors = set(allowed_flavors)
+    return allowed_flavors

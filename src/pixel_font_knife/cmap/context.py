@@ -10,7 +10,7 @@ from typing import Any
 from pixel_font_knife.cmap.file import CmapGlyphFile
 from pixel_font_knife.cmap.mapping.mapping import CmapMapping
 from pixel_font_knife.cmap.variants import CmapGlyphVariants
-from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy, check_code_point
+from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy, check_code_point, normalize_allowed_flavors
 from pixel_font_knife.utils import fs_util
 
 
@@ -48,8 +48,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             root_dir: str | PathLike[str],
             allowed_flavors: Collection[str] | None = None,
     ) -> CmapContext:
-        if allowed_flavors is not None:
-            allowed_flavors = set(allowed_flavors)
+        allowed_flavors = normalize_allowed_flavors(allowed_flavors)
 
         if not isinstance(root_dir, Path):
             root_dir = Path(root_dir)
