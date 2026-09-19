@@ -52,7 +52,11 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
             if glyph_file.name_key != self.name_key:
                 raise ValueError(f'name key mismatch: {self.name_key!r} != {glyph_file.name_key!r}')
 
-    def select(self, flavor: str | None = None) -> NamedGlyphFile:
+    def select(
+            self,
+            flavor: str | None = None,
+            fallback_default: bool = True,
+    ) -> NamedGlyphFile:
         if flavor is not None:
             check_flavor(flavor)
 
@@ -61,7 +65,7 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
         if flavor in self:
             return self[flavor]
 
-        if None in self:
+        if None in self and fallback_default:
             return self[None]
 
         raise KeyError(f'no flavor file: {flavor!r}')

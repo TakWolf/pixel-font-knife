@@ -174,6 +174,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             self,
             *mappings: CmapMapping,
             allow_missing_code_point: bool = True,
+            fallback_default: bool = True,
             conflict: MergeConflictStrategy = 'error',
     ) -> CmapContext:
         check_merge_conflict_strategy(conflict)
@@ -212,7 +213,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                         if glyph_variants is None:
                             glyph_variants = CmapGlyphVariants()
 
-                        glyph_variants[flavor] = self[glyph_reference.code_point].select(glyph_reference.flavor)
+                        try:
+                            glyph_variants[flavor] = self[glyph_reference.code_point].select(glyph_reference.flavor, fallback_default)
+                        except KeyError as error:
+                            raise KeyError(f'0x{code_point:04X}: reference 0x{glyph_reference.code_point:04X}: {error.args[0]}') from error
 
                     if glyph_variants is None:
                         continue
@@ -234,6 +238,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             self,
             *mappings: CmapMapping,
             allow_missing_code_point: bool = True,
+            fallback_default: bool = True,
             conflict: MergeConflictStrategy = 'error',
     ) -> CmapContext:
         check_merge_conflict_strategy(conflict)
@@ -272,7 +277,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                         if source_variants is None:
                             source_variants = CmapGlyphVariants()
 
-                        source_variants[flavor] = self[glyph_reference.code_point].select(glyph_reference.flavor)
+                        try:
+                            source_variants[flavor] = self[glyph_reference.code_point].select(glyph_reference.flavor, fallback_default)
+                        except KeyError as error:
+                            raise KeyError(f'0x{code_point:04X}: reference 0x{glyph_reference.code_point:04X}: {error.args[0]}') from error
 
                     if source_variants is None:
                         continue
@@ -319,7 +327,11 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                         raise RuntimeError(f'cannot fallback default with flavors: {flavor_order!r}')
         return result
 
-    def get_glyph_sequence(self, flavor_order: Sequence[str | None] | None = None) -> list[CmapGlyphFile]:
+    def get_glyph_sequence(
+            self,
+            flavor_order: Sequence[str | None] | None = None,
+            fallback_default: bool = True,
+    ) -> list[CmapGlyphFile]:
         flavor_order = normalize_flavor_order(flavor_order)
         if flavor_order is None:
             flavor_order = [None]
@@ -330,17 +342,29 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
         glyph_names = set()
         for flavor in flavor_order:
             for code_point, glyph_variants in context:
-                glyph_file = glyph_variants.select(flavor)
+                try:
+                    glyph_file = glyph_variants.select(flavor, fallback_default)
+                except KeyError as error:
+                    raise KeyError(f'0x{code_point:04X}: {error.args[0]}') from error
+
                 glyph_name = glyph_file.glyph_name
                 if glyph_name not in glyph_names:
                     glyph_names.add(glyph_name)
                     sequence.append(glyph_file)
         return sequence
 
-    def get_character_mapping(self, flavor: str | None = None) -> dict[int, str]:
+    def get_character_mapping(
+            self,
+            flavor: str | None = None,
+            fallback_default: bool = True,
+    ) -> dict[int, str]:
         character_mapping = {}
         for code_point, glyph_variants in self.items():
-            glyph_file = glyph_variants.select(flavor)
+            try:
+                glyph_file = glyph_variants.select(flavor, fallback_default)
+            except KeyError as error:
+                raise KeyError(f'0x{code_point:04X}: {error.args[0]}') from error
+
             character_mapping[code_point] = glyph_file.glyph_name
         return character_mapping
 

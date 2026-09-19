@@ -1,4 +1,7 @@
+import re
 from pathlib import Path
+
+import pytest
 
 from pixel_font_knife.cmap.context import CmapContext
 from pixel_font_knife.cmap.file import CmapGlyphFile
@@ -69,6 +72,41 @@ def test_calculate_kerning_values_ignores_non_negative_and_missing_characters(gl
     assert template.calculate_kerning_values(context) == {
         ('u0054', 'u006F'): -1,
     }
+
+
+@pytest.mark.parametrize(
+    ('missing_character', 'message'),
+    [
+        ('T', "left group 'left' character 'T': no flavor file: 'alt'"),
+        ('o', "right group 'right' character 'o': no flavor file: 'alt'"),
+    ],
+)
+def test_calculate_kerning_values_reports_missing_flavor_context(
+        glyphs_dir: Path,
+        missing_character: str,
+        message: str,
+) -> None:
+    default_context = CmapContext.load(glyphs_dir.joinpath('kerning'))
+    context = CmapContext()
+    for character in ('T', 'o'):
+        code_point = ord(character)
+        default_file = default_context[code_point][None]
+        variants = CmapGlyphVariants({None: default_file})
+        if character != missing_character:
+            variants['alt'] = CmapGlyphFile(default_file.file_path, code_point, ['alt'])
+        context[code_point] = variants
+    template = CmapKerningTemplate(
+        groups={
+            'left': ['T'],
+            'right': ['o'],
+        },
+        values={
+            ('left', 'right'): -1,
+        },
+    )
+
+    with pytest.raises(KeyError, match=re.escape(str(KeyError(message)))):
+        template.calculate_kerning_values(context, 'alt', fallback_default=False)
 
 
 def test_calculate_kerning_values_uses_requested_flavors(glyphs_dir: Path) -> None:

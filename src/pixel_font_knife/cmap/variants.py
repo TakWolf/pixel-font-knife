@@ -34,14 +34,18 @@ class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
     def __copy__(self) -> CmapGlyphVariants:
         return self.copy()
 
-    def select(self, flavor: str | None = None) -> CmapGlyphFile:
+    def select(
+            self,
+            flavor: str | None = None,
+            fallback_default: bool = True,
+    ) -> CmapGlyphFile:
         if flavor is not None:
             check_flavor(flavor)
 
         if flavor in self:
             return self[flavor]
 
-        if None in self:
+        if None in self and fallback_default:
             return self[None]
 
         raise KeyError(f'no flavor file: {flavor!r}')

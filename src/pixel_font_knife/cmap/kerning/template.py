@@ -59,6 +59,7 @@ class CmapKerningTemplate:
             self,
             context: CmapContext,
             flavor_order: Sequence[str | None] | None = None,
+            fallback_default: bool = True,
     ) -> dict[tuple[str, str], int]:
         flavor_order = normalize_flavor_order(flavor_order)
         if flavor_order is None:
@@ -77,14 +78,23 @@ class CmapKerningTemplate:
                     left_code_point = ord(left_c)
                     if left_code_point not in context:
                         continue
-                    left_file = context[left_code_point].select(flavor)
+
+                    try:
+                        left_file = context[left_code_point].select(flavor, fallback_default)
+                    except KeyError as error:
+                        raise KeyError(f'left group {left_group_name!r} character {left_c!r}: {error.args[0]}') from error
+
                     left_bitmap_mask = left_file.canvas.bitmap.dilate(1)
 
                     for right_c in right_group:
                         right_code_point = ord(right_c)
                         if right_code_point not in context:
                             continue
-                        right_file = context[right_code_point].select(flavor)
+
+                        try:
+                            right_file = context[right_code_point].select(flavor, fallback_default)
+                        except KeyError as error:
+                            raise KeyError(f'right group {right_group_name!r} character {right_c!r}: {error.args[0]}') from error
 
                         actual_offset = offset
                         while actual_offset < 0:

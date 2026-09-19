@@ -188,7 +188,11 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
                         raise RuntimeError(f'cannot fallback default with flavors: {flavor_order!r}')
         return result
 
-    def get_glyph_sequence(self, flavor_order: Sequence[str | None] | None = None) -> list[NamedGlyphFile]:
+    def get_glyph_sequence(
+            self,
+            flavor_order: Sequence[str | None] | None = None,
+            fallback_default: bool = True,
+    ) -> list[NamedGlyphFile]:
         flavor_order = normalize_flavor_order(flavor_order)
         if flavor_order is None:
             flavor_order = [None]
@@ -197,7 +201,11 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
         glyph_names = set()
         for name_key, glyph_variants in sorted(self.items()):
             for flavor in flavor_order:
-                glyph_file = glyph_variants.select(flavor)
+                try:
+                    glyph_file = glyph_variants.select(flavor, fallback_default)
+                except KeyError as error:
+                    raise KeyError(f'{name_key!r}: {error.args[0]}') from error
+
                 glyph_name = glyph_file.glyph_name
                 if glyph_name not in glyph_names:
                     glyph_names.add(glyph_name)

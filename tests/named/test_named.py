@@ -130,14 +130,18 @@ def test_context_requires_matching_name_key() -> None:
     glyph_variants = NamedGlyphVariants('foo')
 
     with pytest.raises(ValueError, match=re.escape("name key mismatch: 'bar' != 'foo'")):
-        NamedContext({'bar': glyph_variants})
+        NamedContext({
+            'bar': glyph_variants,
+        })
 
 
 def test_check_after_name_key_modified() -> None:
     glyph_file = NamedGlyphFile('foo.png', 'foo')
     glyph_variants = NamedGlyphVariants('foo')
     glyph_variants[None] = glyph_file
-    context = NamedContext({'foo': glyph_variants})
+    context = NamedContext({
+        'foo': glyph_variants,
+    })
 
     glyph_file.name_key = 'bar'
 
@@ -149,7 +153,9 @@ def test_copy_shares_matching_glyph_file() -> None:
     glyph_file = NamedGlyphFile('foo.png', 'foo')
     glyph_variants = NamedGlyphVariants('foo')
     glyph_variants[None] = glyph_file
-    context = NamedContext({'foo': glyph_variants})
+    context = NamedContext({
+        'foo': glyph_variants,
+    })
 
     result = context.copy()
 
@@ -163,8 +169,12 @@ def test_merge_by_name_key_replaces_whole_variants_group() -> None:
     default_variants = _create_variants('foo', None, 'foo.png')
     flavored_variants = _create_variants('foo', 'zh_cn', 'foo zh_cn.png')
 
-    result = NamedContext({'foo': default_variants}).merge_by_name_key(
-        NamedContext({'foo': flavored_variants}),
+    result = NamedContext({
+        'foo': default_variants,
+    }).merge_by_name_key(
+        NamedContext({
+            'foo': flavored_variants,
+        }),
         conflict='replace',
     )
 
@@ -182,8 +192,12 @@ def test_merge_by_flavor_replaces_only_conflicting_flavor() -> None:
     source_variants = NamedGlyphVariants('foo')
     source_variants['zh_cn'] = new_file
 
-    result = NamedContext({'foo': target_variants}).merge_by_flavor(
-        NamedContext({'foo': source_variants}),
+    result = NamedContext({
+        'foo': target_variants,
+    }).merge_by_flavor(
+        NamedContext({
+            'foo': source_variants,
+        }),
         conflict='replace',
     )
 
@@ -206,7 +220,9 @@ def test_with_default_flavor_uses_priority_without_mutating_source(
     glyph_variants = NamedGlyphVariants('foo')
     glyph_variants['zh_cn'] = zh_cn_file
     glyph_variants['zh_tw'] = zh_tw_file
-    context = NamedContext({'foo': glyph_variants})
+    context = NamedContext({
+        'foo': glyph_variants,
+    })
 
     result = context.with_default_flavor(flavor_order)
 
@@ -239,7 +255,21 @@ def test_get_glyph_sequence_accepts_string_flavor_order() -> None:
     variants = NamedGlyphVariants('foo')
     variants[None] = default_file
     variants['zh_cn'] = flavored_file
-    context = NamedContext({'foo': variants})
+    context = NamedContext({
+        'foo': variants,
+    })
 
     assert context.get_glyph_sequence('zh_cn') == [flavored_file]
     assert context.get_glyph_sequence('default') == [default_file]
+
+
+def test_get_glyph_sequence_reports_name_key_for_missing_flavor() -> None:
+    default_file = NamedGlyphFile('foo.png', 'foo')
+    variants = NamedGlyphVariants('foo')
+    variants[None] = default_file
+    context = NamedContext({
+        'foo': variants,
+    })
+
+    with pytest.raises(KeyError, match=re.escape(str(KeyError("'foo': no flavor file: 'zh_cn'")))):
+        context.get_glyph_sequence('zh_cn', fallback_default=False)

@@ -148,6 +148,29 @@ def test_apply_mapping_rejects_partially_missing_code_point(method_name: str) ->
         getattr(context, method_name)(mapping, allow_missing_code_point=False)
 
 
+@pytest.mark.parametrize(
+    'method_name',
+    [
+        'apply_mapping_by_code_point',
+        'apply_mapping_by_flavor',
+    ],
+)
+def test_apply_mapping_reports_missing_reference_flavor(method_name: str) -> None:
+    default_file = CmapGlyphFile('0042.png', 0x42)
+    context = CmapContext({
+        0x42: CmapGlyphVariants({None: default_file}),
+    })
+    entry = CmapMappingEntry({
+        'zh_cn': CmapGlyphReference(0x42, 'zh_cn'),
+    })
+    mapping = CmapMapping({
+        0x41: entry,
+    })
+
+    with pytest.raises(KeyError, match=re.escape(str(KeyError("0x0041: reference 0x0042: no flavor file: 'zh_cn'")))):
+        getattr(context, method_name)(mapping, fallback_default=False)
+
+
 def test_load_yaml_accepts_string_allowed_flavors(tmp_path: Path) -> None:
     yaml_path = tmp_path.joinpath('mapping.yaml')
     yaml_path.write_text('0x0041:\n  zh_cn: 0x0042 zh_cn\n', 'utf-8')
