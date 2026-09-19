@@ -148,6 +148,16 @@ def test_apply_mapping_rejects_partially_missing_code_point(method_name: str) ->
         getattr(context, method_name)(mapping, allow_missing_code_point=False)
 
 
+def test_load_yaml_accepts_string_allowed_flavors(tmp_path: Path) -> None:
+    yaml_path = tmp_path.joinpath('mapping.yaml')
+    yaml_path.write_text('0x0041:\n  zh_cn: 0x0042 zh_cn\n', 'utf-8')
+
+    mapping = CmapMapping.load_yaml(yaml_path, 'zh_cn')
+
+    assert set(mapping[0x41]) == {'zh_cn'}
+    assert mapping[0x41]['zh_cn'].flavor == 'zh_cn'
+
+
 def test_load_yaml_rejects_disallowed_target_flavor(tmp_path: Path) -> None:
     yaml_path = tmp_path.joinpath('mapping.yaml')
     yaml_path.write_text('0x0041:\n  zh_tw: 0x0042\n', 'utf-8')
@@ -164,12 +174,23 @@ def test_load_yaml_rejects_disallowed_reference_flavor(tmp_path: Path) -> None:
         CmapMapping.load_yaml(yaml_path, {'zh_cn'})
 
 
-def test_load_and_save_yaml_preserves_mapping_semantics(assets_dir: Path, tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    'flavor_order',
+    [
+        None,
+        [None, 'ko', 'zh_cn', 'zh_hk'],
+    ],
+)
+def test_load_and_save_yaml_preserves_mapping_semantics(
+        assets_dir: Path,
+        tmp_path: Path,
+        flavor_order: list[str | None] | None,
+) -> None:
     load_path = assets_dir.joinpath('mapping-example.yaml')
     save_path = tmp_path.joinpath('mapping-example.yaml')
 
     mapping = CmapMapping.load_yaml(load_path)
-    mapping.save_yaml(save_path)
+    mapping.save_yaml(save_path, flavor_order)
 
     assert load_path.read_text('utf-8') == save_path.read_text('utf-8')
     assert set(mapping) == {0x0004, 0x0005}

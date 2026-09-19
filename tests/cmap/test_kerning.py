@@ -27,6 +27,15 @@ def test_calculate_kerning_values(assets_dir: Path, glyphs_dir: Path) -> None:
     }
 
 
+def test_calculate_kerning_values_accepts_string_flavor_order(assets_dir: Path, glyphs_dir: Path) -> None:
+    context = CmapContext.load(glyphs_dir.joinpath('kerning'))
+    template = CmapKerningTemplate.load(assets_dir.joinpath('kerning-example.yaml'))
+
+    assert template.calculate_kerning_values(context, 'default') == {
+        ('u0054', 'u006F'): -1,
+    }
+
+
 def test_calculate_kerning_values_reduces_offset_to_avoid_overlap(glyphs_dir: Path) -> None:
     context = CmapContext.load(glyphs_dir.joinpath('kerning'))
     template = CmapKerningTemplate(

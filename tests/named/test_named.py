@@ -45,18 +45,38 @@ def test_load_notdef_uses_special_glyph_name() -> None:
     assert glyph_file.glyph_name == '.notdef'
 
 
-def test_file_normalize_uses_requested_flavor_order(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    'flavor_order',
+    [
+        ['zh_cn', 'zh_tw'],
+        [None, 'zh_cn', 'zh_tw'],
+    ],
+)
+def test_file_normalize_uses_requested_flavor_order(
+        tmp_path: Path,
+        flavor_order: list[str | None],
+) -> None:
     file_path = tmp_path.joinpath('source.png')
     file_path.touch()
     glyph_file = NamedGlyphFile(file_path, 'foo', ['zh_tw', 'zh_cn'])
 
-    glyph_file.normalize(['zh_cn', 'zh_tw'])
+    glyph_file.normalize(flavor_order)
 
     assert glyph_file.file_path == tmp_path.joinpath('foo zh_cn,zh_tw.png')
     assert glyph_file.file_path.exists()
     assert not file_path.exists()
     assert glyph_file.flavors == ['zh_tw', 'zh_cn']
     assert glyph_file.glyph_name == 'foo.zh_tw'
+
+
+def test_file_normalize_accepts_string_flavor_order(tmp_path: Path) -> None:
+    file_path = tmp_path.joinpath('source.png')
+    file_path.touch()
+    glyph_file = NamedGlyphFile(file_path, 'foo', ['zh_cn'])
+
+    glyph_file.normalize('zh_cn')
+
+    assert glyph_file.file_path.name == 'foo zh_cn.png'
 
 
 def test_variants_select_exact_flavor_then_default() -> None:
@@ -89,6 +109,14 @@ def test_context_load_builds_flavor_usage_mapping(tmp_path: Path) -> None:
     assert context['foo']['zh_cn'] is context['foo']['zh_tw']
     assert context['foo']['zh_cn'].file_path == tmp_path.joinpath('foo zh_cn,zh_tw.png')
     assert context['bar']['ja'].file_path == tmp_path.joinpath('bar ja.png')
+
+
+def test_context_load_accepts_string_allowed_flavors(tmp_path: Path) -> None:
+    _touch(tmp_path, 'foo zh_cn.png')
+
+    context = NamedContext.load(tmp_path, 'zh_cn')
+
+    assert set(context['foo']) == {'zh_cn'}
 
 
 def test_context_load_rejects_disallowed_flavor(tmp_path: Path) -> None:
@@ -163,7 +191,16 @@ def test_merge_by_flavor_replaces_only_conflicting_flavor() -> None:
     assert result['foo']['zh_cn'] is new_file
 
 
-def test_with_default_flavor_uses_priority_without_mutating_source() -> None:
+@pytest.mark.parametrize(
+    'flavor_order',
+    [
+        ['zh_tw', 'zh_cn'],
+        'zh_tw',
+    ],
+)
+def test_with_default_flavor_uses_priority_without_mutating_source(
+        flavor_order: list[str] | str,
+) -> None:
     zh_cn_file = NamedGlyphFile('foo zh_cn.png', 'foo')
     zh_tw_file = NamedGlyphFile('foo zh_tw.png', 'foo')
     glyph_variants = NamedGlyphVariants('foo')
@@ -171,7 +208,7 @@ def test_with_default_flavor_uses_priority_without_mutating_source() -> None:
     glyph_variants['zh_tw'] = zh_tw_file
     context = NamedContext({'foo': glyph_variants})
 
-    result = context.with_default_flavor(['zh_tw', 'zh_cn'])
+    result = context.with_default_flavor(flavor_order)
 
     assert None not in context['foo']
     assert result['foo'][None] is zh_tw_file
@@ -194,3 +231,15 @@ def test_get_glyph_sequence_sorts_by_name_key_then_flavor_and_deduplicates() -> 
     }).get_glyph_sequence([None, 'zh_cn', 'zh_tw'])
 
     assert sequence == [bar_default, foo_default, foo_flavored]
+
+
+def test_get_glyph_sequence_accepts_string_flavor_order() -> None:
+    default_file = NamedGlyphFile('foo.png', 'foo')
+    flavored_file = NamedGlyphFile('foo zh_cn.png', 'foo', ['zh_cn'])
+    variants = NamedGlyphVariants('foo')
+    variants[None] = default_file
+    variants['zh_cn'] = flavored_file
+    context = NamedContext({'foo': variants})
+
+    assert context.get_glyph_sequence('zh_cn') == [flavored_file]
+    assert context.get_glyph_sequence('default') == [default_file]

@@ -43,12 +43,22 @@ def test_file_load_rejects_non_png_file() -> None:
         CmapGlyphFile.load('4E00.txt')
 
 
-def test_file_normalize_uses_code_point_directory_and_flavor_order(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    'flavor_order',
+    [
+        ['zh_cn', 'zh_tw'],
+        [None, 'zh_cn', 'zh_tw'],
+    ],
+)
+def test_file_normalize_uses_code_point_directory_and_flavor_order(
+        tmp_path: Path,
+        flavor_order: list[str | None],
+) -> None:
     file_path = tmp_path.joinpath('source.png')
     file_path.touch()
     glyph_file = CmapGlyphFile(file_path, 0x4E00, ['zh_tw', 'zh_cn'])
 
-    glyph_file.normalize(tmp_path, ['zh_cn', 'zh_tw'])
+    glyph_file.normalize(tmp_path, flavor_order)
 
     assert glyph_file.file_path == tmp_path.joinpath(
         '4E00-9FFF CJK Unified Ideographs',
@@ -59,6 +69,16 @@ def test_file_normalize_uses_code_point_directory_and_flavor_order(tmp_path: Pat
     assert not file_path.exists()
     assert glyph_file.flavors == ['zh_tw', 'zh_cn']
     assert glyph_file.glyph_name == 'u4E00.zh_tw'
+
+
+def test_file_normalize_accepts_string_flavor_order(tmp_path: Path) -> None:
+    file_path = tmp_path.joinpath('source.png')
+    file_path.touch()
+    glyph_file = CmapGlyphFile(file_path, 0x4E00, ['zh_cn'])
+
+    glyph_file.normalize(tmp_path, 'zh_cn')
+
+    assert glyph_file.file_path.name == '4E00 zh_cn.png'
 
 
 def test_variants_select_exact_flavor_then_default() -> None:
@@ -83,6 +103,14 @@ def test_context_load_builds_flavor_usage_mapping(tmp_path: Path) -> None:
     assert context[0x4E00]['zh_cn'] is context[0x4E00]['zh_tw']
     assert context[0x4E00]['zh_cn'].file_path == tmp_path.joinpath('variants/4E00 zh_cn,zh_tw.png')
     assert context[0x41]['ja'].file_path == tmp_path.joinpath('0041 ja.png')
+
+
+def test_context_load_accepts_string_allowed_flavors(tmp_path: Path) -> None:
+    _touch(tmp_path, '4E00 zh_cn.png')
+
+    context = CmapContext.load(tmp_path, 'zh_cn')
+
+    assert set(context[0x4E00]) == {'zh_cn'}
 
 
 def test_context_load_rejects_disallowed_flavor(tmp_path: Path) -> None:
@@ -134,13 +162,22 @@ def test_merge_by_flavor_replaces_only_conflicting_flavor() -> None:
     assert result[0x4E00]['zh_cn'] is new_file
 
 
-def test_with_default_flavor_uses_priority_without_mutating_source() -> None:
+@pytest.mark.parametrize(
+    'flavor_order',
+    [
+        ['zh_tw', 'zh_cn'],
+        'zh_tw',
+    ],
+)
+def test_with_default_flavor_uses_priority_without_mutating_source(
+        flavor_order: list[str] | str,
+) -> None:
     zh_cn_file = CmapGlyphFile('4E00 zh_cn.png', 0x4E00)
     zh_tw_file = CmapGlyphFile('4E00 zh_tw.png', 0x4E00)
     glyph_variants = CmapGlyphVariants({'zh_cn': zh_cn_file, 'zh_tw': zh_tw_file})
     context = CmapContext({0x4E00: glyph_variants})
 
-    result = context.with_default_flavor(['zh_tw', 'zh_cn'])
+    result = context.with_default_flavor(flavor_order)
 
     assert None not in context[0x4E00]
     assert result[0x4E00][None] is zh_tw_file
@@ -158,6 +195,20 @@ def test_get_glyph_sequence_sorts_by_flavor_then_code_point_and_deduplicates() -
     }).get_glyph_sequence([None, 'zh_cn'])
 
     assert sequence == [shared_file, default_file]
+
+
+def test_get_glyph_sequence_accepts_string_flavor_order() -> None:
+    default_file = CmapGlyphFile('0041.png', 0x41)
+    flavored_file = CmapGlyphFile('0041 zh_cn.png', 0x41, ['zh_cn'])
+    context = CmapContext({
+        0x41: CmapGlyphVariants({
+            None: default_file,
+            'zh_cn': flavored_file,
+        }),
+    })
+
+    assert context.get_glyph_sequence('zh_cn') == [flavored_file]
+    assert context.get_glyph_sequence('default') == [default_file]
 
 
 def test_get_character_mapping_uses_context_code_points() -> None:
