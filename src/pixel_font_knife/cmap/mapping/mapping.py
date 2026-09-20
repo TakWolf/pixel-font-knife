@@ -131,19 +131,19 @@ class CmapMapping(UserDict[int, CmapMappingEntry]):
                 buffer.write(f'  # {_display_code_point(glyph_reference.code_point)}\n')
                 buffer.write(f'  "*": 0x{glyph_reference.code_point:04X}\n')
             else:
-                reference_pending = {}
+                pending_references = {}
                 for flavor, glyph_reference in entry.items():
                     key = glyph_reference.code_point, glyph_reference.flavor
-                    if key in reference_pending:
-                        flavors = reference_pending[key]
+                    if key in pending_references:
+                        flavors = pending_references[key]
                     else:
                         flavors = []
-                        reference_pending[key] = flavors
+                        pending_references[key] = flavors
                     flavors.append(flavor)
 
-                flavor_pending = []
+                pending_flavors = []
                 default_reference = None
-                for (reference_code_point, reference_flavor), flavors in reference_pending.items():
+                for (reference_code_point, reference_flavor), flavors in pending_references.items():
                     reference_str = f'0x{reference_code_point:04X}'
                     if reference_flavor is not None:
                         reference_str = f'{reference_str} {reference_flavor}'
@@ -156,20 +156,20 @@ class CmapMapping(UserDict[int, CmapMappingEntry]):
                         flavors.sort()
                     else:
                         flavors.sort(key=lambda x: flavor_order.index(x))
-                    flavor_pending.append((flavors[0], ','.join(flavors), (reference_str, reference_c)))
+                    pending_flavors.append((flavors[0], ','.join(flavors), (reference_str, reference_c)))
 
                 if flavor_order is None:
-                    flavor_pending.sort()
+                    pending_flavors.sort()
                 else:
-                    flavor_pending.sort(key=lambda x: flavor_order.index(x[0]))
+                    pending_flavors.sort(key=lambda x: flavor_order.index(x[0]))
 
                 if default_reference is not None:
                     default_reference_str, default_reference_c = default_reference
                     buffer.write(f'  # {default_reference_c}\n')
                     buffer.write(f'  ~: {default_reference_str}\n')
-                for _, flavors_str, (reference_str, reference_c) in flavor_pending:
+                for _, flavors_text, (reference_str, reference_c) in pending_flavors:
                     buffer.write(f'  # {reference_c}\n')
-                    buffer.write(f'  {flavors_str}: {reference_str}\n')
+                    buffer.write(f'  {flavors_text}: {reference_str}\n')
 
         if not isinstance(file_path, Path):
             file_path = Path(file_path)
