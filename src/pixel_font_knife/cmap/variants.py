@@ -27,7 +27,7 @@ class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
             return
 
         if not isinstance(glyph_file, CmapGlyphFile):
-            raise ValueError(f'illegal value type: {type(glyph_file).__name__!r}')
+            raise TypeError(f'illegal value type: {type(glyph_file).__name__!r}')
 
         super().__setitem__(flavor, glyph_file)
 

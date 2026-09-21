@@ -102,7 +102,7 @@ class CmapMapping(UserDict[int, CmapMappingEntry]):
             return
 
         if not isinstance(entry, CmapMappingEntry):
-            raise ValueError(f'illegal value type: {type(entry).__name__!r}')
+            raise TypeError(f'illegal value type: {type(entry).__name__!r}')
 
         super().__setitem__(code_point, entry)
 

@@ -73,7 +73,7 @@ class NamedGlyphFile(GlyphFile):
 
     def normalize(self, flavor_order: str | Sequence[str | None] | None = None) -> None:
         if not self.file_path.exists():
-            raise RuntimeError(f"missing glyph file:\n'{self.file_path}'")
+            raise FileNotFoundError(f"missing glyph file:\n'{self.file_path}'")
 
         check_glyph_name_key(self.name_key)
         check_flavors(self.flavors)
@@ -92,7 +92,7 @@ class NamedGlyphFile(GlyphFile):
         if self.file_path.name != file_name:
             file_path = self.file_path.with_name(file_name)
             if file_path.exists():
-                raise RuntimeError(f"duplicate glyph files:\n'{self.file_path}'\n'{file_path}'")
+                raise FileExistsError(f"duplicate glyph files:\n'{self.file_path}'\n'{file_path}'")
             else:
                 self.file_path.rename(file_path)
                 self.file_path = file_path

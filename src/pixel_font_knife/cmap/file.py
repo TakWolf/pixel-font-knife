@@ -81,7 +81,7 @@ class CmapGlyphFile(GlyphFile):
             flavor_order: str | Sequence[str | None] | None = None,
     ) -> None:
         if not self.file_path.exists():
-            raise RuntimeError(f"missing glyph file:\n'{self.file_path}'")
+            raise FileNotFoundError(f"missing glyph file:\n'{self.file_path}'")
 
         check_code_point(self.code_point)
         check_flavors(self.flavors)
@@ -102,7 +102,7 @@ class CmapGlyphFile(GlyphFile):
         file_path = file_dir.joinpath(file_name)
         if self.file_path != file_path:
             if file_path.exists():
-                raise RuntimeError(f"duplicate glyph files:\n'{self.file_path}'\n'{file_path}'")
+                raise FileExistsError(f"duplicate glyph files:\n'{self.file_path}'\n'{file_path}'")
             else:
                 file_dir.mkdir(parents=True, exist_ok=True)
                 self.file_path.rename(file_path)

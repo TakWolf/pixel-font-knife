@@ -23,6 +23,6 @@ class CmapMappingEntry(UserDict[str | None, CmapGlyphReference]):
             return
 
         if not isinstance(glyph_reference, CmapGlyphReference):
-            raise ValueError(f'illegal value type: {type(glyph_reference).__name__!r}')
+            raise TypeError(f'illegal value type: {type(glyph_reference).__name__!r}')
 
         super().__setitem__(flavor, glyph_reference)

@@ -36,7 +36,7 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
             return
 
         if not isinstance(glyph_file, NamedGlyphFile):
-            raise ValueError(f'illegal value type: {type(glyph_file).__name__!r}')
+            raise TypeError(f'illegal value type: {type(glyph_file).__name__!r}')
 
         if glyph_file.name_key != self.name_key:
             raise ValueError(f'name key mismatch: {self.name_key!r} != {glyph_file.name_key!r}')

@@ -92,7 +92,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             return
 
         if not isinstance(glyph_variants, CmapGlyphVariants):
-            raise ValueError(f'illegal value type: {type(glyph_variants).__name__!r}')
+            raise TypeError(f'illegal value type: {type(glyph_variants).__name__!r}')
 
         super().__setitem__(code_point, glyph_variants)
 

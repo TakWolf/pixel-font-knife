@@ -84,7 +84,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
             return
 
         if not isinstance(glyph_variants, NamedGlyphVariants):
-            raise ValueError(f'illegal value type: {type(glyph_variants).__name__!r}')
+            raise TypeError(f'illegal value type: {type(glyph_variants).__name__!r}')
 
         if glyph_variants.name_key != name_key:
             raise ValueError(f'name key mismatch: {name_key!r} != {glyph_variants.name_key!r}')
