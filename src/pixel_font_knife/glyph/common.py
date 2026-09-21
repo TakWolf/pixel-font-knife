@@ -60,7 +60,8 @@ def normalize_allowed_flavors(allowed_flavors: Collection[str] | None) -> set[st
         if isinstance(allowed_flavors, str):
             allowed_flavors = {allowed_flavors}
         else:
-            allowed_flavors = set(allowed_flavors)
+            if not isinstance(allowed_flavors, set):
+                allowed_flavors = set(allowed_flavors)
     return allowed_flavors
 
 
