@@ -65,6 +65,7 @@ class CmapKerningTemplate:
         if flavor_order is None:
             flavor_order = [None]
 
+        kerning_presets = {}
         kerning_values = {}
         for (left_group_name, right_group_name), offset in self.values.items():
             if offset >= 0:
@@ -98,8 +99,23 @@ class CmapKerningTemplate:
 
                         left_glyph_name = left_file.glyph_name
                         right_glyph_name = right_file.glyph_name
+                        glyph_name_pair = left_glyph_name, right_glyph_name
+                        source = left_group_name, right_group_name, left_c, right_c, flavor
 
-                        if (left_glyph_name, right_glyph_name) not in kerning_values:
+                        if glyph_name_pair in kerning_presets:
+                            preset_offset, preset_source = kerning_presets[glyph_name_pair]
+                            if preset_offset != offset:
+                                preset_left_group, preset_right_group, preset_left_c, preset_right_c, preset_flavor = preset_source
+                                raise ValueError(
+                                    f'kerning preset mismatch for glyph pair {glyph_name_pair!r}: '
+                                    f'{preset_offset} from groups {(preset_left_group, preset_right_group)!r}, '
+                                    f'characters {(preset_left_c, preset_right_c)!r}, requested flavor {preset_flavor!r} != '
+                                    f'{offset} from groups {(left_group_name, right_group_name)!r}, '
+                                    f'characters {(left_c, right_c)!r}, requested flavor {flavor!r}'
+                                )
+                        else:
+                            kerning_presets[glyph_name_pair] = (offset, source)
+
                             actual_offset = offset
                             while actual_offset < 0:
                                 if not left_bitmap_mask.overlaps(right_file.canvas.bitmap, x=left_bitmap_mask.width + actual_offset):

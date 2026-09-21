@@ -1,8 +1,10 @@
 import re
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
+from pixel_font_knife.bitmap.mono_bitmap import MonoBitmap
 from pixel_font_knife.cmap.context import CmapContext
 from pixel_font_knife.cmap.file import CmapGlyphFile
 from pixel_font_knife.cmap.kerning.template import CmapKerningTemplate
@@ -139,3 +141,50 @@ def test_calculate_kerning_values_uses_requested_flavors(glyphs_dir: Path) -> No
         ('u0054.alt', 'u006F.alt'): -1,
         ('u0054', 'u006F'): -1,
     }
+
+
+def test_calculate_kerning_values_deduplicates_fallback_default(
+        glyphs_dir: Path,
+        monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    context = CmapContext.load(glyphs_dir.joinpath('kerning'))
+    template = CmapKerningTemplate(
+        groups={
+            'left': ['T'],
+            'right': ['o'],
+        },
+        values={
+            ('left', 'right'): -8,
+        },
+    )
+    overlaps = Mock(return_value=False)
+    monkeypatch.setattr(MonoBitmap, 'overlaps', overlaps)
+
+    assert template.calculate_kerning_values(context, ['alt', None]) == {
+        ('u0054', 'u006F'): -8,
+    }
+    overlaps.assert_called_once()
+
+
+def test_calculate_kerning_values_reports_preset_mismatch(glyphs_dir: Path) -> None:
+    context = CmapContext.load(glyphs_dir.joinpath('kerning'))
+    template = CmapKerningTemplate(
+        groups={
+            'left_1': ['T'],
+            'right_1': ['o'],
+            'left_2': ['T'],
+            'right_2': ['o'],
+        },
+        values={
+            ('left_1', 'right_1'): -1,
+            ('left_2', 'right_2'): -8,
+        },
+    )
+
+    message = (
+        "kerning preset mismatch for glyph pair ('u0054', 'u006F'): "
+        "-1 from groups ('left_1', 'right_1'), characters ('T', 'o'), requested flavor None != "
+        "-8 from groups ('left_2', 'right_2'), characters ('T', 'o'), requested flavor None"
+    )
+    with pytest.raises(ValueError, match=re.escape(message)):
+        template.calculate_kerning_values(context)
