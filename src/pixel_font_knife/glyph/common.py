@@ -15,35 +15,35 @@ def check_merge_conflict_strategy(conflict: MergeConflictStrategy) -> None:
 
 def check_code_point(code_point: Any) -> None:
     if not isinstance(code_point, int):
-        raise KeyError(f'illegal code point type: {type(code_point).__name__!r}')
+        raise TypeError(f'illegal code point type: {type(code_point).__name__!r}')
 
     if code_point < 0:
-        raise KeyError(f'illegal code point: {code_point}')
+        raise ValueError(f'illegal code point: {code_point}')
 
 
 def check_glyph_name_key(name_key: Any) -> None:
     if not isinstance(name_key, str):
-        raise KeyError(f'illegal name key type: {type(name_key).__name__!r}')
+        raise TypeError(f'illegal name key type: {type(name_key).__name__!r}')
 
     if name_key == '':
-        raise KeyError('name key cannot be empty')
+        raise ValueError('name key cannot be empty')
 
     if any(character.isspace() for character in name_key):
-        raise KeyError(f'illegal name key: {name_key!r}')
+        raise ValueError(f'illegal name key: {name_key!r}')
 
 
 def check_flavor(flavor: Any) -> None:
     if flavor is None:
-        raise KeyError('flavor cannot be None')
+        raise TypeError('flavor cannot be None')
 
     if not isinstance(flavor, str):
-        raise KeyError(f'illegal flavor type: {type(flavor).__name__!r}')
+        raise TypeError(f'illegal flavor type: {type(flavor).__name__!r}')
 
     if len(flavor) == 0:
-        raise KeyError('flavor cannot be empty')
+        raise ValueError('flavor cannot be empty')
 
     if any(character.isspace() for character in flavor) or '.' in flavor or ',' in flavor or '*' in flavor:
-        raise KeyError(f'illegal flavor: {flavor!r}')
+        raise ValueError(f'illegal flavor: {flavor!r}')
 
 
 def check_flavors(flavors: Iterable[Any]) -> None:
@@ -51,7 +51,7 @@ def check_flavors(flavors: Iterable[Any]) -> None:
     for flavor in flavors:
         check_flavor(flavor)
         if flavor in validated_flavors:
-            raise KeyError(f'duplicate flavor: {flavor!r}')
+            raise ValueError(f'duplicate flavor: {flavor!r}')
         validated_flavors.add(flavor)
 
 
