@@ -81,6 +81,20 @@ def test_file_normalize_accepts_string_flavor_order(tmp_path: Path) -> None:
     assert glyph_file.file_path.name == '4E00 zh_cn.png'
 
 
+def test_variants_reject_none_value_for_default_flavor() -> None:
+    glyph_variants = CmapGlyphVariants()
+
+    with pytest.raises(TypeError, match=re.escape("illegal value type: 'NoneType'")):
+        glyph_variants[None] = None
+
+
+def test_context_rejects_none_value() -> None:
+    context = CmapContext()
+
+    with pytest.raises(TypeError, match=re.escape("illegal value type: 'NoneType'")):
+        context[0x4E00] = None
+
+
 def test_variants_select_exact_flavor_then_default() -> None:
     default_file = CmapGlyphFile('4E00.png', 0x4E00)
     flavored_file = CmapGlyphFile('4E00 zh_cn.png', 0x4E00, ['zh_cn'])

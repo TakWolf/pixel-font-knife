@@ -79,10 +79,6 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
     def __setitem__(self, name_key: Any, glyph_variants: Any) -> None:
         check_glyph_name_key(name_key)
 
-        if glyph_variants is None:
-            self.pop(name_key, None)
-            return
-
         if not isinstance(glyph_variants, NamedGlyphVariants):
             raise TypeError(f'illegal value type: {type(glyph_variants).__name__!r}')
 

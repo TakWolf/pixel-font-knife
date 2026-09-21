@@ -79,6 +79,20 @@ def test_file_normalize_accepts_string_flavor_order(tmp_path: Path) -> None:
     assert glyph_file.file_path.name == 'foo zh_cn.png'
 
 
+def test_variants_reject_none_value_for_default_flavor() -> None:
+    glyph_variants = NamedGlyphVariants('foo')
+
+    with pytest.raises(TypeError, match=re.escape("illegal value type: 'NoneType'")):
+        glyph_variants[None] = None
+
+
+def test_context_rejects_none_value() -> None:
+    context = NamedContext()
+
+    with pytest.raises(TypeError, match=re.escape("illegal value type: 'NoneType'")):
+        context['foo'] = None
+
+
 def test_variants_select_exact_flavor_then_default() -> None:
     default_file = NamedGlyphFile('foo.png', 'foo')
     flavored_file = NamedGlyphFile('foo zh_cn.png', 'foo', ['zh_cn'])

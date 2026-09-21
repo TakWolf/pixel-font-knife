@@ -22,10 +22,6 @@ class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
         if flavor is not None:
             check_flavor(flavor)
 
-        if glyph_file is None:
-            self.pop(flavor, None)
-            return
-
         if not isinstance(glyph_file, CmapGlyphFile):
             raise TypeError(f'illegal value type: {type(glyph_file).__name__!r}')
 

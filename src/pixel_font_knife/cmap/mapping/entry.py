@@ -18,10 +18,6 @@ class CmapMappingEntry(UserDict[str | None, CmapGlyphReference]):
         if flavor is not None and flavor != '*':
             check_flavor(flavor)
 
-        if glyph_reference is None:
-            self.pop(flavor, None)
-            return
-
         if not isinstance(glyph_reference, CmapGlyphReference):
             raise TypeError(f'illegal value type: {type(glyph_reference).__name__!r}')
 

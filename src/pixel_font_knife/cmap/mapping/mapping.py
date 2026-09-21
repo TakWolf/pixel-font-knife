@@ -97,10 +97,6 @@ class CmapMapping(UserDict[int, CmapMappingEntry]):
     def __setitem__(self, code_point: Any, entry: Any) -> None:
         check_code_point(code_point)
 
-        if entry is None:
-            self.pop(code_point, None)
-            return
-
         if not isinstance(entry, CmapMappingEntry):
             raise TypeError(f'illegal value type: {type(entry).__name__!r}')
 

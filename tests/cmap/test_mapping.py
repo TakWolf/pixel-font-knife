@@ -16,6 +16,20 @@ def _create_mapping(target_code_point: int, reference_code_point: int) -> CmapMa
     return CmapMapping({target_code_point: entry})
 
 
+def test_entry_rejects_none_value_for_default_flavor() -> None:
+    entry = CmapMappingEntry()
+
+    with pytest.raises(TypeError, match=re.escape("illegal value type: 'NoneType'")):
+        entry[None] = None
+
+
+def test_mapping_rejects_none_value() -> None:
+    mapping = CmapMapping()
+
+    with pytest.raises(TypeError, match=re.escape("illegal value type: 'NoneType'")):
+        mapping[0x41] = None
+
+
 @pytest.mark.parametrize(
     'method_name',
     [

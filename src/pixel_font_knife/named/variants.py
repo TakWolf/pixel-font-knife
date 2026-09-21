@@ -31,10 +31,6 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
         if flavor is not None:
             check_flavor(flavor)
 
-        if glyph_file is None:
-            self.pop(flavor, None)
-            return
-
         if not isinstance(glyph_file, NamedGlyphFile):
             raise TypeError(f'illegal value type: {type(glyph_file).__name__!r}')
 
