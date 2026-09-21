@@ -109,7 +109,7 @@ class CmapMapping(UserDict[int, CmapMappingEntry]):
     def save_yaml(
             self,
             file_path: str | PathLike[str],
-            flavor_order: Sequence[str | None] | None = None,
+            flavor_order: str | Sequence[str | None] | None = None,
     ) -> None:
         flavor_order = normalize_flavor_order(flavor_order)
 

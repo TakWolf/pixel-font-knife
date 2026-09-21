@@ -71,7 +71,7 @@ class NamedGlyphFile(GlyphFile):
             name = f'{name}.{self.flavors[0]}'
         return name
 
-    def normalize(self, flavor_order: Sequence[str | None] | None = None) -> None:
+    def normalize(self, flavor_order: str | Sequence[str | None] | None = None) -> None:
         if not self.file_path.exists():
             raise RuntimeError(f"missing glyph file:\n'{self.file_path}'")
 

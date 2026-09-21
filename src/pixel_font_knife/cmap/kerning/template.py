@@ -58,7 +58,7 @@ class CmapKerningTemplate:
     def calculate_kerning_values(
             self,
             context: CmapContext,
-            flavor_order: Sequence[str | None] | None = None,
+            flavor_order: str | Sequence[str | None] | None = None,
             fallback_default: bool = True,
     ) -> dict[tuple[str, str], int]:
         flavor_order = normalize_flavor_order(flavor_order)

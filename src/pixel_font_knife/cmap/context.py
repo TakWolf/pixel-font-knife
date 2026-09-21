@@ -102,7 +102,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
     def normalize(
             self,
             root_dir: str | PathLike[str],
-            flavor_order: Sequence[str | None] | None = None,
+            flavor_order: str | Sequence[str | None] | None = None,
     ) -> None:
         flavor_order = normalize_flavor_order(flavor_order)
 
@@ -305,7 +305,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                             raise RuntimeError(f'duplicate flavor: 0x{code_point:04X} {flavor!r}')
         return result
 
-    def with_default_flavor(self, flavor_order: Sequence[str | None] | None = None) -> CmapContext:
+    def with_default_flavor(self, flavor_order: str | Sequence[str | None] | None = None) -> CmapContext:
         flavor_order = normalize_flavor_order(flavor_order)
 
         result = self.copy()
@@ -329,7 +329,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
 
     def get_glyph_sequence(
             self,
-            flavor_order: Sequence[str | None] | None = None,
+            flavor_order: str | Sequence[str | None] | None = None,
             fallback_default: bool = True,
     ) -> list[CmapGlyphFile]:
         flavor_order = normalize_flavor_order(flavor_order)

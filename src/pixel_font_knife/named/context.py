@@ -102,7 +102,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
                 raise ValueError(f'name key mismatch: {name_key!r} != {glyph_variants.name_key!r}')
             glyph_variants.check()
 
-    def normalize(self, flavor_order: Sequence[str | None] | None = None) -> None:
+    def normalize(self, flavor_order: str | Sequence[str | None] | None = None) -> None:
         self.check()
 
         flavor_order = normalize_flavor_order(flavor_order)
@@ -166,7 +166,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
                             raise RuntimeError(f'duplicate flavor: {name_key!r} {flavor!r}')
         return result
 
-    def with_default_flavor(self, flavor_order: Sequence[str | None] | None = None) -> NamedContext:
+    def with_default_flavor(self, flavor_order: str | Sequence[str | None] | None = None) -> NamedContext:
         flavor_order = normalize_flavor_order(flavor_order)
 
         result = self.copy()
@@ -190,7 +190,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
 
     def get_glyph_sequence(
             self,
-            flavor_order: Sequence[str | None] | None = None,
+            flavor_order: str | Sequence[str | None] | None = None,
             fallback_default: bool = True,
     ) -> list[NamedGlyphFile]:
         flavor_order = normalize_flavor_order(flavor_order)

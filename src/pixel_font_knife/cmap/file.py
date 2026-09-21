@@ -78,7 +78,7 @@ class CmapGlyphFile(GlyphFile):
     def normalize(
             self,
             root_dir: str | PathLike[str],
-            flavor_order: Sequence[str | None] | None = None,
+            flavor_order: str | Sequence[str | None] | None = None,
     ) -> None:
         if not self.file_path.exists():
             raise RuntimeError(f"missing glyph file:\n'{self.file_path}'")

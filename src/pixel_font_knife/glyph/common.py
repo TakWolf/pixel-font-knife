@@ -65,7 +65,7 @@ def normalize_allowed_flavors(allowed_flavors: Collection[str] | None) -> set[st
     return allowed_flavors
 
 
-def normalize_flavor_order(flavor_order: Sequence[str | None] | None) -> Sequence[str | None] | None:
+def normalize_flavor_order(flavor_order: str | Sequence[str | None] | None) -> Sequence[str | None] | None:
     if isinstance(flavor_order, str):
         flavor_order = [flavor_order]
     return flavor_order
