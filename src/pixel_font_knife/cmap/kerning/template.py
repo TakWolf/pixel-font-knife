@@ -96,12 +96,16 @@ class CmapKerningTemplate:
                         except KeyError as error:
                             raise KeyError(f'right group {right_group_name!r} character {right_c!r}: {error.args[0]}') from error
 
-                        actual_offset = offset
-                        while actual_offset < 0:
-                            if not left_bitmap_mask.overlaps(right_file.canvas.bitmap, x=left_bitmap_mask.width + actual_offset):
-                                break
-                            actual_offset += 1
+                        left_glyph_name = left_file.glyph_name
+                        right_glyph_name = right_file.glyph_name
 
-                        if actual_offset < 0:
-                            kerning_values[(left_file.glyph_name, right_file.glyph_name)] = actual_offset
+                        if (left_glyph_name, right_glyph_name) not in kerning_values:
+                            actual_offset = offset
+                            while actual_offset < 0:
+                                if not left_bitmap_mask.overlaps(right_file.canvas.bitmap, x=left_bitmap_mask.width + actual_offset):
+                                    break
+                                actual_offset += 1
+
+                            if actual_offset < 0:
+                                kerning_values[(left_glyph_name, right_glyph_name)] = actual_offset
         return kerning_values
