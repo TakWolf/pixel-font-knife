@@ -290,8 +290,8 @@ def test_scale_to() -> None:
 
 
 def test_scale(bitmaps_dir: Path) -> None:
-    for file_path in bitmaps_dir.joinpath('x1').iterdir():
-        if file_path.suffix != '.png':
+    for file_path in bitmaps_dir.joinpath('x1').glob('*.png'):
+        if not file_path.is_file():
             continue
 
         x1_bitmap = MonoBitmap.load_png(file_path)
@@ -487,8 +487,8 @@ def test_load_dump_save(bitmaps_dir: Path, tmp_path: Path) -> None:
     save_dir = tmp_path.joinpath('x1')
     save_dir.mkdir()
 
-    for load_path in load_dir.iterdir():
-        if load_path.suffix != '.png':
+    for load_path in load_dir.glob('*.png'):
+        if not load_path.is_file():
             continue
 
         bitmap = MonoBitmap.load_png(load_path)
@@ -542,8 +542,8 @@ def test_eq() -> None:
 
 
 def test_move_right_and_overlap_bolding(bitmaps_dir: Path) -> None:
-    for file_path in bitmaps_dir.joinpath('x1').iterdir():
-        if file_path.suffix != '.png':
+    for file_path in bitmaps_dir.joinpath('x1').glob('*.png'):
+        if not file_path.is_file():
             continue
 
         bitmap = MonoBitmap.load_png(file_path)
@@ -555,8 +555,8 @@ def test_move_right_and_overlap_bolding(bitmaps_dir: Path) -> None:
 
 
 def test_move_left_and_overlap_bolding(bitmaps_dir: Path) -> None:
-    for file_path in bitmaps_dir.joinpath('x1').iterdir():
-        if file_path.suffix != '.png':
+    for file_path in bitmaps_dir.joinpath('x1').glob('*.png'):
+        if not file_path.is_file():
             continue
 
         bitmap = MonoBitmap.load_png(file_path)
@@ -568,8 +568,8 @@ def test_move_left_and_overlap_bolding(bitmaps_dir: Path) -> None:
 
 
 def test_inflation_bolding(bitmaps_dir: Path) -> None:
-    for file_path in bitmaps_dir.joinpath('x1').iterdir():
-        if file_path.suffix != '.png':
+    for file_path in bitmaps_dir.joinpath('x1').glob('*.png'):
+        if not file_path.is_file():
             continue
 
         bitmap = MonoBitmap.load_png(file_path)

@@ -54,34 +54,32 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             root_dir = Path(root_dir)
 
         context = CmapContext()
-        for file_dir, _, file_names in root_dir.walk():
-            for file_name in file_names:
-                if not file_name.endswith('.png'):
-                    continue
+        for file_path in root_dir.rglob('*.png'):
+            if not file_path.is_file():
+                continue
 
-                file_path = file_dir.joinpath(file_name)
-                glyph_file = CmapGlyphFile.load(file_path)
+            glyph_file = CmapGlyphFile.load(file_path)
 
-                if glyph_file.code_point not in context:
-                    glyph_variants = CmapGlyphVariants()
-                    context[glyph_file.code_point] = glyph_variants
-                else:
-                    glyph_variants = context[glyph_file.code_point]
+            if glyph_file.code_point not in context:
+                glyph_variants = CmapGlyphVariants()
+                context[glyph_file.code_point] = glyph_variants
+            else:
+                glyph_variants = context[glyph_file.code_point]
 
-                if len(glyph_file.flavors) > 0:
-                    for flavor in glyph_file.flavors:
-                        if allowed_flavors is not None and flavor not in allowed_flavors:
-                            raise RuntimeError(f"flavor {flavor!r} not allowed:\n'{file_path}'")
+            if len(glyph_file.flavors) > 0:
+                for flavor in glyph_file.flavors:
+                    if allowed_flavors is not None and flavor not in allowed_flavors:
+                        raise RuntimeError(f"flavor {flavor!r} not allowed:\n'{file_path}'")
 
-                        if flavor in glyph_variants:
-                            raise RuntimeError(f"flavor {flavor!r} already exists:\n'{file_path}'\n'{glyph_variants[flavor].file_path}'")
+                    if flavor in glyph_variants:
+                        raise RuntimeError(f"flavor {flavor!r} already exists:\n'{file_path}'\n'{glyph_variants[flavor].file_path}'")
 
-                        glyph_variants[flavor] = glyph_file
-                else:
-                    if None in glyph_variants:
-                        raise RuntimeError(f"default flavor already exists:\n'{file_path}'\n'{glyph_variants[None].file_path}'")
+                    glyph_variants[flavor] = glyph_file
+            else:
+                if None in glyph_variants:
+                    raise RuntimeError(f"default flavor already exists:\n'{file_path}'\n'{glyph_variants[None].file_path}'")
 
-                    glyph_variants[None] = glyph_file
+                glyph_variants[None] = glyph_file
         return context
 
     def __setitem__(self, code_point: Any, glyph_variants: Any) -> None:
