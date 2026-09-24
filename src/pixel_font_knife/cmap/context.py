@@ -69,15 +69,15 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             if len(glyph_file.flavors) > 0:
                 for flavor in glyph_file.flavors:
                     if allowed_flavors is not None and flavor not in allowed_flavors:
-                        raise RuntimeError(f"flavor {flavor!r} not allowed:\n'{file_path}'")
+                        raise RuntimeError(f'flavor {flavor!r} not allowed:\n{str(file_path)!r}')
 
                     if flavor in glyph_variants:
-                        raise RuntimeError(f"flavor {flavor!r} already exists:\n'{file_path}'\n'{glyph_variants[flavor].file_path}'")
+                        raise RuntimeError(f'flavor {flavor!r} already exists:\n{str(file_path)!r}\n{str(glyph_variants[flavor].file_path)!r}')
 
                     glyph_variants[flavor] = glyph_file
             else:
                 if None in glyph_variants:
-                    raise RuntimeError(f"default flavor already exists:\n'{file_path}'\n'{glyph_variants[None].file_path}'")
+                    raise RuntimeError(f'default flavor already exists:\n{str(file_path)!r}\n{str(glyph_variants[None].file_path)!r}')
 
                 glyph_variants[None] = glyph_file
         return context

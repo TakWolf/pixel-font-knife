@@ -31,7 +31,7 @@ class NamedGlyphFile(GlyphFile):
             file_path = Path(file_path)
 
         if file_path.suffix != '.png':
-            raise ValueError(f"illegal glyph file extension: '{file_path}'")
+            raise ValueError(f'illegal glyph file extension: {str(file_path)!r}')
 
         name_key, separator, flavors_text = file_path.stem.partition(' ')
         flavors = flavors_text.split(',') if separator else []
@@ -43,7 +43,7 @@ class NamedGlyphFile(GlyphFile):
             file_path = Path(file_path)
 
         if file_path.suffix != '.png':
-            raise ValueError(f"illegal glyph file extension: '{file_path}'")
+            raise ValueError(f'illegal glyph file extension: {str(file_path)!r}')
 
         return NamedGlyphFile(file_path, '.notdef')
 
@@ -73,7 +73,7 @@ class NamedGlyphFile(GlyphFile):
 
     def normalize(self, flavor_order: str | Sequence[str | None] | None = None) -> None:
         if not self.file_path.exists():
-            raise FileNotFoundError(f"missing glyph file:\n'{self.file_path}'")
+            raise FileNotFoundError(f'missing glyph file:\n{str(self.file_path)!r}')
 
         check_glyph_name_key(self.name_key)
         check_flavors(self.flavors)
@@ -92,7 +92,7 @@ class NamedGlyphFile(GlyphFile):
         if self.file_path.name != file_name:
             file_path = self.file_path.with_name(file_name)
             if file_path.exists():
-                raise FileExistsError(f"duplicate glyph files:\n'{self.file_path}'\n'{file_path}'")
+                raise FileExistsError(f'duplicate glyph files:\n{str(self.file_path)!r}\n{str(file_path)!r}')
             else:
                 self.file_path.rename(file_path)
                 self.file_path = file_path

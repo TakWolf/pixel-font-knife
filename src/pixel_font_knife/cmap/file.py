@@ -44,7 +44,7 @@ class CmapGlyphFile(GlyphFile):
             file_path = Path(file_path)
 
         if file_path.suffix != '.png':
-            raise ValueError(f"illegal glyph file extension: '{file_path}'")
+            raise ValueError(f'illegal glyph file extension: {str(file_path)!r}')
 
         code_point_text, separator, flavors_text = file_path.stem.partition(' ')
         code_point = int(code_point_text, 16)
@@ -81,7 +81,7 @@ class CmapGlyphFile(GlyphFile):
             flavor_order: str | Sequence[str | None] | None = None,
     ) -> None:
         if not self.file_path.exists():
-            raise FileNotFoundError(f"missing glyph file:\n'{self.file_path}'")
+            raise FileNotFoundError(f'missing glyph file:\n{str(self.file_path)!r}')
 
         check_code_point(self.code_point)
         check_flavors(self.flavors)
@@ -102,7 +102,7 @@ class CmapGlyphFile(GlyphFile):
         file_path = file_dir.joinpath(file_name)
         if self.file_path != file_path:
             if file_path.exists():
-                raise FileExistsError(f"duplicate glyph files:\n'{self.file_path}'\n'{file_path}'")
+                raise FileExistsError(f'duplicate glyph files:\n{str(self.file_path)!r}\n{str(file_path)!r}')
             else:
                 file_dir.mkdir(parents=True, exist_ok=True)
                 self.file_path.rename(file_path)
