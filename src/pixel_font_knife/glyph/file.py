@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from os import PathLike
 from pathlib import Path
+from typing import Literal
 
 from pixel_font_knife.bitmap.mono_bitmap import MonoBitmap
 from pixel_font_knife.glyph.canvas import GlyphCanvas
@@ -39,6 +40,31 @@ class GlyphFile(ABC):
     @canvas.setter
     def canvas(self, canvas: GlyphCanvas) -> None:
         self._canvas = canvas
+
+    def suggest_horizontal_offset(
+            self,
+            em_size: int,
+            baseline_from_em_top: int,
+            vertical_bias: Literal['top', 'bottom'] | None = None,
+    ) -> tuple[int, int]:
+        return self.canvas.horizontal_offset_for_trimmed(em_size, baseline_from_em_top, vertical_bias)
+
+    def suggest_advance_width(self) -> int:
+        return self.canvas.advance_width()
+
+    def suggest_vertical_offset(
+            self,
+            em_size: int,
+            horizontal_bias: Literal['left', 'right'] | None = 'left',
+            vertical_bias: Literal['top', 'bottom'] | None = None,
+    ) -> tuple[int, int]:
+        return self.canvas.vertical_offset_for_trimmed(em_size, horizontal_bias, vertical_bias)
+
+    def suggest_advance_height(self, em_size: int) -> int:
+        return self.canvas.advance_height(em_size)
+
+    def suggest_bitmap(self) -> list[list[int]]:
+        return self.canvas.trimmed_bitmap.data
 
     def save(self) -> None:
         self.canvas.bitmap.save_png(self.file_path)

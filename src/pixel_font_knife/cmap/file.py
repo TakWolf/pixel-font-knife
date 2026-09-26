@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from os import PathLike
 from pathlib import Path
 
+import unicodedata2
 import unidata_blocks
 
 from pixel_font_knife.glyph.common import check_code_point, check_flavors, normalize_flavor_order
@@ -74,6 +75,12 @@ class CmapGlyphFile(GlyphFile):
         if len(self.flavors) > 0:
             name = f'{name}.{self.flavors[0]}'
         return name
+
+    def suggest_advance_width(self) -> int:
+        category = unicodedata2.category(chr(self.code_point))
+        if category == 'Mn':
+            return 0
+        return super().suggest_advance_width()
 
     def normalize(
             self,
