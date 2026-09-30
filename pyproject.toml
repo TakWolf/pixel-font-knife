@@ -23,7 +23,7 @@ classifiers = [
 
 dependencies = [
     "unicodedata2>=18.0.0",
-    "unidata-blocks>=0.0.27",
+    "unidata-blocks>=0.0.28",
     "pyyaml>=6.0.3",
 ]
 
