@@ -21,15 +21,6 @@ wheels = [
 ]
 
 [[package]]
-name = "langcodes"
-version = "3.5.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a9/75/f9edc5d72945019312f359e69ded9f82392a81d49c5051ed3209b100c0d2/langcodes-3.5.1.tar.gz", hash = "sha256:40bff315e01b01d11c2ae3928dd4f5cbd74dd38f9bd912c12b9a3606c143f731", size = 191084, upload-time = "2025-12-02T16:22:01.627Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/dd/c1/d10b371bcba7abce05e2b33910e39c33cfa496a53f13640b7b8e10bb4d2b/langcodes-3.5.1-py3-none-any.whl", hash = "sha256:b6a9c25c603804e2d169165091d0cdb23934610524a21d226e4f463e8e958a72", size = 183050, upload-time = "2025-12-02T16:21:59.954Z" },
-]
-
-[[package]]
 name = "packaging"
 version = "26.3"
 source = { registry = "https://pypi.org/simple" }
@@ -57,7 +48,7 @@ dev = [
 requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "unicodedata2", specifier = ">=18.0.0" },
-    { name = "unidata-blocks", specifier = ">=0.0.27" },
+    { name = "unidata-blocks", specifier = ">=18.0.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -207,12 +198,9 @@ wheels = [
 
 [[package]]
 name = "unidata-blocks"
-version = "0.0.27"
+version = "18.0.0"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "langcodes" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d1/0f/617aed960aec9db4d7de1078b4a464cd0a66df8b0985fc258dd6c5e2d54b/unidata_blocks-0.0.27.tar.gz", hash = "sha256:d27703ec2124aafc056c708e834eed111c2d739ae606e4f1b006657050384fc0", size = 15212, upload-time = "2026-09-17T20:28:04.322Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/78/5d/c2fc661369e1b126203bd56b6b43ffe3c8e64c69a67d7f809044852e4131/unidata_blocks-18.0.0.tar.gz", hash = "sha256:112b268a7285cc73c5dfcf40e24c2ddad8b4d28032cd3dcc473ae0e053d0e153", size = 12147, upload-time = "2026-10-22T09:40:52.838Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4f/b3/8fb3976975e8a0373660c2a8b470ef9fc356c093e9626ffe90dc1ac8fc2e/unidata_blocks-0.0.27-py3-none-any.whl", hash = "sha256:ea01b98d78561a6da94124a02f2ad2ee66fda1acf2348979ebadc56f56b59e36", size = 26014, upload-time = "2026-09-17T20:28:03.429Z" },
+    { url = "https://files.pythonhosted.org/packages/60/c8/a2887a1d33a8b9dc71a8fe525f59ef7b38afd7c6e0fbdccf9dfddd4e0d82/unidata_blocks-18.0.0-py3-none-any.whl", hash = "sha256:edd7db7d36450c330bde97e9f87db4a8be453538e7cc5e6d4dd22ba98e458f4f", size = 12929, upload-time = "2026-10-22T09:40:51.782Z" },
 ]

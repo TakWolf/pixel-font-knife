@@ -34,7 +34,7 @@ class CmapGlyphFile(GlyphFile):
 
         block = unidata_blocks.get_block_by_code_point(code_point)
         file_dir = root_dir.joinpath(f'{block.code_start:04X}-{block.code_end:04X} {block.name}')
-        if block.name == 'CJK Unified Ideographs':
+        if block == unidata_blocks.BLOCK_CJK_UNIFIED_IDEOGRAPHS:
             code_name = f'{code_point:04X}'
             file_dir = file_dir.joinpath(f'{code_name[0:-2]}-')
         return file_dir
