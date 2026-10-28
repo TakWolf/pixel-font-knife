@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import UserDict
 from typing import Any
 
-from pixel_font_knife.glyph.common import check_glyph_name_key, check_flavor
+from pixel_font_knife.glyph.common import FlavorFallbackStrategy, check_glyph_name_key, check_flavor
 from pixel_font_knife.named.file import NamedGlyphFile
 
 
@@ -16,8 +16,8 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
     可以引用同一个 ``NamedGlyphFile`` 对象，映射修改不会改变字形文件属性。
 
     ``check()`` 用于在字形属性被动态修改后重新检查 name key 一致性。``select()`` 优先返回指定
-    flavor，缺失时回退到默认变体。``copy()`` 只复制映射容器，保留相同的 ``name_key``，并始终共享
-    原有的 ``NamedGlyphFile`` 对象及其画布缓存。
+    flavor，缺失时由 ``fallback`` 决定返回默认变体、跳过或报错。``copy()`` 只复制映射容器，
+    保留相同的 ``name_key``，并始终共享原有的 ``NamedGlyphFile`` 对象及其画布缓存。
     """
 
     name_key: str
@@ -51,8 +51,8 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
     def select(
             self,
             flavor: str | None = None,
-            fallback_default: bool = True,
-    ) -> NamedGlyphFile:
+            fallback: FlavorFallbackStrategy = 'default',
+    ) -> NamedGlyphFile | None:
         if flavor is not None:
             check_flavor(flavor)
 
@@ -61,8 +61,12 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
         if flavor in self:
             return self[flavor]
 
-        if None in self and fallback_default:
-            return self[None]
+        match fallback:
+            case 'default':
+                if None in self:
+                    return self[None]
+            case 'skip':
+                return None
 
         raise KeyError(f'no flavor file: {flavor!r}')
 

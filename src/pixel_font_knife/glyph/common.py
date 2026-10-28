@@ -1,6 +1,12 @@
 from collections.abc import Iterable, Collection, Sequence
 from typing import Any, Literal
 
+FlavorFallbackStrategy = Literal[
+    'default',
+    'skip',
+    'error',
+]
+
 MergeConflictStrategy = Literal[
     'keep',
     'replace',

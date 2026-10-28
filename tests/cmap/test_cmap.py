@@ -6,6 +6,7 @@ import pytest
 from pixel_font_knife.cmap.context import CmapContext
 from pixel_font_knife.cmap.file import CmapGlyphFile
 from pixel_font_knife.cmap.variants import CmapGlyphVariants
+from pixel_font_knife.glyph.common import FlavorFallbackStrategy
 
 
 def _touch(root_dir: Path, *file_names: str) -> None:
@@ -217,7 +218,10 @@ def test_with_default_flavor_uses_priority_without_mutating_source(
     assert result[0x4E00][None] is zh_tw_file
 
 
-def test_get_glyph_sequence_sorts_by_flavor_then_code_point_and_deduplicates() -> None:
+@pytest.mark.parametrize('fallback', ['default', 'skip'])
+def test_get_glyph_sequence_sorts_by_flavor_then_code_point_and_deduplicates(
+        fallback: FlavorFallbackStrategy,
+) -> None:
     default_file = CmapGlyphFile('0042.png', 0x42)
     shared_file = CmapGlyphFile('0041 zh_cn.png', 0x41, ['zh_cn'])
     first_variants = CmapGlyphVariants({
@@ -232,7 +236,7 @@ def test_get_glyph_sequence_sorts_by_flavor_then_code_point_and_deduplicates() -
     sequence = CmapContext({
         0x42: second_variants,
         0x41: first_variants,
-    }).get_glyph_sequence([None, 'zh_cn'])
+    }).get_glyph_sequence([None, 'zh_cn'], fallback=fallback)
 
     assert sequence == [shared_file, default_file]
 
@@ -260,7 +264,7 @@ def test_get_glyph_sequence_reports_code_point_for_missing_flavor() -> None:
     })
 
     with pytest.raises(KeyError, match=re.escape(str(KeyError("0x0041: no flavor file: 'zh_cn'")))):
-        context.get_glyph_sequence('zh_cn', fallback_default=False)
+        context.get_glyph_sequence('zh_cn', fallback='error')
 
 
 def test_get_character_mapping_uses_context_code_points() -> None:
@@ -285,4 +289,31 @@ def test_get_character_mapping_reports_code_point_for_missing_flavor() -> None:
     })
 
     with pytest.raises(KeyError, match=re.escape(str(KeyError("0x0042: no flavor file: 'zh_cn'")))):
-        context.get_character_mapping('zh_cn', fallback_default=False)
+        context.get_character_mapping('zh_cn', fallback='error')
+
+
+def test_get_character_mapping_skips_missing_flavor_without_mutating_context() -> None:
+    default_file = CmapGlyphFile('0041.png', 0x41)
+    flavored_file = CmapGlyphFile('0042 alt.png', 0x42, ['alt'])
+    context = CmapContext({
+        0x41: CmapGlyphVariants({None: default_file}),
+        0x43: CmapGlyphVariants({'alt': flavored_file}),
+    })
+
+    assert context.get_character_mapping('alt', fallback='skip') == {0x43: 'u0042.alt'}
+    assert context.get_character_mapping(fallback='skip') == {0x41: 'u0041'}
+    assert context.get_character_mapping('missing', fallback='skip') == {}
+    assert set(context) == {0x41, 0x43}
+    assert dict(context[0x41]) == {None: default_file}
+    assert dict(context[0x43]) == {'alt': flavored_file}
+
+
+def test_get_character_mapping_falls_back_to_default() -> None:
+    default_file = CmapGlyphFile('0041.png', 0x41)
+    context = CmapContext({0x42: CmapGlyphVariants({None: default_file})})
+
+    assert context.get_character_mapping('alt', fallback='default') == {0x42: 'u0041'}
+
+    del context[0x42][None]
+    with pytest.raises(KeyError, match=re.escape("0x0042: no flavor file: 'alt'")):
+        context.get_character_mapping('alt', fallback='default')

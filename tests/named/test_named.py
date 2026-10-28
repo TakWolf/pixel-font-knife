@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from pixel_font_knife.glyph.common import FlavorFallbackStrategy
 from pixel_font_knife.named.context import NamedContext
 from pixel_font_knife.named.file import NamedGlyphFile
 from pixel_font_knife.named.variants import NamedGlyphVariants
@@ -244,7 +245,10 @@ def test_with_default_flavor_uses_priority_without_mutating_source(
     assert result['foo'][None] is zh_tw_file
 
 
-def test_get_glyph_sequence_sorts_by_name_key_then_flavor_and_deduplicates() -> None:
+@pytest.mark.parametrize('fallback', ['default', 'skip'])
+def test_get_glyph_sequence_sorts_by_name_key_then_flavor_and_deduplicates(
+        fallback: FlavorFallbackStrategy,
+) -> None:
     foo_default = NamedGlyphFile('foo.png', 'foo')
     foo_flavored = NamedGlyphFile('foo zh_cn.png', 'foo', ['zh_cn'])
     foo_variants = NamedGlyphVariants('foo')
@@ -258,7 +262,7 @@ def test_get_glyph_sequence_sorts_by_name_key_then_flavor_and_deduplicates() -> 
     sequence = NamedContext({
         'foo': foo_variants,
         'bar': bar_variants,
-    }).get_glyph_sequence([None, 'zh_cn', 'zh_tw'])
+    }).get_glyph_sequence([None, 'zh_cn', 'zh_tw'], fallback=fallback)
 
     assert sequence == [bar_default, foo_default, foo_flavored]
 
@@ -286,4 +290,4 @@ def test_get_glyph_sequence_reports_name_key_for_missing_flavor() -> None:
     })
 
     with pytest.raises(KeyError, match=re.escape(str(KeyError("'foo': no flavor file: 'zh_cn'")))):
-        context.get_glyph_sequence('zh_cn', fallback_default=False)
+        context.get_glyph_sequence('zh_cn', fallback='error')
