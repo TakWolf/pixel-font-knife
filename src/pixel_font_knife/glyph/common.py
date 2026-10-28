@@ -2,9 +2,9 @@ from collections.abc import Iterable, Collection, Sequence
 from typing import Any, Literal
 
 MergeConflictStrategy = Literal[
-    'error',
     'keep',
     'replace',
+    'error',
 ]
 
 
