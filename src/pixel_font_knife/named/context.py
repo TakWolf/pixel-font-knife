@@ -186,6 +186,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
             self,
             flavor_order: str | Sequence[str | None] | None = None,
             fallback_default: bool = True,
+            allow_missing_glyph: bool = False,
     ) -> list[NamedGlyphFile]:
         flavor_order = normalize_flavor_order(flavor_order)
         if flavor_order is None:
@@ -196,9 +197,12 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
         for name_key, glyph_variants in sorted(self.items()):
             for flavor in flavor_order:
                 try:
-                    glyph_file = glyph_variants.select(flavor, fallback_default)
+                    glyph_file = glyph_variants.select(flavor, fallback_default, allow_missing_glyph)
                 except KeyError as error:
                     raise KeyError(f'{name_key!r}: {error.args[0]}') from error
+
+                if glyph_file is None:
+                    continue
 
                 glyph_name = glyph_file.glyph_name
                 if glyph_name not in glyph_names:

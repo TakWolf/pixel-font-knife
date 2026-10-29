@@ -60,6 +60,7 @@ class CmapKerningTemplate:
             context: CmapContext,
             flavor_order: str | Sequence[str | None] | None = None,
             fallback_default: bool = True,
+            allow_missing_glyph: bool = False,
     ) -> dict[tuple[str, str], int]:
         flavor_order = normalize_flavor_order(flavor_order)
         if flavor_order is None:
@@ -81,9 +82,12 @@ class CmapKerningTemplate:
                         continue
 
                     try:
-                        left_file = context[left_code_point].select(flavor, fallback_default)
+                        left_file = context[left_code_point].select(flavor, fallback_default, allow_missing_glyph)
                     except KeyError as error:
                         raise KeyError(f'left group {left_group_name!r} character {left_c!r}: {error.args[0]}') from error
+
+                    if left_file is None:
+                        continue
 
                     left_bitmap_mask = left_file.canvas.bitmap.dilate(1)
 
@@ -93,9 +97,12 @@ class CmapKerningTemplate:
                             continue
 
                         try:
-                            right_file = context[right_code_point].select(flavor, fallback_default)
+                            right_file = context[right_code_point].select(flavor, fallback_default, allow_missing_glyph)
                         except KeyError as error:
                             raise KeyError(f'right group {right_group_name!r} character {right_c!r}: {error.args[0]}') from error
+
+                        if right_file is None:
+                            continue
 
                         left_glyph_name = left_file.glyph_name
                         right_glyph_name = right_file.glyph_name

@@ -16,8 +16,9 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
     可以引用同一个 ``NamedGlyphFile`` 对象，映射修改不会改变字形文件属性。
 
     ``check()`` 用于在字形属性被动态修改后重新检查 name key 一致性。``select()`` 优先返回指定
-    flavor，缺失时回退到默认变体。``copy()`` 只复制映射容器，保留相同的 ``name_key``，并始终共享
-    原有的 ``NamedGlyphFile`` 对象及其画布缓存。
+    flavor，缺失时由 ``fallback_default`` 决定是否尝试默认变体，
+    最终缺失时由 ``allow_missing_glyph`` 决定返回 ``None`` 或报错。``copy()`` 只复制映射容器，
+    保留相同的 ``name_key``，并始终共享原有的 ``NamedGlyphFile`` 对象及其画布缓存。
     """
 
     name_key: str
@@ -52,7 +53,8 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
             self,
             flavor: str | None = None,
             fallback_default: bool = True,
-    ) -> NamedGlyphFile:
+            allow_missing_glyph: bool = False,
+    ) -> NamedGlyphFile | None:
         if flavor is not None:
             check_flavor(flavor)
 
@@ -63,6 +65,9 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
 
         if None in self and fallback_default:
             return self[None]
+
+        if allow_missing_glyph:
+            return None
 
         raise KeyError(f'no flavor file: {flavor!r}')
 

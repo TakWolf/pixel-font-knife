@@ -244,7 +244,10 @@ def test_with_default_flavor_uses_priority_without_mutating_source(
     assert result['foo'][None] is zh_tw_file
 
 
-def test_get_glyph_sequence_sorts_by_name_key_then_flavor_and_deduplicates() -> None:
+@pytest.mark.parametrize('fallback_default', [True, False])
+def test_get_glyph_sequence_sorts_by_name_key_then_flavor_and_deduplicates(
+        fallback_default: bool,
+) -> None:
     foo_default = NamedGlyphFile('foo.png', 'foo')
     foo_flavored = NamedGlyphFile('foo zh_cn.png', 'foo', ['zh_cn'])
     foo_variants = NamedGlyphVariants('foo')
@@ -258,7 +261,7 @@ def test_get_glyph_sequence_sorts_by_name_key_then_flavor_and_deduplicates() -> 
     sequence = NamedContext({
         'foo': foo_variants,
         'bar': bar_variants,
-    }).get_glyph_sequence([None, 'zh_cn', 'zh_tw'])
+    }).get_glyph_sequence([None, 'zh_cn', 'zh_tw'], fallback_default=fallback_default, allow_missing_glyph=True)
 
     assert sequence == [bar_default, foo_default, foo_flavored]
 
