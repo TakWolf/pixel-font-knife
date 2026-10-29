@@ -204,13 +204,14 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                             else:
                                 raise RuntimeError(f'0x{code_point:04X}: missing reference code point 0x{glyph_reference.code_point:04X}')
 
-                        if glyph_variants is None:
-                            glyph_variants = CmapGlyphVariants()
-
                         try:
-                            glyph_variants[flavor] = self[glyph_reference.code_point].select(glyph_reference.flavor, fallback_default)
+                            glyph_file = self[glyph_reference.code_point].select(glyph_reference.flavor, fallback_default)
                         except KeyError as error:
                             raise KeyError(f'0x{code_point:04X}: reference 0x{glyph_reference.code_point:04X}: {error.args[0]}') from error
+
+                        if glyph_variants is None:
+                            glyph_variants = CmapGlyphVariants()
+                        glyph_variants[flavor] = glyph_file
 
                     if glyph_variants is None:
                         continue
@@ -268,13 +269,14 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
                             else:
                                 raise RuntimeError(f'0x{code_point:04X}: missing reference code point 0x{glyph_reference.code_point:04X}')
 
-                        if source_variants is None:
-                            source_variants = CmapGlyphVariants()
-
                         try:
-                            source_variants[flavor] = self[glyph_reference.code_point].select(glyph_reference.flavor, fallback_default)
+                            glyph_file = self[glyph_reference.code_point].select(glyph_reference.flavor, fallback_default)
                         except KeyError as error:
                             raise KeyError(f'0x{code_point:04X}: reference 0x{glyph_reference.code_point:04X}: {error.args[0]}') from error
+
+                        if source_variants is None:
+                            source_variants = CmapGlyphVariants()
+                        source_variants[flavor] = glyph_file
 
                     if source_variants is None:
                         continue
