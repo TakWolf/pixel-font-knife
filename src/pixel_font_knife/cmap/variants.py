@@ -4,7 +4,7 @@ from collections import UserDict
 from typing import Any
 
 from pixel_font_knife.cmap.file import CmapGlyphFile
-from pixel_font_knife.glyph.common import FlavorFallbackStrategy, check_flavor
+from pixel_font_knife.glyph.common import check_flavor
 
 
 class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
@@ -14,8 +14,8 @@ class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
     相互独立，不要求一致。多个 flavor 可以引用同一个 ``CmapGlyphFile`` 对象，映射修改不会改变
     字形文件属性。
 
-    ``select()`` 优先返回指定 flavor，缺失时由 ``fallback`` 决定返回默认变体、跳过或报错。
-    ``copy()`` 只复制映射容器，始终共享原有的 ``CmapGlyphFile`` 对象及其画布缓存。
+    ``select()`` 优先返回指定 flavor，缺失时回退到默认变体。``copy()`` 只复制映射容器，始终共享
+    原有的 ``CmapGlyphFile`` 对象及其画布缓存。
     """
 
     def __setitem__(self, flavor: Any, glyph_file: Any) -> None:
@@ -33,20 +33,16 @@ class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
     def select(
             self,
             flavor: str | None = None,
-            fallback: FlavorFallbackStrategy = 'default',
-    ) -> CmapGlyphFile | None:
+            fallback_default: bool = True,
+    ) -> CmapGlyphFile:
         if flavor is not None:
             check_flavor(flavor)
 
         if flavor in self:
             return self[flavor]
 
-        match fallback:
-            case 'default':
-                if None in self:
-                    return self[None]
-            case 'skip':
-                return None
+        if None in self and fallback_default:
+            return self[None]
 
         raise KeyError(f'no flavor file: {flavor!r}')
 

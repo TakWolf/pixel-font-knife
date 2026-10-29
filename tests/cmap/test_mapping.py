@@ -9,7 +9,6 @@ from pixel_font_knife.cmap.mapping.entry import CmapMappingEntry
 from pixel_font_knife.cmap.mapping.mapping import CmapMapping
 from pixel_font_knife.cmap.mapping.reference import CmapGlyphReference
 from pixel_font_knife.cmap.variants import CmapGlyphVariants
-from pixel_font_knife.glyph.common import MergeConflictStrategy
 
 
 def _create_mapping(target_code_point: int, reference_code_point: int) -> CmapMapping:
@@ -183,90 +182,7 @@ def test_apply_mapping_reports_missing_reference_flavor(method_name: str) -> Non
     })
 
     with pytest.raises(KeyError, match=re.escape(str(KeyError("0x0041: reference 0x0042: no flavor file: 'zh_cn'")))):
-        getattr(context, method_name)(mapping, fallback='error')
-
-
-@pytest.mark.parametrize('method_name', ['apply_mapping_by_code_point', 'apply_mapping_by_flavor'])
-@pytest.mark.parametrize('existing_target', [False, True])
-@pytest.mark.parametrize('conflict', ['keep', 'replace', 'error'])
-def test_apply_mapping_all_skipped_leaves_target_unchanged(
-        method_name: str,
-        existing_target: bool,
-        conflict: MergeConflictStrategy,
-) -> None:
-    source_file = CmapGlyphFile('0042.png', 0x42)
-    target_file = CmapGlyphFile('0041.png', 0x41)
-    context = CmapContext({0x42: CmapGlyphVariants({None: source_file})})
-    if existing_target:
-        context[0x41] = CmapGlyphVariants({None: target_file})
-    mapping = CmapMapping({0x41: CmapMappingEntry({
-        'alt': CmapGlyphReference(0x42, 'alt'),
-    })})
-
-    result = getattr(context, method_name)(mapping, fallback='skip', conflict=conflict)
-
-    assert result == context
-    assert result is not context
-    assert (0x41 in result) == existing_target
-    if existing_target:
-        assert dict(result[0x41]) == {None: target_file}
-
-
-@pytest.mark.parametrize('method_name', ['apply_mapping_by_code_point', 'apply_mapping_by_flavor'])
-@pytest.mark.parametrize('missing_first', [False, True])
-def test_apply_mapping_skips_only_missing_reference_flavors(method_name: str, missing_first: bool) -> None:
-    source_file = CmapGlyphFile('0042.png', 0x42)
-    context = CmapContext({0x42: CmapGlyphVariants({None: source_file})})
-    references = [
-        ('found', CmapGlyphReference(0x42)),
-        ('missing', CmapGlyphReference(0x42, 'alt')),
-    ]
-    if missing_first:
-        references.reverse()
-    mapping = CmapMapping({0x41: CmapMappingEntry(dict(references))})
-
-    result = getattr(context, method_name)(mapping, fallback='skip')
-
-    assert dict(result[0x41]) == {'found': source_file}
-    assert 0x41 not in context
-    assert dict(context[0x42]) == {None: source_file}
-
-
-@pytest.mark.parametrize('method_name', ['apply_mapping_by_code_point', 'apply_mapping_by_flavor'])
-def test_apply_mapping_falls_back_to_default_and_reports_missing_default(method_name: str) -> None:
-    source_file = CmapGlyphFile('0042.png', 0x42)
-    context = CmapContext({0x42: CmapGlyphVariants({None: source_file})})
-    mapping = CmapMapping({0x41: CmapMappingEntry({
-        'alt': CmapGlyphReference(0x42, 'alt'),
-    })})
-
-    result = getattr(context, method_name)(mapping, fallback='default')
-
-    assert dict(result[0x41]) == {'alt': source_file}
-    del context[0x42][None]
-    with pytest.raises(KeyError, match=re.escape("0x0041: reference 0x0042: no flavor file: 'alt'")):
-        getattr(context, method_name)(mapping, fallback='default')
-
-
-@pytest.mark.parametrize('method_name', ['apply_mapping_by_code_point', 'apply_mapping_by_flavor'])
-def test_apply_mapping_skip_still_rejects_missing_code_point_when_required(method_name: str) -> None:
-    context = CmapContext()
-    mapping = _create_mapping(0x41, 0x42)
-
-    with pytest.raises(RuntimeError, match=re.escape('0x0041: missing reference code point 0x0042')):
-        getattr(context, method_name)(mapping, fallback='skip', allow_missing_code_point=False)
-
-
-@pytest.mark.parametrize('method_name', ['apply_mapping_by_code_point', 'apply_mapping_by_flavor'])
-def test_apply_mapping_wildcard_copies_all_variants_with_skip(method_name: str) -> None:
-    source_file = CmapGlyphFile('0042 alt.png', 0x42, ['alt'])
-    context = CmapContext({0x42: CmapGlyphVariants({'alt': source_file})})
-    mapping = CmapMapping({0x41: CmapMappingEntry({'*': CmapGlyphReference(0x42)})})
-
-    result = getattr(context, method_name)(mapping, fallback='skip')
-
-    assert dict(result[0x41]) == {'alt': source_file}
-    assert result[0x41] is not context[0x42]
+        getattr(context, method_name)(mapping, fallback_default=False)
 
 
 def test_load_yaml_accepts_string_allowed_flavors(tmp_path: Path) -> None:

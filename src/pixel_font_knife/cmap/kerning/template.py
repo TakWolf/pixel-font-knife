@@ -7,7 +7,7 @@ from pathlib import Path
 import yaml
 
 from pixel_font_knife.cmap.context import CmapContext
-from pixel_font_knife.glyph.common import FlavorFallbackStrategy, normalize_flavor_order
+from pixel_font_knife.glyph.common import normalize_flavor_order
 
 
 class CmapKerningTemplate:
@@ -59,7 +59,7 @@ class CmapKerningTemplate:
             self,
             context: CmapContext,
             flavor_order: str | Sequence[str | None] | None = None,
-            fallback: FlavorFallbackStrategy = 'default',
+            fallback_default: bool = True,
     ) -> dict[tuple[str, str], int]:
         flavor_order = normalize_flavor_order(flavor_order)
         if flavor_order is None:
@@ -81,12 +81,9 @@ class CmapKerningTemplate:
                         continue
 
                     try:
-                        left_file = context[left_code_point].select(flavor, fallback)
+                        left_file = context[left_code_point].select(flavor, fallback_default)
                     except KeyError as error:
                         raise KeyError(f'left group {left_group_name!r} character {left_c!r}: {error.args[0]}') from error
-
-                    if left_file is None:
-                        continue
 
                     left_bitmap_mask = left_file.canvas.bitmap.dilate(1)
 
@@ -96,12 +93,9 @@ class CmapKerningTemplate:
                             continue
 
                         try:
-                            right_file = context[right_code_point].select(flavor, fallback)
+                            right_file = context[right_code_point].select(flavor, fallback_default)
                         except KeyError as error:
                             raise KeyError(f'right group {right_group_name!r} character {right_c!r}: {error.args[0]}') from error
-
-                        if right_file is None:
-                            continue
 
                         left_glyph_name = left_file.glyph_name
                         right_glyph_name = right_file.glyph_name

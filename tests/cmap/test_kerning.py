@@ -108,7 +108,7 @@ def test_calculate_kerning_values_reports_missing_flavor_context(
     )
 
     with pytest.raises(KeyError, match=re.escape(str(KeyError(message)))):
-        template.calculate_kerning_values(context, 'alt', fallback='error')
+        template.calculate_kerning_values(context, 'alt', fallback_default=False)
 
 
 def test_calculate_kerning_values_uses_requested_flavors(glyphs_dir: Path) -> None:
@@ -164,43 +164,6 @@ def test_calculate_kerning_values_deduplicates_fallback_default(
         ('u0054', 'u006F'): -8,
     }
     overlaps.assert_called_once()
-
-
-@pytest.mark.parametrize('missing_character', ['T', 'o'])
-def test_calculate_kerning_values_skips_missing_flavor_and_continues_other_flavors(
-        glyphs_dir: Path,
-        missing_character: str,
-) -> None:
-    context = CmapContext.load(glyphs_dir.joinpath('kerning'))
-    for character in ('T', 'o'):
-        if character != missing_character:
-            code_point = ord(character)
-            default_file = context[code_point][None]
-            context[code_point]['alt'] = CmapGlyphFile(default_file.file_path, code_point, ['alt'])
-    template = CmapKerningTemplate({'left': ['T'], 'right': ['o']}, {('left', 'right'): -1})
-
-    assert template.calculate_kerning_values(context, 'alt', fallback='skip') == {}
-    assert template.calculate_kerning_values(context, ['alt', None], fallback='skip') == {
-        ('u0054', 'u006F'): -1,
-    }
-
-    # 默认回退应保留缺失侧的默认字形，并使用另一侧已有的 alt 字形。
-    expected_pair = ('u0054', 'u006F.alt') if missing_character == 'T' else ('u0054.alt', 'u006F')
-    assert template.calculate_kerning_values(context, 'alt', fallback='default') == {expected_pair: -1}
-
-
-def test_calculate_kerning_values_skip_includes_existing_flavored_pairs(glyphs_dir: Path) -> None:
-    context = CmapContext.load(glyphs_dir.joinpath('kerning'))
-    for code_point, variants in context.items():
-        variants['alt'] = CmapGlyphFile(variants[None].file_path, code_point, ['alt'])
-        del variants[None]
-    template = CmapKerningTemplate({'left': ['T'], 'right': ['o']}, {('left', 'right'): -1})
-
-    assert template.calculate_kerning_values(context, [None, 'alt', 'missing'], fallback='skip') == {
-        ('u0054.alt', 'u006F.alt'): -1,
-    }
-    with pytest.raises(KeyError, match=re.escape("left group 'left' character 'T': no flavor file: None")):
-        template.calculate_kerning_values(context, fallback='default')
 
 
 def test_calculate_kerning_values_reports_preset_mismatch(glyphs_dir: Path) -> None:

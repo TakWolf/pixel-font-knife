@@ -6,7 +6,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Any
 
-from pixel_font_knife.glyph.common import FlavorFallbackStrategy, MergeConflictStrategy, check_merge_conflict_strategy, check_glyph_name_key, normalize_allowed_flavors, normalize_flavor_order
+from pixel_font_knife.glyph.common import MergeConflictStrategy, check_merge_conflict_strategy, check_glyph_name_key, normalize_allowed_flavors, normalize_flavor_order
 from pixel_font_knife.named.file import NamedGlyphFile
 from pixel_font_knife.named.variants import NamedGlyphVariants
 
@@ -185,7 +185,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
     def get_glyph_sequence(
             self,
             flavor_order: str | Sequence[str | None] | None = None,
-            fallback: FlavorFallbackStrategy = 'default',
+            fallback_default: bool = True,
     ) -> list[NamedGlyphFile]:
         flavor_order = normalize_flavor_order(flavor_order)
         if flavor_order is None:
@@ -196,12 +196,9 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
         for name_key, glyph_variants in sorted(self.items()):
             for flavor in flavor_order:
                 try:
-                    glyph_file = glyph_variants.select(flavor, fallback)
+                    glyph_file = glyph_variants.select(flavor, fallback_default)
                 except KeyError as error:
                     raise KeyError(f'{name_key!r}: {error.args[0]}') from error
-
-                if glyph_file is None:
-                    continue
 
                 glyph_name = glyph_file.glyph_name
                 if glyph_name not in glyph_names:
