@@ -58,7 +58,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
             else:
                 glyph_variants = context[glyph_file.name_key]
 
-            if len(glyph_file.flavors) > 0:
+            if glyph_file.flavors:
                 for flavor in glyph_file.flavors:
                     if allowed_flavors is not None and flavor not in allowed_flavors:
                         raise RuntimeError(f'flavor {flavor!r} not allowed:\n{str(file_path)!r}')
@@ -166,7 +166,7 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
         result = self.copy()
         for name_key, glyph_variants in result.items():
             if None not in glyph_variants:
-                if len(glyph_variants) == 0:
+                if not glyph_variants:
                     raise RuntimeError(f'empty glyph variants: {name_key!r}')
 
                 if flavor_order is None:

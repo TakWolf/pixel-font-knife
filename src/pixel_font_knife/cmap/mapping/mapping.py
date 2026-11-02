@@ -77,7 +77,7 @@ class CmapMapping(UserDict[int, CmapMappingEntry]):
 
                                 glyph_reference = CmapGlyphReference(reference_code_point, reference_flavor if separator else None)
 
-                            if len(flavors) > 0:
+                            if flavors:
                                 for flavor in flavors:
                                     if allowed_flavors is not None and flavor not in allowed_flavors:
                                         raise RuntimeError(f'0x{code_point:04X}: flavor {flavor!r} not allowed')

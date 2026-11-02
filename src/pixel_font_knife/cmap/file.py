@@ -72,7 +72,7 @@ class CmapGlyphFile(GlyphFile):
     @property
     def glyph_name(self) -> str:
         name = f'u{self.code_point:04X}'
-        if len(self.flavors) > 0:
+        if self.flavors:
             name = f'{name}.{self.flavors[0]}'
         return name
 
@@ -97,7 +97,7 @@ class CmapGlyphFile(GlyphFile):
 
         file_dir = CmapGlyphFile.get_normalized_dir(self.code_point, root_dir)
 
-        if len(self.flavors) > 0:
+        if self.flavors:
             if flavor_order is None:
                 flavors = self.flavors
             else:

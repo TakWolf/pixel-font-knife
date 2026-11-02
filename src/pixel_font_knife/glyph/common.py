@@ -25,7 +25,7 @@ def check_glyph_name_key(name_key: Any) -> None:
     if not isinstance(name_key, str):
         raise TypeError(f'illegal name key type: {type(name_key).__name__!r}')
 
-    if name_key == '':
+    if not name_key:
         raise ValueError('name key cannot be empty')
 
     if any(character.isspace() for character in name_key):
@@ -39,7 +39,7 @@ def check_flavor(flavor: Any) -> None:
     if not isinstance(flavor, str):
         raise TypeError(f'illegal flavor type: {type(flavor).__name__!r}')
 
-    if len(flavor) == 0:
+    if not flavor:
         raise ValueError('flavor cannot be empty')
 
     if any(character.isspace() for character in flavor) or '.' in flavor or ',' in flavor or '*' in flavor:

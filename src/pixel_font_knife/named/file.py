@@ -67,7 +67,7 @@ class NamedGlyphFile(GlyphFile):
     @property
     def glyph_name(self) -> str:
         name = self.name_key
-        if len(self.flavors) > 0:
+        if self.flavors:
             name = f'{name}.{self.flavors[0]}'
         return name
 
@@ -80,7 +80,7 @@ class NamedGlyphFile(GlyphFile):
 
         flavor_order = normalize_flavor_order(flavor_order)
 
-        if len(self.flavors) > 0:
+        if self.flavors:
             if flavor_order is None:
                 flavors = self.flavors
             else:

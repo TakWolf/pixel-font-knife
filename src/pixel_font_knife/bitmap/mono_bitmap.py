@@ -70,7 +70,7 @@ class MonoBitmap(UserList[list[int]]):
 
     def __init__(self, bitmap: list[list[int]] | None = None) -> None:
         super().__init__()
-        if bitmap is None or len(bitmap) == 0:
+        if not bitmap:
             self.width = 0
             self.height = 0
         else:

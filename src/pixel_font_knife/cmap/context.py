@@ -66,7 +66,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
             else:
                 glyph_variants = context[glyph_file.code_point]
 
-            if len(glyph_file.flavors) > 0:
+            if glyph_file.flavors:
                 for flavor in glyph_file.flavors:
                     if allowed_flavors is not None and flavor not in allowed_flavors:
                         raise RuntimeError(f'flavor {flavor!r} not allowed:\n{str(file_path)!r}')
@@ -177,7 +177,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
         result = self.copy()
         for mapping in mappings:
             for code_point, entry in mapping.items():
-                if len(entry) == 0:
+                if not entry:
                     continue
 
                 if '*' in entry:
@@ -246,7 +246,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
         result = self.copy()
         for mapping in mappings:
             for code_point, entry in mapping.items():
-                if len(entry) == 0:
+                if not entry:
                     continue
 
                 if '*' in entry:
@@ -315,7 +315,7 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
         result = self.copy()
         for code_point, glyph_variants in result.items():
             if None not in glyph_variants:
-                if len(glyph_variants) == 0:
+                if not glyph_variants:
                     raise RuntimeError(f'empty glyph variants: 0x{code_point:04X}')
 
                 if flavor_order is None:
