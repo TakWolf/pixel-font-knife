@@ -118,7 +118,7 @@ class CmapKerningTemplate:
                                     f'{preset_offset} from groups {(preset_left_group, preset_right_group)!r}, '
                                     f'characters {(preset_left_c, preset_right_c)!r}, requested flavor {preset_flavor!r} != '
                                     f'{offset} from groups {(left_group_name, right_group_name)!r}, '
-                                    f'characters {(left_c, right_c)!r}, requested flavor {flavor!r}'
+                                    f'characters {(left_c, right_c)!r}, requested flavor {flavor!r}',
                                 )
                         else:
                             kerning_presets[glyph_name_pair] = (offset, source)
