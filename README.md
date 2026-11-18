@@ -13,9 +13,9 @@ pip install pixel-font-knife
 
 ## 程序依赖
 
-- [PyPNG](https://gitlab.com/drj11/pypng)
 - [unicodedata2](https://github.com/fonttools/unicodedata2)
 - [Unidata Blocks](https://github.com/TakWolf/unidata-blocks)
+- [PNG - Python](https://github.com/TakWolf/png-python)
 - [PyYAML](https://github.com/yaml/pyyaml)
 
 ## 许可证

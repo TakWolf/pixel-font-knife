@@ -6,8 +6,9 @@ from math import floor, isfinite
 from os import PathLike
 from typing import Any, BinaryIO, Literal
 
+from png import PngImage, PngHeader, PngColorType, PngFilterType
+
 from pixel_font_knife.bitmap.padding import Padding
-from pixel_font_knife.internal import png
 
 _SetOperation = Literal[
     'union',
@@ -51,19 +52,19 @@ class MonoBitmap(UserList[list[int]]):
 
     @staticmethod
     def load_png(file_path: str | PathLike[str]) -> MonoBitmap:
-        with open(file_path, 'rb') as file:
-            width, height, rows, info = png.Reader(file=file).asRGBA()
-            alpha_threshold = 1 << (info['bitdepth'] - 1)
+        image = PngImage.load(file_path)
+        if image.header.color_type != PngColorType.TRUECOLOR_ALPHA or image.header.bit_depth != 8:
+            image = image.to_rgba(bit_depth=8)
 
-            bitmap = MonoBitmap()
-            bitmap.width = width
-            bitmap.height = height
-            for row in rows:
-                bitmap.append([
-                    1 if row[x * 4 + 3] >= alpha_threshold else 0
-                    for x in range(width)
-                ])
-            return bitmap
+        bitmap = MonoBitmap()
+        bitmap.width = image.header.width
+        bitmap.height = image.header.height
+        for row in image.bitmap:
+            bitmap.append([
+                1 if row[x + 3] >= 128 else 0
+                for x in range(0, len(row), 4)
+            ])
+        return bitmap
 
     width: int
     height: int
@@ -363,7 +364,7 @@ class MonoBitmap(UserList[list[int]]):
             text.write('\n')
         return text.getvalue()
 
-    def _build_png(self) -> png.Image:
+    def _build_png(self) -> PngImage:
         if self.width == 0 or self.height == 0:
             raise ValueError('cannot encode empty bitmap as PNG')
 
@@ -373,13 +374,17 @@ class MonoBitmap(UserList[list[int]]):
             for pixel in bitmap_row:
                 row.extend((0, 0, 0, 255 if pixel != 0 else 0))
             rows.append(row)
-        return png.from_array(rows, 'RGBA')
+
+        return PngImage(
+            header=PngHeader((self.width, self.height)),
+            bitmap=rows,
+        )
 
     def dump_png(self, stream: BinaryIO) -> None:
-        self._build_png().write(stream)
+        self._build_png().dump(stream, filter_type=PngFilterType.NONE)
 
     def save_png(self, file_path: str | PathLike[str]) -> None:
-        self._build_png().save(file_path)
+        self._build_png().save(file_path, filter_type=PngFilterType.NONE)
 
     def copy(self) -> MonoBitmap:
         bitmap = MonoBitmap()
