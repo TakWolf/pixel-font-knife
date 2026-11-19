@@ -10,7 +10,7 @@ from png import PngImage, PngHeader, PngColorType, PngFilterType
 
 from pixel_font_knife.bitmap.padding import Padding
 
-_SetOperation = Literal[
+type _SetOperation = Literal[
     'union',
     'intersection',
     'difference',

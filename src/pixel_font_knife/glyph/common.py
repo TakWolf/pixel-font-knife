@@ -1,7 +1,7 @@
 from collections.abc import Iterable, Collection, Sequence
 from typing import Any, Literal
 
-MergeConflictStrategy = Literal[
+type MergeConflictStrategy = Literal[
     'keep',
     'replace',
     'error',
