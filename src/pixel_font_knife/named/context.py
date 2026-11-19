@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import UserDict
 from collections.abc import Collection, Sequence
+from copy import copy
 from os import PathLike
 from pathlib import Path
 from typing import Any
@@ -88,7 +89,10 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
         super().__setitem__(name_key, glyph_variants)
 
     def __copy__(self) -> NamedContext:
-        return self.copy()
+        result = NamedContext()
+        for name_key, glyph_variants in self.items():
+            result[name_key] = glyph_variants.copy()
+        return result
 
     def check(self) -> None:
         for name_key, glyph_variants in self.items():
@@ -211,7 +215,4 @@ class NamedContext(UserDict[str, NamedGlyphVariants]):
         return sequence
 
     def copy(self) -> NamedContext:
-        result = NamedContext()
-        for name_key, glyph_variants in self.items():
-            result[name_key] = glyph_variants.copy()
-        return result
+        return copy(self)

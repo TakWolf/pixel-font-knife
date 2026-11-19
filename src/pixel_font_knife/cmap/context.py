@@ -3,6 +3,7 @@ from __future__ import annotations
 import shutil
 from collections import UserDict
 from collections.abc import Collection, Sequence
+from copy import copy
 from os import PathLike
 from pathlib import Path
 from typing import Any
@@ -91,7 +92,10 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
         super().__setitem__(code_point, glyph_variants)
 
     def __copy__(self) -> CmapContext:
-        return self.copy()
+        result = CmapContext()
+        for code_point, glyph_variants in self.items():
+            result[code_point] = glyph_variants.copy()
+        return result
 
     def normalize(
             self,
@@ -381,7 +385,4 @@ class CmapContext(UserDict[int, CmapGlyphVariants]):
         return character_mapping
 
     def copy(self) -> CmapContext:
-        result = CmapContext()
-        for code_point, glyph_variants in self.items():
-            result[code_point] = glyph_variants.copy()
-        return result
+        return copy(self)

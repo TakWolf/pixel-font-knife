@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy, deepcopy
 from typing import Any
 
 
@@ -24,10 +25,15 @@ class Padding:
         self.bottom = bottom
 
     def __copy__(self) -> Padding:
-        return self.copy()
+        return Padding(
+            self.left,
+            self.right,
+            self.top,
+            self.bottom,
+        )
 
     def __deepcopy__(self, memo: dict[int, Any]) -> Padding:
-        return self.deepcopy()
+        return copy(self)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Padding):
@@ -38,12 +44,7 @@ class Padding:
                 self.bottom == other.bottom)
 
     def copy(self) -> Padding:
-        return Padding(
-            self.left,
-            self.right,
-            self.top,
-            self.bottom,
-        )
+        return copy(self)
 
     def deepcopy(self) -> Padding:
-        return self.copy()
+        return deepcopy(self)

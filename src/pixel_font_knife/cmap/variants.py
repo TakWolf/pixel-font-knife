@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import UserDict
+from copy import copy
 from typing import Any
 
 from pixel_font_knife.cmap.file import CmapGlyphFile
@@ -29,7 +30,7 @@ class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
         super().__setitem__(flavor, glyph_file)
 
     def __copy__(self) -> CmapGlyphVariants:
-        return self.copy()
+        return CmapGlyphVariants(self)
 
     def select(
             self,
@@ -52,4 +53,4 @@ class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
         raise KeyError(f'no flavor file: {flavor!r}')
 
     def copy(self) -> CmapGlyphVariants:
-        return CmapGlyphVariants(self)
+        return copy(self)

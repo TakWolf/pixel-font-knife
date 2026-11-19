@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import UserDict
+from copy import copy
 from typing import Any
 
 from pixel_font_knife.glyph.common import check_glyph_name_key, check_flavor
@@ -41,7 +42,11 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
         super().__setitem__(flavor, glyph_file)
 
     def __copy__(self) -> NamedGlyphVariants:
-        return self.copy()
+        self.check()
+
+        result = NamedGlyphVariants(self.name_key)
+        result.update(self)
+        return result
 
     def check(self) -> None:
         check_glyph_name_key(self.name_key)
@@ -72,8 +77,4 @@ class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
         raise KeyError(f'no flavor file: {flavor!r}')
 
     def copy(self) -> NamedGlyphVariants:
-        self.check()
-
-        result = NamedGlyphVariants(self.name_key)
-        result.update(self)
-        return result
+        return copy(self)
