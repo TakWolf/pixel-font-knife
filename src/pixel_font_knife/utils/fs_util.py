@@ -2,6 +2,7 @@ import os
 from os import PathLike
 from pathlib import Path
 
+from pixel_font_knife.bitmap.color import ColorBitmap
 from pixel_font_knife.bitmap.mono import MonoBitmap
 
 
@@ -20,5 +21,8 @@ def format_glyph_files(root_dir: str | PathLike[str]) -> None:
         if not file_path.is_file():
             continue
 
-        bitmap = MonoBitmap.load_png(file_path)
+        if file_path.name.endswith('.color.png'):
+            bitmap = ColorBitmap.load_png(file_path)
+        else:
+            bitmap = MonoBitmap.load_png(file_path)
         bitmap.save_png(file_path)
