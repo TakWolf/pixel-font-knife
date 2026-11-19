@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from pixel_font_knife.bitmap.mono_bitmap import MonoBitmap
+from pixel_font_knife.bitmap.mono import MonoBitmap
 from pixel_font_knife.bitmap.padding import Padding
 from pixel_font_knife.glyph.canvas import GlyphCanvas
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pixel_font_knife.bitmap.mono_bitmap import MonoBitmap
+from pixel_font_knife.bitmap.mono import MonoBitmap
 from pixel_font_knife.bitmap.padding import Padding
 
 

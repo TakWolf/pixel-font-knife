@@ -2,7 +2,7 @@ import os
 from os import PathLike
 from pathlib import Path
 
-from pixel_font_knife.bitmap.mono_bitmap import MonoBitmap
+from pixel_font_knife.bitmap.mono import MonoBitmap
 
 
 def is_empty_dir(path: str | PathLike[str]) -> bool:

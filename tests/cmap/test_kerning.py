@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from pixel_font_knife.bitmap.mono_bitmap import MonoBitmap
+from pixel_font_knife.bitmap.mono import MonoBitmap
 from pixel_font_knife.cmap.context import CmapContext
 from pixel_font_knife.cmap.file import CmapGlyphFile
 from pixel_font_knife.cmap.kerning.template import CmapKerningTemplate

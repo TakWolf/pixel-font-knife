@@ -3,7 +3,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Literal
 
-from pixel_font_knife.bitmap.mono_bitmap import MonoBitmap
+from pixel_font_knife.bitmap.mono import MonoBitmap
 from pixel_font_knife.glyph.canvas import GlyphCanvas
 
 
