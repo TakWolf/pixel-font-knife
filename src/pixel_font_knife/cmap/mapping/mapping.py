@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from collections import UserDict
 from collections.abc import Collection, Sequence
 from io import StringIO
@@ -16,11 +17,15 @@ from pixel_font_knife.glyph.common import check_code_point, normalize_allowed_fl
 
 
 def _display_code_point(code_point: int) -> str:
-    c = chr(code_point)
-    category = unicodedata2.category(c)
-    if category.startswith(('L', 'M', 'N', 'P', 'S')):
-        return c
-    return unicodedata2.name(c, f'0x{code_point:04X}')
+    if 0 <= code_point <= sys.maxunicode:
+        c = chr(code_point)
+        category = unicodedata2.category(c)
+        if category.startswith(('L', 'M', 'N', 'P', 'S')):
+            return c
+        else:
+            return unicodedata2.name(c, f'0x{code_point:04X}')
+    else:
+        return f'0x{code_point:04X}'
 
 
 class CmapMapping(UserDict[int, CmapMappingEntry]):

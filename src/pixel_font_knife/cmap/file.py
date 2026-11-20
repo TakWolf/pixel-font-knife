@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from collections.abc import Sequence
 from os import PathLike
 from pathlib import Path
@@ -33,10 +34,13 @@ class CmapGlyphFile(GlyphFile):
             root_dir = Path(root_dir)
 
         block = unidata_blocks.get_block_by_code_point(code_point)
-        file_dir = root_dir.joinpath(f'{block.code_start:04X}-{block.code_end:04X} {block.name}')
-        if block == unidata_blocks.BLOCK_CJK_UNIFIED_IDEOGRAPHS:
-            code_name = f'{code_point:04X}'
-            file_dir = file_dir.joinpath(f'{code_name[0:-2]}-')
+        if block is not None:
+            file_dir = root_dir.joinpath(f'{block.code_start:04X}-{block.code_end:04X} {block.name}')
+            if block == unidata_blocks.BLOCK_CJK_UNIFIED_IDEOGRAPHS:
+                code_name = f'{code_point:04X}'
+                file_dir = file_dir.joinpath(f'{code_name[0:-2]}-')
+        else:
+            file_dir = root_dir
         return file_dir
 
     @staticmethod
@@ -77,9 +81,11 @@ class CmapGlyphFile(GlyphFile):
         return name
 
     def suggest_advance_width(self) -> int:
-        category = unicodedata2.category(chr(self.code_point))
-        if category == 'Mn':
-            return 0
+        if 0 <= self.code_point <= sys.maxunicode:
+            c = chr(self.code_point)
+            category = unicodedata2.category(c)
+            if category == 'Mn':
+                return 0
         return super().suggest_advance_width()
 
     def normalize(
