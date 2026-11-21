@@ -13,27 +13,34 @@ from pixel_font_knife.named.variants import NamedGlyphVariants
 
 
 class NamedContext(UserDict[str, NamedGlyphVariants]):
-    """固定名称字形文件的使用映射上下文。
+    """Context mapping fixed glyph names and requested flavors to glyph files.
 
-    数据结构为 ``name_key -> flavor -> NamedGlyphFile``。上下文的 name key、变体集合的 name key
-    与集合内所有 ``NamedGlyphFile.name_key`` 必须一致，不允许将字形文件再次映射到其他 name key。
-    flavor 键是构建时的使用映射，与 ``NamedGlyphFile.flavors`` 的本地存储信息相互独立，不要求
-    保持一致；同一个字形文件仍可被同一 name key 下的多个 flavor 引用。
+    The structure is ``name_key -> flavor -> NamedGlyphFile``. The context key,
+    variant set's name key, and every contained ``NamedGlyphFile.name_key`` must
+    match; remapping a file to a different name key is not allowed. Flavor keys
+    describe usage during a build and are independent of local storage metadata
+    in ``NamedGlyphFile.flavors``. They need not match it, and multiple flavors
+    under the same name key may reference the same file.
 
-    ``load()`` 根据本地文件名建立初始使用映射，并确保同一 name key 下的每个 flavor 只对应一个文件。
-    字形文件的 flavors 允许在素材设计阶段修改，修改后应立即调用 ``normalize()`` 规范文件名；若需
-    修改 name key，则必须先将字形文件脱离原变体集合，再按新的 name key 建立映射。``normalize()``
-    不会重建或改变当前使用映射，也不保证规范化后的目录能够再次无冲突地加载。
+    ``load()`` builds the initial usage mapping from local filenames, ensuring
+    each flavor under a name key resolves to just one file. A glyph file's flavors
+    may be edited while designing assets; call ``normalize()`` promptly afterward
+    to normalize filenames. Before changing a name key, detach the file from its
+    original variant set, then map it under the new key. ``normalize()`` neither
+    rebuilds nor changes usage mappings and does not guarantee the normalized
+    directory can be reloaded without conflicts.
 
-    ``check()`` 用于在字形属性被动态修改后重新检查 name key 一致性。``copy()`` 和合并操作只复制
-    ``NamedContext`` 与 ``NamedGlyphVariants`` 容器，始终共享原有的 ``NamedGlyphFile`` 对象及其
-    画布缓存。按 name key 合并时以整组变体为单位处理冲突；按 flavor
-    合并时只处理同一 name key 下发生冲突的 flavor。对合并结果中字形文件属性的修改，会被所有共享
-    该对象的上下文观察到。
+    ``check()`` rechecks name key consistency after glyph attributes are edited.
+    ``copy()`` and merge operations copy only the ``NamedContext`` and
+    ``NamedGlyphVariants`` containers, sharing glyph file objects and canvas caches.
+    Merging by name key resolves conflicts for entire variant sets; merging by
+    flavor resolves only colliding flavors under the same name key. Changes to
+    shared glyph file attributes are visible in every context referencing them.
 
-    ``get_glyph_sequence()`` 按 name key 顺序和 flavor 顺序生成字形序列，并按 glyph name 保留首次
-    出现的字形，以满足固定名称字形的构建排序约定。``.notdef`` 不属于该上下文，应作为独立的
-    ``NamedGlyphFile`` 实体加载。
+    ``get_glyph_sequence()`` iterates in name key order, then flavor order, keeping
+    the first glyph for each glyph name to meet fixed-name glyph build ordering
+    conventions. ``.notdef`` is not part of this context and should be loaded as a
+    standalone ``NamedGlyphFile`` entity.
     """
 
     @staticmethod

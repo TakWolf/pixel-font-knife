@@ -14,23 +14,32 @@ type _SetOperation = Literal[
 
 
 class MonoBitmap(Bitmap[int]):
-    """尺寸固定的 0/1 单色位图。
+    """Monochrome bitmap with fixed dimensions and 0/1 pixels.
 
-    0 表示空白，1 表示墨迹。构造输入和 ``solid()`` 的显式填充值会将所有非零值归一化为 1；
-    ``blank()`` 默认填入 0，``solid()`` 默认填入 1。矩阵坐标、尺寸、复制和裁边约定见 ``Bitmap``。
-    调用方原地修改像素时应保持 0/1 取值和矩阵尺寸，直接修改不会触发归一化。
+    Zero denotes blank pixels and one denotes ink. Construction and explicit
+    ``solid()`` values normalize all nonzero values to one. ``blank()`` defaults
+    to zero and ``solid()`` to one. See ``Bitmap`` for coordinates, dimensions,
+    copying, and trimming. In-place edits must preserve 0/1 values and matrix
+    dimensions; direct edits do not trigger normalization.
 
-    PNG 读写继承自 ``Bitmap``，本类通过 ``_rgba_to_pixel()`` 和 ``_pixel_to_rgba()`` 定义转换规则。
-    ``load_png()`` 先将图像转换为 8bit RGBA，再将 Alpha 大于等于 128 的像素视为墨迹，
-    其余视为空白；RGB 颜色不参与判断。``dump_png()`` 和 ``save_png()`` 写出 8bit RGBA PNG，
-    墨迹为不透明黑色，空白为透明黑色。宽或高为 0 的位图可参与内存操作，但不能编码为 PNG。
+    PNG I/O is inherited from ``Bitmap``, with conversion rules defined by
+    ``_rgba_to_pixel()`` and ``_pixel_to_rgba()``. ``load_png()`` converts images to
+    8-bit RGBA and treats alpha values of at least 128 as ink, ignoring RGB.
+    ``dump_png()`` and ``save_png()`` write 8-bit RGBA PNGs with opaque black ink
+    and transparent black blanks. Zero width or height is allowed in memory but
+    cannot be encoded as PNG.
 
-    ``scale_to()`` 按最近邻采样缩放至指定尺寸，``scale()`` 按比例计算目标尺寸并四舍五入，
-    两者均不修改原位图。目标宽或高为 0 时得到对应尺寸的空位图，零尺寸源图不能放大为非零尺寸。
+    ``scale_to()`` uses nearest-neighbor sampling; ``scale()`` computes target
+    dimensions from scale factors and rounds half up. Both leave the source
+    unchanged. Zero target width or height produces an empty bitmap of that size.
+    A source with zero width or height cannot be scaled to a target with both
+    dimensions nonzero.
 
-    集合运算将另一位图的左上角放在指定偏移处，结果保持自身画布尺寸，超出画布的内容被裁去。
-    ``dilate()`` 按指定半径和邻域形状扩张墨迹，同样不扩大画布。集合运算和膨胀均返回新位图；
-    ``overlaps()`` 只判断墨迹是否相交，不修改任一输入。
+    Set operations place the other bitmap's top left at the given offset, retain
+    this bitmap's canvas dimensions, and clip content outside the canvas.
+    ``dilate()`` expands ink using the specified radius and neighborhood shape
+    without expanding the canvas. Set operations and dilation return new bitmaps.
+    ``overlaps()`` only checks for intersecting ink and leaves both inputs unchanged.
     """
 
     @staticmethod

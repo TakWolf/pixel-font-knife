@@ -9,15 +9,18 @@ from pixel_font_knife.glyph.common import check_flavor
 
 
 class CmapGlyphVariants(UserDict[str | None, CmapGlyphFile]):
-    """同一个上下文码点下按 flavor 选择字形文件的使用映射。
+    """Map requested flavors to glyph files for one context code point.
 
-    键是请求时使用的 flavor，``None`` 表示默认变体；键与 ``CmapGlyphFile.flavors`` 的本地存储信息
-    相互独立，不要求一致。多个 flavor 可以引用同一个 ``CmapGlyphFile`` 对象，映射修改不会改变
-    字形文件属性。
+    Keys are requested flavors; ``None`` denotes the default variant. They are
+    independent of the local storage metadata in ``CmapGlyphFile.flavors`` and
+    need not match it. Multiple flavors may reference the same ``CmapGlyphFile``;
+    editing this mapping does not change glyph file attributes.
 
-    ``select()`` 优先返回指定 flavor，缺失时由 ``fallback_default`` 决定是否尝试默认变体，
-    最终缺失时由 ``allow_missing_glyph`` 决定返回 ``None`` 或报错。
-    ``copy()`` 只复制映射容器，始终共享原有的 ``CmapGlyphFile`` 对象及其画布缓存。
+    ``select()`` prefers the requested flavor. If it is missing, ``fallback_default``
+    controls whether to try the default variant. If no glyph is found,
+    ``allow_missing_glyph`` controls whether to return ``None`` or raise an error.
+    ``copy()`` copies only the mapping container, sharing the original glyph file
+    objects and their canvas caches.
     """
 
     def __setitem__(self, flavor: Any, glyph_file: Any) -> None:

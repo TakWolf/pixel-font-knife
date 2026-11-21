@@ -13,16 +13,19 @@ from pixel_font_knife.glyph.file import GlyphFile
 
 
 class CmapGlyphFile(GlyphFile):
-    """采用 cmap PNG 文件命名范式的字形文件实体。
+    """Glyph file entity following the cmap PNG naming convention.
 
-    ``code_point`` 和 ``flavors`` 表示字形身份及本地存储信息，并共同决定规范文件路径；它们不表示
-    ``CmapContext`` 中的使用映射键。属性在素材设计阶段允许修改，修改后应立即调用 ``normalize()``
-    将本地文件移动到由当前属性确定的规范路径。
+    ``code_point`` and ``flavors`` describe glyph identity and local storage, and
+    together determine the canonical path. They do not represent usage keys in
+    ``CmapContext``. These attributes may be edited while designing assets; call
+    ``normalize()`` promptly afterward to move the file to its canonical path.
 
-    glyph name 由 code point 和第一个 flavor 生成；只使用第一个 flavor 是为了控制字体内 glyph name
-    的长度。无 flavor 时名称仅由 code point 生成。``load()`` 从文件名解析属性并验证 flavor，
-    不会修改 flavor 的大小写或其他字符。``normalize()`` 只规范本地路径，不会更新任何上下文映射，
-    也不会校验整个目录能否无冲突地重新加载。
+    The glyph name is derived from the code point and the first flavor only, to
+    limit its length within the font. Without flavors, it uses only the code point.
+    ``load()`` parses attributes from the filename and validates flavors without
+    changing their case or other characters. ``normalize()`` only normalizes the
+    local path; it neither updates context mappings nor checks whether the whole
+    directory can be reloaded without conflicts.
     """
 
     @staticmethod

@@ -9,17 +9,21 @@ from pixel_font_knife.named.file import NamedGlyphFile
 
 
 class NamedGlyphVariants(UserDict[str | None, NamedGlyphFile]):
-    """同一个 name key 下按 flavor 选择字形文件的使用映射。
+    """Map requested flavors to glyph files for one name key.
 
-    ``name_key`` 是该变体集合唯一对应的名称键，集合中的所有 ``NamedGlyphFile.name_key`` 必须与其
-    一致，不允许把字形文件再次映射到其他 name key。映射键是请求时使用的 flavor，``None`` 表示默认
-    变体；flavor 键与 ``NamedGlyphFile.flavors`` 的本地存储信息相互独立，不要求一致。多个 flavor
-    可以引用同一个 ``NamedGlyphFile`` 对象，映射修改不会改变字形文件属性。
+    ``name_key`` is the unique name key for this variant set. Every contained
+    ``NamedGlyphFile.name_key`` must match it; remapping a glyph file to a different
+    name key is not allowed. Mapping keys are requested flavors, with ``None`` for
+    the default variant. They are independent of ``NamedGlyphFile.flavors`` local
+    storage metadata and need not match it. Multiple flavors may reference the
+    same glyph file; editing this mapping does not change glyph file attributes.
 
-    ``check()`` 用于在字形属性被动态修改后重新检查 name key 一致性。``select()`` 优先返回指定
-    flavor，缺失时由 ``fallback_default`` 决定是否尝试默认变体，
-    最终缺失时由 ``allow_missing_glyph`` 决定返回 ``None`` 或报错。``copy()`` 只复制映射容器，
-    保留相同的 ``name_key``，并始终共享原有的 ``NamedGlyphFile`` 对象及其画布缓存。
+    ``check()`` rechecks name key consistency after glyph attributes are edited.
+    ``select()`` prefers the requested flavor. If it is missing, ``fallback_default``
+    controls whether to try the default variant. If no glyph is found,
+    ``allow_missing_glyph`` controls whether to return ``None`` or raise an error.
+    ``copy()`` copies only the mapping container, retaining the same ``name_key``
+    and sharing glyph file objects and canvas caches.
     """
 
     name_key: str

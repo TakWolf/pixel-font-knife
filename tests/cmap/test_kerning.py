@@ -184,12 +184,12 @@ def test_calculate_kerning_values_skips_missing_flavor_and_continues_other_flavo
         ('u0054', 'u006F'): -1,
     }
 
-    # 默认回退应保留缺失侧的默认字形，并使用另一侧已有的 alt 字形。
+    # Default fallback uses the default glyph on the missing side and the available alt glyph on the other.
     expected_pair = ('u0054', 'u006F.alt') if missing_character == 'T' else ('u0054.alt', 'u006F')
     assert template.calculate_kerning_values(context, 'alt', fallback_default=True) == {expected_pair: -1}
     assert template.calculate_kerning_values(context, 'alt', allow_missing_glyph=True) == {expected_pair: -1}
 
-    # 默认也缺失时，仅跳过受影响的字形对。
+    # If the default is also missing, skip only the affected glyph pairs.
     del context[ord(missing_character)][None]
     assert template.calculate_kerning_values(context, ['alt', None], allow_missing_glyph=True) == {}
 

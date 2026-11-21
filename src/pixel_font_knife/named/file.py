@@ -9,20 +9,26 @@ from pixel_font_knife.glyph.file import GlyphFile
 
 
 class NamedGlyphFile(GlyphFile):
-    """采用固定名称 PNG 文件命名范式的字形文件实体。
+    """Glyph file entity following the fixed-name PNG naming convention.
 
-    ``name_key`` 和 ``flavors`` 表示字形身份及本地存储信息，并共同决定规范文件名。``name_key`` 必须
-    与所属 ``NamedGlyphVariants`` 及 ``NamedContext`` 的名称键一致，不允许再次映射；若需修改，必须先
-    将字形文件脱离原变体集合，再按新的 name key 建立映射。属性修改后应立即调用 ``normalize()``，
-    将本地文件重命名为由当前属性确定的规范文件名。
+    ``name_key`` and ``flavors`` describe glyph identity and local storage, and
+    together determine the canonical filename. ``name_key`` must match the keys
+    in its ``NamedGlyphVariants`` and ``NamedContext``; remapping to a different
+    name key is not allowed. Before changing it, detach the file from its original
+    variant set, then map it under the new key. After editing attributes, call
+    ``normalize()`` promptly to rename the local file to its canonical filename.
 
-    glyph name 由 name key 和第一个 flavor 生成；只使用第一个 flavor 是为了控制字体内 glyph name
-    的长度。无 flavor 时 glyph name 等于 name key。``load()`` 从文件名解析属性并验证 name key 与
-    flavor，不会修改它们的大小写或其他字符。``normalize()`` 只在原目录内规范文件名，不会更新任何
-    上下文映射，也不会校验所在目录能否被 ``NamedContext`` 无冲突地重新加载。
+    The glyph name is derived from the name key and the first flavor only, to
+    limit its length within the font. Without flavors, it equals the name key.
+    ``load()`` parses attributes from the filename and validates the name key and
+    flavors without changing their case or other characters. ``normalize()`` only
+    normalizes the filename within its current directory; it neither updates
+    context mappings nor checks whether ``NamedContext`` can reload the directory
+    without conflicts.
 
-    ``load_notdef()`` 创建 glyph name 为 ``.notdef`` 的独立字形文件实体；该实体类型可以复用于
-    ``.notdef``，但不因此属于 ``NamedContext`` 的使用映射。
+    ``load_notdef()`` creates a standalone entity with the glyph name ``.notdef``.
+    Reusing this entity type for ``.notdef`` does not make it part of a
+    ``NamedContext`` usage mapping.
     """
 
     @staticmethod

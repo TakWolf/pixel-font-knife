@@ -14,36 +14,51 @@ type ColorRgba = tuple[int, int, int, int]
 
 
 class Bitmap[PixelT: (int, ColorRgba)](UserList[list[PixelT]], ABC):
-    """提供矩形像素矩阵和公共位图操作的抽象基类。
+    """Abstract base class for rectangular pixel matrices and shared bitmap operations.
 
-    ``PixelT`` 为单色整数或 RGBA 元组，具体像素语义由子类定义。矩阵按从上到下的行顺序存储，
-    行内像素从左到右排列；坐标原点位于左上角，x 向右、y 向下，``dimensions`` 为 ``(width, height)``。
-    构造时复制输入矩阵及各行，逐像素归一化，并检查行宽一致；``None`` 或空序列表示 0×0 位图。
+    ``PixelT`` is a monochrome integer or an RGBA tuple; subclasses define its
+    meaning. Rows run from top to bottom and pixels from left to right. The origin
+    is at the top left, x increases rightward, y increases downward, and
+    ``dimensions`` is ``(width, height)``. Construction copies the matrix and each
+    row, normalizes every pixel, and checks for equal row widths. ``None`` or an
+    empty sequence produces a 0-by-0 bitmap.
 
-    子类通过 ``_blank_value()``、``_solid_value()`` 和 ``_is_blank()`` 定义默认空白值、填充值和
-    空白判断，并必须实现 ``_normalize_pixel()``，以规范构造输入和 ``solid()`` 的显式填充值。
-    空白判断不要求像素与默认空白值完全相等。
+    Subclasses define blank and solid defaults and blank detection through
+    ``_blank_value()``, ``_solid_value()``, and ``_is_blank()``. They must implement
+    ``_normalize_pixel()`` for constructor input and explicit ``solid()`` values.
+    A blank pixel need not equal the default blank value.
 
-    PNG 读写由基类统一完成，子类必须通过 ``_rgba_to_pixel()`` 和 ``_pixel_to_rgba()`` 定义
-    内部像素与 8bit RGBA 的转换规则。``load_png()`` 先将图像转换为 8bit RGBA，再逐像素转换，
-    保留画布尺寸并返回调用类的实例。``_build_png()`` 通过相反的转换构造图像，供 ``dump_png()``
-    和 ``save_png()`` 写出；宽或高为 0 的位图不能编码为 PNG。
+    PNG I/O is shared by this base class. Subclasses implement ``_rgba_to_pixel()``
+    and ``_pixel_to_rgba()`` to convert between internal pixels and 8-bit RGBA.
+    ``load_png()`` converts the image to 8-bit RGBA and then converts each pixel,
+    preserving canvas dimensions and returning an instance of the calling class.
+    ``_build_png()`` performs the reverse conversion for ``dump_png()`` and
+    ``save_png()``. PNG encoding requires nonzero width and height.
 
-    ``blank()`` 和 ``solid()`` 允许宽或高为 0。调用方可原地修改像素或以等宽行替换现有行，
-    但应维持矩阵尺寸和子类的像素约定；直接修改列表不会自动维护宽高或重新归一化像素。
-    ``resize()`` 按四条边扩展或裁减画布，新增区域填入空白值；``crop()`` 的矩形必须位于画布内。
-    这些操作与 ``trim()`` 均返回新位图，不修改原矩阵。
+    ``blank()`` and ``solid()`` allow zero width or height. Callers may edit pixels
+    in place or replace rows with rows of equal width, but must preserve dimensions
+    and subclass pixel conventions. Direct list edits do not update dimensions or
+    normalize pixels. ``resize()`` expands or crops the canvas at its four edges,
+    filling new areas with blank pixels. The rectangle passed to ``crop()`` must
+    lie inside the canvas. These operations and ``trim()`` return new bitmaps.
 
-    ``scale_to()`` 按最近邻采样缩放至指定尺寸，``scale()`` 按比例计算目标尺寸并四舍五入，
-    两者均保留具体类型且不修改原位图。目标宽或高为 0 时得到对应尺寸的空位图，
-    零尺寸源图不能放大为非零尺寸。PNG 编码前会检查矩阵高度和各行宽度是否与记录尺寸一致。
+    ``scale_to()`` uses nearest-neighbor sampling. ``scale()`` computes target
+    dimensions from scale factors and rounds half up. Both preserve the concrete
+    type and leave the source unchanged. A zero target width or height produces
+    an empty bitmap of the requested dimensions. A source with zero width or
+    height cannot be scaled to a target with both dimensions nonzero. PNG encoding
+    checks that the matrix height and row widths match the recorded dimensions.
 
-    边距测量、裁边和碰撞检测均使用子类的空白判断。``overlaps()`` 将另一位图的左上角放在
-    ``(x, y)``，只检查两幅画布交集内是否存在同时非空的像素。全空位图的 ``measure_padding()``
-    返回 ``Padding(width, 0, height, 0)``，``trim()`` 得到 0×0 位图并返回对应边距。
+    Padding measurement, trimming, and overlap detection use subclass blank
+    detection. ``overlaps()`` places the other bitmap's top left at ``(x, y)`` and
+    checks for pixels that are nonblank in both canvases within their intersection.
+    For an entirely blank bitmap, ``measure_padding()`` returns
+    ``Padding(width, 0, height, 0)``; ``trim()`` returns a 0-by-0 bitmap and that
+    padding.
 
-    相等比较要求具体类型、尺寸和像素内容均相同。``copy()`` 与 ``deepcopy()`` 都复制矩阵及各行，
-    保留具体类型；整数和 RGBA 元组不可变，无需额外复制像素值。
+    Equality requires the same concrete type, dimensions, and pixel contents.
+    ``copy()`` and ``deepcopy()`` copy the matrix and each row while preserving the
+    concrete type. Integers and RGBA tuples are immutable and need no further copy.
     """
 
     @staticmethod

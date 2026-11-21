@@ -5,7 +5,7 @@ from typing import Any
 
 
 class Padding:
-    """位图内容相对原始画布四条边的空白像素数量。"""
+    """Blank pixel counts between bitmap content and the four original canvas edges."""
 
     left: int
     right: int

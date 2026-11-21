@@ -7,14 +7,19 @@ from pixel_font_knife.bitmap.padding import Padding
 
 
 class GlyphCanvas:
-    """保留字形原始画布尺寸及其布局含义的位图容器。
+    """Bitmap container preserving the original glyph canvas and its layout meaning.
 
-    ``bitmap`` 表示未裁边的 PNG 画布，其宽高参与 advance 和相对 em box 的偏移计算；
-    ``trimmed_bitmap`` 与 ``trimmed_padding`` 仅表示墨迹裁边结果，不能替代原始画布参与布局计算。
-    由于 ``MonoBitmap`` 允许原地修改，trimmed 数据会在每次访问时重新计算，避免返回过期结果。
+    ``bitmap`` is the untrimmed PNG canvas. Its dimensions determine advances and
+    offsets relative to the em box. ``trimmed_bitmap`` and ``trimmed_padding``
+    describe the ink bounds and cannot replace the original canvas in layout
+    calculations. Trimmed data is computed lazily and cached. Assigning ``bitmap``
+    clears this cache; in-place edits to the bitmap do not. After an in-place edit,
+    reassign ``bitmap`` (even to the same object) before accessing trimmed data.
 
-    横排和竖排偏移先根据原始画布计算，再由 ``*_for_trimmed()`` 使用裁边 padding 补偿墨迹位置。
-    奇偶尺寸无法对称居中时，必须通过 bias 明确离散方向；该 bias 与裁边 padding 是相互独立的概念。
+    Horizontal and vertical offsets are computed from the original canvas, then
+    ``*_for_trimmed()`` compensates for the trimmed padding. When odd/even size
+    differences prevent exact centering, a bias selects the discrete direction.
+    This bias is independent of the trimmed padding.
     """
 
     _bitmap: MonoBitmap

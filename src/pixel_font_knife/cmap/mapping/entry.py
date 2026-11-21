@@ -8,10 +8,11 @@ from pixel_font_knife.glyph.common import check_flavor
 
 
 class CmapMappingEntry(UserDict[str | None, CmapGlyphReference]):
-    """一个目标码点下，目标 flavor 到实体字形引用的配置映射。
+    """Map target flavors to concrete glyph references for one target code point.
 
-    ``None`` 表示默认目标 flavor，``'*'`` 表示复制源字形的完整变体集合；通配符的结构约束由
-    ``CmapMapping`` 的加载、保存和 ``CmapContext`` 的应用入口检查。
+    ``None`` denotes the default target flavor; ``'*'`` copies the source glyph's
+    entire variant set. Wildcard structure is checked when ``CmapMapping`` loads
+    or saves data and when ``CmapContext`` applies mappings.
     """
 
     def __setitem__(self, flavor: Any, glyph_reference: Any) -> None:

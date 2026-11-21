@@ -2,10 +2,11 @@ from pixel_font_knife.glyph.common import check_code_point, check_flavor
 
 
 class CmapGlyphReference:
-    """指向 ``CmapContext`` 中实体字形的源码点与可选 flavor。
+    """Source code point and optional flavor of a concrete glyph in ``CmapContext``.
 
-    该对象只描述引用位置，不持有字形文件。应用 mapping 时，引用必须直接指向原始上下文中的实体字形，
-    不应指向其他 mapping 创建的目标映射。
+    This object describes a reference location without holding a glyph file.
+    When applying mappings, references should point directly to concrete glyphs
+    in the original context, rather than to targets introduced by other mappings.
     """
 
     code_point: int

@@ -29,14 +29,19 @@ def _display_code_point(code_point: int) -> str:
 
 
 class CmapMapping(UserDict[int, CmapMappingEntry]):
-    """目标码点到字形引用配置项的声明式映射。
+    """Declarative mapping from target code points to glyph reference entries.
 
-    YAML 中的顶层键是目标码点；每个配置项再按目标 flavor 引用原始 ``CmapContext`` 中的实体字形。
-    ``~`` 表示默认 flavor，``"*"`` 表示复制源字形的完整变体集合。加载和保存保持 flavor 大小写，
-    并将多个指向同一引用的 flavor 合并为同一个 YAML 键。
+    Top-level YAML keys are target code points. Each entry maps target flavors to
+    concrete glyphs in the original ``CmapContext``. ``~`` denotes the default
+    flavor; ``"*"`` copies the source glyph's entire variant set. Loading and saving
+    preserve flavor case. Saving groups nondefault flavors that share a reference
+    into one YAML key.
 
-    mapping 本身不解析引用关系。应用时所有引用都从调用方提供的原始上下文解析，因此合法配置的文件
-    顺序和条目顺序不会影响结果；引用其他 mapping 创建的目标不属于受支持的用法。
+    This mapping does not resolve references itself. During application, all
+    references are resolved from the caller's original context, independently of
+    file or entry order. Conflicting targets are subject to the context's conflict
+    strategy, so ``keep`` and ``replace`` results can depend on application order.
+    Referencing targets introduced by other mappings is not supported.
     """
 
     @staticmethod

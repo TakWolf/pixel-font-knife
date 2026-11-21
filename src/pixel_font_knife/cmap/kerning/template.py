@@ -11,17 +11,22 @@ from pixel_font_knife.glyph.common import normalize_flavor_order
 
 
 class CmapKerningTemplate:
-    """通过 cmap 字母表反向推导字形 kerning 的专用工具。
+    """Derive glyph kerning from character groups resolved through a cmap context.
 
-    ``groups`` 使用字符组成的字母表描述左右字形组，``values`` 使用组名对描述期望的水平间距。
-    ``calculate_kerning_values()`` 通过 ``CmapContext`` 将字符反向解析为实际 ``CmapGlyphFile``，
-    再根据字形位图碰撞结果收缩配置值，最终生成符合 pixel-font-builder 格式的
-    ``(left_glyph_name, right_glyph_name) -> offset`` 数据。
+    ``groups`` defines left and right glyph groups as lists of characters.
+    ``values`` maps group name pairs to requested horizontal offsets.
+    ``calculate_kerning_values()`` resolves characters to ``CmapGlyphFile`` objects
+    through ``CmapContext``. Only negative presets are processed. For each pair,
+    the left bitmap is dilated by one pixel within its canvas, and the requested
+    offset is moved toward zero until this mask no longer overlaps the right
+    bitmap, or zero is reached. Only negative results are returned, in the
+    pixel-font-builder format ``(left_glyph_name, right_glyph_name) -> offset``.
 
-    pixel-font-builder 会将顶级 kerning 配置编译到默认脚本和默认语言系统中。通常不应让不同语言或
-    不同文字系统的字形参与彼此的 kerning，因此参与 kerning 的字符应尽量避免共享同一个字形实体。
-    例如，不应将拉丁字母 A 和西里尔字母 А 映射到同一个字形，否则根据 glyph name 生成的 kerning
-    可能跨文字系统生效。
+    Kerning is keyed by glyph name, so characters sharing a glyph also share its
+    kerning. Use separate glyph entities when kerning must differ across scripts
+    or languages. For example, sharing a glyph between Latin A (U+0041) and
+    Cyrillic A (U+0410) may cause unintended kerning across scripts. Conflicting
+    negative presets for the same glyph name pair raise ``ValueError``.
     """
 
     @staticmethod
