@@ -49,9 +49,7 @@ class ColorBitmap(Bitmap[ColorRgba]):
 
     @staticmethod
     def _normalize_pixel(pixel: ColorRgba) -> ColorRgba:
-        if not isinstance(pixel, (tuple, list)) or len(pixel) != 4 or any(not isinstance(channel, int) or not 0 <= channel <= 255 for channel in pixel):
-            raise ValueError(f'expected four RGBA integers in [0, 255], got {pixel!r}')
-        return tuple(pixel) if pixel[3] != 0 else (0, 0, 0, 0)
+        return pixel if pixel[3] != 0 else (0, 0, 0, 0)
 
     @staticmethod
     def _rgba_to_pixel(color: ColorRgba) -> ColorRgba:
@@ -59,10 +57,12 @@ class ColorBitmap(Bitmap[ColorRgba]):
 
     @staticmethod
     def _pixel_to_rgba(pixel: ColorRgba) -> ColorRgba:
-        return ColorBitmap._normalize_pixel(pixel)
+        return pixel if pixel[3] != 0 else (0, 0, 0, 0)
 
     def to_mono_mask(self) -> MonoBitmap:
+        _is_blank = type(self)._is_blank
+
         bitmap = MonoBitmap.blank(self.width, self.height)
         for y, bitmap_row in enumerate(self):
-            bitmap[y] = [0 if self._is_blank(pixel) else 1 for pixel in bitmap_row]
+            bitmap[y] = [0 if _is_blank(pixel) else 1 for pixel in bitmap_row]
         return bitmap

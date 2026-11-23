@@ -13,6 +13,18 @@ type _SetOperation = Literal[
 ]
 
 
+def _set_pixel(left: int, right: int, operation: _SetOperation) -> int:
+    if operation == 'union':
+        return left | right
+    if operation == 'intersection':
+        return left & right
+    if operation == 'difference':
+        return left & (1 - right)
+    if operation == 'symmetric_difference':
+        return left ^ right
+    raise ValueError(f'unsupported set operation: {operation!r}')
+
+
 class MonoBitmap(Bitmap[int]):
     """Monochrome bitmap with fixed dimensions and 0/1 pixels.
 
@@ -66,18 +78,6 @@ class MonoBitmap(Bitmap[int]):
     def _pixel_to_rgba(pixel: int) -> ColorRgba:
         return (0, 0, 0, 255) if pixel != 0 else (0, 0, 0, 0)
 
-    @staticmethod
-    def _set_pixel(left: int, right: int, operation: _SetOperation) -> int:
-        if operation == 'union':
-            return left | right
-        if operation == 'intersection':
-            return left & right
-        if operation == 'difference':
-            return left & (1 - right)
-        if operation == 'symmetric_difference':
-            return left ^ right
-        raise ValueError(f'unsupported set operation: {operation!r}')
-
     def _set_operation(
             self,
             other: MonoBitmap,
@@ -99,7 +99,7 @@ class MonoBitmap(Bitmap[int]):
             self_row = self[target_y]
             other_row = other[target_y - y]
             for target_x in range(left, right):
-                bitmap_row[target_x] = self._set_pixel(
+                bitmap_row[target_x] = _set_pixel(
                     self_row[target_x],
                     other_row[target_x - x],
                     operation,
